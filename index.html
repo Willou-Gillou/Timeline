@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; img-src 'self' blob: data:; connect-src 'self' https://api.anthropic.com; object-src 'none'; base-uri 'none';">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width:100%; height:100%; margin:0; overflow:hidden !important; overscroll-behavior:none; }
@@ -176,6 +176,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     <button class="btn btn-icon" onclick="promptSaveJSON()" title="Sauvegarder le planning en JSON" aria-label="Sauvegarder le planning">💾</button>
     <label class="btn btn-icon" style="cursor:pointer;" title="Charger un planning JSON" aria-label="Charger un planning">📂<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
     <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle">🧩</button>
+    <button class="btn btn-icon" onclick="openPhotoImport()" title="Importer depuis une photo de timeline (IA)" aria-label="Importer depuis une photo de timeline">📷</button>
     <button class="btn btn-icon" onclick="copyMacroPlanningImage()" title="Exporter le planning en PNG" aria-label="Exporter le planning en PNG">🖼️</button>
   </div>
 
@@ -196,7 +197,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 <div class="app-shell">
 <div class="app-body">
   <div class="sidebar">
-    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.2</div>
+    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.3</div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
       <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">DEPLACEMENT PLANNING</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
@@ -566,6 +567,12 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.3:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Nouveau : import d'une timeline depuis une photo (bouton 📷). L'IA de Claude extrait phases, tâches et jalons, avec aperçu avant import (ajout ou remplacement du planning). Nécessite une clé API Anthropic.</li>
+        <li>Phase : boutons de décalage renommés « ± 30 jours » pour correspondre au comportement réel. Suppression de code mort.</li>
+        <li>CSP : ajout de img-src (blob/data) et connect-src limité à api.anthropic.com.</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.2:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Correction définitive de la synchronisation entre la vue Données et le Gantt : la modification de la date d'un jalon met désormais fin et début à jour, avec redessin fiable du Gantt via une fonction dédiée (updateJalonDate).</li>
@@ -635,6 +642,35 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     <div class="modal-btns" style="margin-top:16px;justify-content:flex-end;">
       <button onclick="refreshMemoryDiagnostic()">Actualiser</button>
       <button onclick="closeMemoryDiagnostic()">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<div id="photo-import-overlay" class="modal-overlay" style="display:none;">
+  <div class="modal-box" style="width:560px;max-width:94vw;max-height:90vh;overflow:auto;text-align:left;">
+    <h3>📷 Importer une timeline depuis une photo</h3>
+    <div style="font-size:12px;color:#555;line-height:1.5;margin-bottom:12px;">
+      La photo est analysée par l'IA de Claude, qui en extrait phases, tâches et jalons. Vous vérifiez le résultat avant de l'importer.
+      <br><b>Confidentialité :</b> l'image est envoyée à Anthropic avec votre clé API ; elle ne transite par aucun autre serveur.
+    </div>
+    <label style="font-size:12px;font-weight:700;color:#333;">Clé API Anthropic</label>
+    <input id="photo-api-key" type="password" autocomplete="off" placeholder="sk-ant-…" style="width:100%;padding:7px 9px;border:1px solid #ccc;border-radius:6px;margin:4px 0 4px;font-size:13px;">
+    <label style="font-size:11px;color:#666;display:flex;gap:6px;align-items:center;margin-bottom:12px;cursor:pointer;">
+      <input id="photo-api-remember" type="checkbox"> Mémoriser sur cet appareil (sinon, oubliée à la fermeture de l'onglet)
+    </label>
+    <label style="font-size:12px;font-weight:700;color:#333;">Photo ou capture d'écran</label>
+    <input id="photo-file" type="file" accept="image/*" onchange="onPhotoPicked(event)" style="display:block;width:100%;margin:4px 0 8px;font-size:12px;">
+    <img id="photo-preview" alt="" style="display:none;max-width:100%;max-height:220px;border:1px solid #ddd;border-radius:6px;margin-bottom:10px;">
+    <div id="photo-status" style="font-size:12px;color:#555;min-height:18px;margin-bottom:8px;"></div>
+    <div id="photo-result" style="display:none;border:1px solid #ddd;border-radius:6px;padding:10px;margin-bottom:10px;font-size:12px;max-height:240px;overflow:auto;"></div>
+    <div id="photo-apply-opts" style="display:none;font-size:12px;margin-bottom:10px;">
+      <label style="display:block;cursor:pointer;"><input type="radio" name="photo-mode" value="append" checked> Ajouter comme nouvelles phases au planning actuel</label>
+      <label style="display:block;cursor:pointer;"><input type="radio" name="photo-mode" value="replace"> Remplacer le planning actuel</label>
+    </div>
+    <div class="modal-btns" style="justify-content:flex-end;">
+      <button id="photo-analyse-btn" onclick="analysePhoto()" disabled>Analyser</button>
+      <button id="photo-apply-btn" onclick="applyPhotoImport()" style="display:none;background:#297FB8;color:#fff;border-color:#297FB8;">Importer</button>
+      <button onclick="closePhotoImport()">Fermer</button>
     </div>
   </div>
 </div>
@@ -3460,6 +3496,184 @@ window.addEventListener('resize', () => {
     renderTimeline();
   }
 });
+// ═══ IMPORT D'UNE TIMELINE DEPUIS UNE PHOTO (vision IA) ══════
+const PHOTO_KEY_STORAGE = 'test_mp_anthropic_key_v1';
+const PHOTO_MODEL = 'claude-sonnet-5-5';
+let photoImage = null;   // { b64, mediaType }
+let photoPlan  = null;   // planning nettoyé en attente de validation
+
+function photoEl(id){ return document.getElementById(id); }
+function photoSetStatus(msg, isErr){ const el=photoEl('photo-status'); el.textContent=msg||''; el.style.color=isErr?'#c0392b':'#555'; }
+
+function openPhotoImport(){
+  photoImage=null; photoPlan=null;
+  photoEl('photo-file').value='';
+  photoEl('photo-preview').style.display='none';
+  photoEl('photo-result').style.display='none';
+  photoEl('photo-apply-opts').style.display='none';
+  photoEl('photo-apply-btn').style.display='none';
+  photoEl('photo-analyse-btn').disabled=true;
+  photoSetStatus('');
+  let k=''; try{ k=localStorage.getItem(PHOTO_KEY_STORAGE)||sessionStorage.getItem(PHOTO_KEY_STORAGE)||''; }catch(e){}
+  photoEl('photo-api-key').value=k;
+  try{ photoEl('photo-api-remember').checked=!!localStorage.getItem(PHOTO_KEY_STORAGE); }catch(e){}
+  photoEl('photo-import-overlay').style.display='flex';
+}
+function closePhotoImport(){ photoEl('photo-import-overlay').style.display='none'; }
+
+function downscaleImage(file, maxSide){
+  return new Promise((resolve, reject)=>{
+    const url=URL.createObjectURL(file);
+    const img=new Image();
+    img.onload=()=>{
+      const r=Math.min(1, maxSide/Math.max(img.width,img.height));
+      const w=Math.max(1,Math.round(img.width*r)), h=Math.max(1,Math.round(img.height*r));
+      const c=document.createElement('canvas'); c.width=w; c.height=h;
+      const ctx=c.getContext('2d'); ctx.fillStyle='#fff'; ctx.fillRect(0,0,w,h); ctx.drawImage(img,0,0,w,h);
+      URL.revokeObjectURL(url);
+      const dataUrl=c.toDataURL('image/jpeg',0.88);
+      resolve({ dataUrl, b64:dataUrl.split(',')[1], mediaType:'image/jpeg' });
+    };
+    img.onerror=()=>{ URL.revokeObjectURL(url); reject(new Error('Image illisible (format non supporté ?)')); };
+    img.src=url;
+  });
+}
+
+async function onPhotoPicked(ev){
+  const f=ev.target.files && ev.target.files[0];
+  photoPlan=null;
+  photoEl('photo-result').style.display='none';
+  photoEl('photo-apply-opts').style.display='none';
+  photoEl('photo-apply-btn').style.display='none';
+  if(!f){ photoImage=null; photoEl('photo-analyse-btn').disabled=true; return; }
+  try{
+    photoImage=await downscaleImage(f,1568);
+    const pv=photoEl('photo-preview'); pv.src=photoImage.dataUrl; pv.style.display='block';
+    photoEl('photo-analyse-btn').disabled=false;
+    photoSetStatus('Photo prête. Cliquez sur « Analyser ».');
+  }catch(e){ photoImage=null; photoEl('photo-analyse-btn').disabled=true; photoSetStatus(e.message,true); }
+}
+
+function photoPrompt(){
+  const today=fmt(new Date());
+  return 'Tu analyses la photo d\'un planning / diagramme de Gantt / timeline de projet. Extrais sa structure pour la reproduire.\n'
+  +'Réponds UNIQUEMENT par un objet JSON valide (aucun texte autour, pas de ```), de la forme :\n'
+  +'{"title":"titre du planning ou chaîne vide","lanes":[{"name":"nom de la phase","tasks":[{"title":"libellé","type":"T","start":"AAAA-MM-JJ","end":"AAAA-MM-JJ"}]}],"notes":"hypothèses faites, dates estimées, éléments illisibles"}\n'
+  +'Règles :\n'
+  +'- Une "lane" = une phase / un groupe / une ligne de regroupement. S\'il n\'y en a pas, utilise une seule lane "Phase 1".\n'
+  +'- type "T" = barre ayant une durée ; type "J" = jalon (losange, drapeau, point) avec start = end.\n'
+  +'- Recopie les libellés tels qu\'ils sont écrits (langue d\'origine). Ne traduis pas.\n'
+  +'- Dates : lis l\'axe du temps (jours, semaines, mois, trimestres) et estime les dates de début et de fin de chaque élément à partir de sa position. Si l\'année n\'est pas visible, déduis-la du contexte, sinon prends l\'année la plus plausible par rapport à aujourd\'hui ('+today+'). Si l\'axe n\'a que des semaines, utilise le lundi de la semaine pour start et le vendredi pour end.\n'
+  +'- N\'invente aucun élément absent de l\'image. Si un élément est illisible, ignore-le et signale-le dans "notes".\n'
+  +'- Conserve l\'ordre de lecture (haut en bas pour les phases, gauche à droite pour les éléments).';
+}
+
+function extractJSON(text){
+  let t=(text||'').trim().replace(/^```(?:json)?/i,'').replace(/```$/,'').trim();
+  const a=t.indexOf('{'), b=t.lastIndexOf('}');
+  if(a<0||b<=a) throw new Error('Réponse sans JSON exploitable.');
+  return JSON.parse(t.slice(a,b+1));
+}
+function validISO(s){ if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false; const d=parseD(s); return !isNaN(d) && fmt(d)===s; }
+
+function sanitizePhotoPlan(raw){
+  const out={ title:(typeof raw.title==='string'?raw.title.trim().slice(0,120):''), lanes:[], skipped:0, notes:(typeof raw.notes==='string'?raw.notes.trim():'') };
+  (Array.isArray(raw.lanes)?raw.lanes:[]).forEach((l,i)=>{
+    const lane={ name:String((l&&l.name)||('Phase '+(i+1))).trim().slice(0,120)||('Phase '+(i+1)), tasks:[] };
+    (Array.isArray(l&&l.tasks)?l.tasks:[]).forEach(tk=>{
+      const type=(tk&&tk.type==='J')?'J':'T';
+      let st=tk&&tk.start, en=tk&&tk.end;
+      if(type==='J'){ if(!validISO(st)) st=validISO(en)?en:null; en=st; }
+      if(!validISO(st)||!validISO(en)){ out.skipped++; return; }
+      if(en<st){ const x=st; st=en; en=x; }
+      lane.tasks.push({ title:String((tk&&tk.title)||'').trim().slice(0,200)||(type==='J'?'jalon':'tâche'), type, start:st, end:en });
+    });
+    if(lane.tasks.length) out.lanes.push(lane);
+  });
+  return out;
+}
+
+async function analysePhoto(){
+  const key=photoEl('photo-api-key').value.trim();
+  if(!photoImage){ photoSetStatus('Choisissez d\'abord une photo.',true); return; }
+  if(!key){ photoSetStatus('Saisissez votre clé API Anthropic.',true); return; }
+  try{
+    sessionStorage.setItem(PHOTO_KEY_STORAGE,key);
+    if(photoEl('photo-api-remember').checked) localStorage.setItem(PHOTO_KEY_STORAGE,key); else localStorage.removeItem(PHOTO_KEY_STORAGE);
+  }catch(e){}
+  const btn=photoEl('photo-analyse-btn'); btn.disabled=true; btn.textContent='⏳ Analyse…';
+  photoEl('photo-result').style.display='none'; photoEl('photo-apply-opts').style.display='none'; photoEl('photo-apply-btn').style.display='none';
+  photoSetStatus('Analyse de la photo en cours (10 à 40 s)…');
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{ 'content-type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true' },
+      body:JSON.stringify({ model:PHOTO_MODEL, max_tokens:8000, messages:[{ role:'user', content:[
+        { type:'image', source:{ type:'base64', media_type:photoImage.mediaType, data:photoImage.b64 } },
+        { type:'text', text:photoPrompt() } ] }] })
+    });
+    if(!resp.ok){
+      let msg='Erreur API ('+resp.status+')';
+      try{ const j=await resp.json(); if(j&&j.error&&j.error.message) msg+=' : '+j.error.message; }catch(e){}
+      if(resp.status===401) msg='Clé API refusée (401). Vérifiez-la.';
+      if(resp.status===429) msg='Trop de requêtes ou quota atteint (429). Réessayez plus tard.';
+      throw new Error(msg);
+    }
+    const data=await resp.json();
+    const text=(data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('\n');
+    const plan=sanitizePhotoPlan(extractJSON(text));
+    if(!plan.lanes.length) throw new Error('Aucune tâche ni aucun jalon exploitable n\'a été trouvé. Essayez une photo plus nette ou mieux cadrée.');
+    photoPlan=plan;
+    renderPhotoPreview(plan);
+    photoSetStatus('Analyse terminée. Vérifiez le résultat, puis importez.');
+  }catch(e){
+    photoSetStatus(e.message||String(e),true);
+  }finally{
+    btn.disabled=false; btn.textContent='Analyser';
+  }
+}
+
+function renderPhotoPreview(plan){
+  const nT=plan.lanes.reduce((n,l)=>n+l.tasks.filter(t=>t.type==='T').length,0);
+  const nJ=plan.lanes.reduce((n,l)=>n+l.tasks.filter(t=>t.type==='J').length,0);
+  let h='<div style="font-weight:700;margin-bottom:6px;">'+plan.lanes.length+' phase(s), '+nT+' tâche(s), '+nJ+' jalon(s)'+(plan.skipped?' — '+plan.skipped+' élément(s) ignoré(s) (dates illisibles)':'')+'</div>';
+  plan.lanes.forEach(l=>{
+    h+='<div style="margin:6px 0 2px;font-weight:700;color:#333;">'+esc(l.name)+'</div>';
+    l.tasks.forEach(t=>{
+      h+='<div style="padding-left:10px;color:#444;">'+(t.type==='J'?'◆ ':'▬ ')+esc(t.title)+' <span style="color:#888;">'+(t.type==='J'?t.start:t.start+' → '+t.end)+'</span></div>';
+    });
+  });
+  if(plan.notes) h+='<div style="margin-top:8px;padding:6px 8px;background:#fff8e1;border-radius:4px;color:#7a5b00;"><b>Remarques de l\'IA :</b> '+esc(plan.notes)+'</div>';
+  h+='<div style="margin-top:6px;color:#888;">Les dates sont estimées d\'après la position sur l\'image ; vous pourrez les ajuster ensuite.</div>';
+  const box=photoEl('photo-result'); box.innerHTML=h; box.style.display='block';
+  photoEl('photo-apply-opts').style.display='block';
+  photoEl('photo-apply-btn').style.display='inline-block';
+}
+
+function applyPhotoImport(){
+  if(!photoPlan) return;
+  const mode=(document.querySelector('input[name="photo-mode"]:checked')||{}).value||'append';
+  if(mode==='replace' && lanes.length>0 && !confirm('Remplacer le planning actuel par celui de la photo ?')) return;
+  if(mode==='replace'){ lanes=[]; lid=1; tid=1; jalonColorIdx=0; }
+  const palette=(defaultTaskJalonPalette&&defaultTaskJalonPalette.length)?defaultTaskJalonPalette:LANE_COLORS;
+  photoPlan.lanes.forEach(l=>{
+    const color=palette[lanes.length%palette.length];
+    const lane={ id:lid++, name:l.name, color, tasks:[] };
+    l.tasks.forEach(t=>{
+      lane.tasks.push({ id:tid++, title:t.title, type:t.type, color:(t.type==='J'?getDefaultJalonColor(color):color), start:t.start, end:t.end, pct:0, status:'' });
+    });
+    lanes.push(lane);
+  });
+  if(mode==='replace' && photoPlan.title){ const te=photoEl('planning-title'); if(te) te.value=photoPlan.title; }
+  renderData();
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ renderTimeline(); }); });
+  updateT0Display();
+  saveState();
+  closePhotoImport();
+  showToast('Timeline importée depuis la photo');
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && photoEl('photo-import-overlay') && photoEl('photo-import-overlay').style.display==='flex') closePhotoImport(); });
+
 </script>
 
 <!-- ═══ MODAL CHECK DOSSIER ═══════════════════════════════════ -->
