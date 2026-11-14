@@ -569,7 +569,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
       <div style="font-weight:700;margin:8px 0 6px;">V4.4:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : périodes de gel. Gérées dans l'onglet Données (nom, dates, couleur, opacité), elles s'affichent sur une ligne juste sous la barre de temps, avec option « Sur toute la hauteur » pour les prolonger sur tout le Gantt (la barre de temps reste toujours visible).</li>
+        <li>Nouveau : périodes de gel. Gérées dans l'onglet Données (nom, dates, couleur, opacité), elles s'affichent sur une ligne dans le bas de la barre de temps, avec option « Sur toute la hauteur » pour les prolonger sur tout le Gantt (la barre de temps reste toujours visible).</li>
         <li>Les périodes de gel sont sauvegardées, exportées/importées avec le planning, prises en compte par l'annulation, et reconnues par l'import depuis une photo.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.3:</div>
@@ -1407,7 +1407,11 @@ function renderTimeline(){
   const totalDays=Math.round((maxD-minD)/86400000)+1;
   const tlSvgParent = document.getElementById("tl-svg").parentElement;
   const showLaneCol=document.getElementById('chk-lane-col')?.checked??true;
-  const LL=showLaneCol?130:0, TH=showTimeBar?52:0, RH=taskRH;
+  const LL=showLaneCol?130:0, TH0=showTimeBar?52:0, RH=taskRH;
+  const _fzList=freezes.filter(f=>validISO(f.start)&&validISO(f.end));
+  const fzFont=Math.max(7,Math.round(taskFontSize*0.72)); // police réduite pour les périodes de gel
+  const FZ=_fzList.length?fzFont+8:0; // bandeau des gels, en bas de la barre de temps
+  const TH=TH0+FZ;
   let _measuredW = 0;
   if(tlSvgParent){
     _measuredW = tlSvgParent.clientWidth || tlSvgParent.getBoundingClientRect().width || 0;
@@ -1460,9 +1464,7 @@ function renderTimeline(){
     return renderTimeline();
   }
   const MA=rows.length===0?0:rows.reduce((a,r)=>Math.max(a,r.topY+r.h),0)+8+3;
-  const _fzList=freezes.filter(f=>validISO(f.start)&&validISO(f.end));
-  const FH=_fzList.length?Math.round(taskFontSize*1.2+10):0; // ligne des périodes de gel : juste SOUS la barre de temps
-  const TOTAL_TOP=MA+TH+FH+timelineGap;
+  const TOTAL_TOP=MA+TH+timelineGap;
 
   const laneRowsCache={};
   let totalRows=0;
@@ -1494,14 +1496,14 @@ function renderTimeline(){
 
   // Graduations
   if(showTimeBar){
-    function majorTick(x,lbl){ if(x<LL||x>VW)return; timebarGroup.appendChild(el('line',{x1:x,y1:MA,x2:x,y2:MA+TH,stroke:'rgba(255,255,255,0.28)','stroke-width':1})); timebarGroup.appendChild(el('text',{x:x+3,y:MA+14,fill:'white','font-size':tMajorFontSize,'font-weight':'bold'},lbl)); timebarGroup.appendChild(el('line',{x1:x,y1:MA+TH,x2:x,y2:VH,stroke:'rgba(0,0,0,0.04)','stroke-width':1})); }
-    function minorTickUp(x,lbl){ if(x<LL||x>VW)return; timebarGroup.appendChild(el('line',{x1:x,y1:MA+28,x2:x,y2:MA+TH,stroke:'rgba(255,255,255,0.12)','stroke-width':1})); if(lbl) timebarGroup.appendChild(upTxt(x,MA+TH-3,lbl)); }
-    function minorTickLbl(x,lbl){ if(x<LL||x>VW)return; timebarGroup.appendChild(el('line',{x1:x,y1:MA+26,x2:x,y2:MA+TH,stroke:'rgba(255,255,255,0.12)','stroke-width':1})); if(lbl) timebarGroup.appendChild(el('text',{x:x+2,y:MA+TH-4,fill:'rgba(255,255,255,0.65)','font-size':tMinorLblFontSize},lbl)); }
+    function majorTick(x,lbl){ if(x<LL||x>VW)return; timebarGroup.appendChild(el('line',{x1:x,y1:MA,x2:x,y2:MA+TH0,stroke:'rgba(255,255,255,0.28)','stroke-width':1})); timebarGroup.appendChild(el('text',{x:x+3,y:MA+14,fill:'white','font-size':tMajorFontSize,'font-weight':'bold'},lbl)); timebarGroup.appendChild(el('line',{x1:x,y1:MA+TH,x2:x,y2:VH,stroke:'rgba(0,0,0,0.04)','stroke-width':1})); }
+    function minorTickUp(x,lbl){ if(x<LL||x>VW)return; timebarGroup.appendChild(el('line',{x1:x,y1:MA+28,x2:x,y2:MA+TH0,stroke:'rgba(255,255,255,0.12)','stroke-width':1})); if(lbl) timebarGroup.appendChild(upTxt(x,MA+TH0-3,lbl)); }
+    function minorTickLbl(x,lbl){ if(x<LL||x>VW)return; timebarGroup.appendChild(el('line',{x1:x,y1:MA+26,x2:x,y2:MA+TH0,stroke:'rgba(255,255,255,0.12)','stroke-width':1})); if(lbl) timebarGroup.appendChild(el('text',{x:x+2,y:MA+TH0-4,fill:'rgba(255,255,255,0.65)','font-size':tMinorLblFontSize},lbl)); }
     let cur;
     if(sc===0){ cur=new Date(minD);cur.setDate(1); while(cur<=maxD){majorTick(dX(cur),MONTHS[cur.getMonth()]+' '+cur.getFullYear());cur.setMonth(cur.getMonth()+1);} cur=new Date(minD); while(cur<=maxD){const dn=cur.getDate();if(dn%dayStep===0||dn===1)minorTickUp(dX(cur),String(dn).padStart(2,'0'));cur.setDate(cur.getDate()+1);}
-    } else if(sc===1){ timebarGroup.appendChild(el('text',{x:LL+6,y:MA+14,fill:'white','font-size':10,'font-weight':'bold'},'Jours')); {const isoSD=new Date(rawMin);isoSD.setHours(0,0,0,0); cur=new Date(minD); while(cur<=maxD){const x=dX(cur);const dn=Math.round((cur-isoSD)/86400000)+1;if(x>=LL&&x<=VW&&dn>=1&&(dn===1||dn%dayStep===0)){timebarGroup.appendChild(el('line',{x1:x,y1:MA+28,x2:x,y2:MA+TH,stroke:'rgba(255,255,255,0.1)','stroke-width':1}));timebarGroup.appendChild(upTxt(x,MA+TH-3,String(dn).padStart(2,'0')));} cur.setDate(cur.getDate()+1);}}
-    } else if(sc===2){ cur=new Date(minD);cur.setDate(1); while(cur<=maxD){majorTick(dX(cur),MONTHS[cur.getMonth()]+' '+cur.getFullYear());cur.setMonth(cur.getMonth()+1);} cur=new Date(minD);const dow=cur.getDay();cur.setDate(cur.getDate()-(dow===0?6:dow-1)); const weekTicks=[]; while(cur<=maxD){const x2=dX(cur),lx2=x2<LL?LL+2:x2+2; if(x2<=VW){ weekTicks.push({x2,lx2,label:'S'+String(isoWeek(cur)).padStart(2,'0')}); } cur.setDate(cur.getDate()+7);} const approxWeekLblW=tMinorLblFontSize*3.6; weekTicks.forEach((wk,i)=>{ if(wk.x2>=LL) timebarGroup.appendChild(el('line',{x1:wk.x2,y1:MA+26,x2:wk.x2,y2:MA+TH,stroke:'rgba(255,255,255,0.12)','stroke-width':1})); const overlapFirst=i===0 && weekTicks[1] && (wk.lx2 + approxWeekLblW > weekTicks[1].lx2); timebarGroup.appendChild(el('text',{x:wk.lx2,y:overlapFirst ? MA+TH-14 : MA+TH-4,fill:'rgba(255,255,255,0.65)','font-size':tMinorLblFontSize},wk.label)); });
-    } else if(sc===3){ timebarGroup.appendChild(el('text',{x:LL+6,y:MA+14,fill:'white','font-size':10,'font-weight':'bold'},'Semaines')); {const isoSW=new Date(rawMin);isoSW.setHours(0,0,0,0);const dwr=isoSW.getDay();isoSW.setDate(isoSW.getDate()-(dwr===0?6:dwr-1)); cur=new Date(minD);const dow2=cur.getDay();cur.setDate(cur.getDate()-(dow2===0?6:dow2-1)); while(cur<=maxD){const wn=Math.round((cur-isoSW)/86400000/7)+1;if(wn>=1){const wx=dX(cur);const lx=wx<LL?LL+2:wx+2;if(wx<=VW){if(wx>=LL)timebarGroup.appendChild(el('line',{x1:wx,y1:MA+26,x2:wx,y2:MA+TH,stroke:'rgba(255,255,255,0.12)','stroke-width':1}));timebarGroup.appendChild(el('text',{x:lx,y:MA+TH-4,fill:'rgba(255,255,255,0.65)','font-size':tMinorLblFontSize},'S'+String(wn).padStart(2,'0')));}} cur.setDate(cur.getDate()+7);}}
+    } else if(sc===1){ timebarGroup.appendChild(el('text',{x:LL+6,y:MA+14,fill:'white','font-size':10,'font-weight':'bold'},'Jours')); {const isoSD=new Date(rawMin);isoSD.setHours(0,0,0,0); cur=new Date(minD); while(cur<=maxD){const x=dX(cur);const dn=Math.round((cur-isoSD)/86400000)+1;if(x>=LL&&x<=VW&&dn>=1&&(dn===1||dn%dayStep===0)){timebarGroup.appendChild(el('line',{x1:x,y1:MA+28,x2:x,y2:MA+TH0,stroke:'rgba(255,255,255,0.1)','stroke-width':1}));timebarGroup.appendChild(upTxt(x,MA+TH0-3,String(dn).padStart(2,'0')));} cur.setDate(cur.getDate()+1);}}
+    } else if(sc===2){ cur=new Date(minD);cur.setDate(1); while(cur<=maxD){majorTick(dX(cur),MONTHS[cur.getMonth()]+' '+cur.getFullYear());cur.setMonth(cur.getMonth()+1);} cur=new Date(minD);const dow=cur.getDay();cur.setDate(cur.getDate()-(dow===0?6:dow-1)); const weekTicks=[]; while(cur<=maxD){const x2=dX(cur),lx2=x2<LL?LL+2:x2+2; if(x2<=VW){ weekTicks.push({x2,lx2,label:'S'+String(isoWeek(cur)).padStart(2,'0')}); } cur.setDate(cur.getDate()+7);} const approxWeekLblW=tMinorLblFontSize*3.6; weekTicks.forEach((wk,i)=>{ if(wk.x2>=LL) timebarGroup.appendChild(el('line',{x1:wk.x2,y1:MA+26,x2:wk.x2,y2:MA+TH0,stroke:'rgba(255,255,255,0.12)','stroke-width':1})); const overlapFirst=i===0 && weekTicks[1] && (wk.lx2 + approxWeekLblW > weekTicks[1].lx2); timebarGroup.appendChild(el('text',{x:wk.lx2,y:overlapFirst ? MA+TH0-14 : MA+TH0-4,fill:'rgba(255,255,255,0.65)','font-size':tMinorLblFontSize},wk.label)); });
+    } else if(sc===3){ timebarGroup.appendChild(el('text',{x:LL+6,y:MA+14,fill:'white','font-size':10,'font-weight':'bold'},'Semaines')); {const isoSW=new Date(rawMin);isoSW.setHours(0,0,0,0);const dwr=isoSW.getDay();isoSW.setDate(isoSW.getDate()-(dwr===0?6:dwr-1)); cur=new Date(minD);const dow2=cur.getDay();cur.setDate(cur.getDate()-(dow2===0?6:dow2-1)); while(cur<=maxD){const wn=Math.round((cur-isoSW)/86400000/7)+1;if(wn>=1){const wx=dX(cur);const lx=wx<LL?LL+2:wx+2;if(wx<=VW){if(wx>=LL)timebarGroup.appendChild(el('line',{x1:wx,y1:MA+26,x2:wx,y2:MA+TH0,stroke:'rgba(255,255,255,0.12)','stroke-width':1}));timebarGroup.appendChild(el('text',{x:lx,y:MA+TH0-4,fill:'rgba(255,255,255,0.65)','font-size':tMinorLblFontSize},'S'+String(wn).padStart(2,'0')));}} cur.setDate(cur.getDate()+7);}}
     } else if(sc===4){ cur=new Date(minD);cur.setDate(1); while(cur<=maxD){majorTick(dX(cur),MONTHS[cur.getMonth()]+' '+cur.getFullYear());cur.setMonth(cur.getMonth()+1);}
     } else if(sc===5){ const isoSM=new Date(rawMin.getFullYear(),rawMin.getMonth(),1); cur=new Date(minD);cur.setDate(1); while(cur<=maxD){const mn=Math.round((cur.getFullYear()-isoSM.getFullYear())*12+(cur.getMonth()-isoSM.getMonth()))+1;if(mn>=1)majorTick(dX(cur),'Mois '+String(mn).padStart(2,'0'));cur.setMonth(cur.getMonth()+1);}
     } else if(sc===6){ cur=new Date(minD);cur.setDate(1);cur.setMonth(Math.floor(cur.getMonth()/3)*3); while(cur<=maxD){majorTick(dX(cur),'T'+(Math.floor(cur.getMonth()/3)+1)+' '+cur.getFullYear());cur.setMonth(cur.getMonth()+3);}
@@ -2011,9 +2013,9 @@ function renderTimeline(){
         if (showCircle) todayMarker=el('circle',{cx:tx,cy:dy,r:6,fill:todaylineColor,stroke:'white','stroke-width':2});
 
         if (showArrow) {
-          todayLabel=el('text',{x:tx,y:MA+(TH/2)+1,'text-anchor':'middle',fill:'white','font-size':todayFontSize,'font-weight':'bold'},"aujourd'hui");
+          todayLabel=el('text',{x:tx,y:MA+(TH0/2)+1,'text-anchor':'middle',fill:'white','font-size':todayFontSize,'font-weight':'bold'},"aujourd'hui");
           svg.appendChild(todayLabel);
-          const labelY = MA+(TH/2)+1;
+          const labelY = MA+(TH0/2)+1;
           const aw = todayArrowSize;
           const arrowTop = labelY + 5;
           const arrowTip = labelY + 5 + Math.round(todayArrowSize*0.8);
@@ -2033,20 +2035,20 @@ function renderTimeline(){
     svg.appendChild(flagGroup);
   }
   svg.appendChild(timebarGroup);
-  if(FH>0){
-    const fzY=MA+TH;
+  if(FZ>0){
+    const fzY=MA+TH0; // bandeau de gel : bas de la barre de temps
     const fzG=document.createElementNS(NS,'g'); fzG.setAttribute('id','freeze-row-group');
     const fzOver=document.createElementNS(NS,'g'); fzOver.setAttribute('id','freeze-overlay-group'); fzOver.setAttribute('pointer-events','none');
     _fzList.forEach(f=>{
       const x1=Math.max(LL,dX(f.start)), x2=Math.min(VW,dX(f.end)+PPD);
       if(x2<=x1) return;
       const col=f.color||FREEZE_DEFAULT_COLOR, op=Math.min(1,Math.max(0.05,+f.opacity||FREEZE_DEFAULT_OPACITY));
-      const band=el('rect',{x:x1,y:fzY+2,width:x2-x1,height:FH-4,rx:3,fill:col,'fill-opacity':op,stroke:col,'stroke-opacity':Math.min(1,op+0.35),'stroke-width':1});
+      const band=el('rect',{x:x1,y:fzY+2,width:x2-x1,height:FZ-4,rx:2,fill:col,'fill-opacity':op,stroke:col,'stroke-opacity':Math.min(1,op+0.45),'stroke-width':1});
       const tip=document.createElementNS(NS,'title'); tip.textContent=(f.title||'Gel')+' : '+f.start+' → '+f.end+(f.full?' (toute la hauteur)':''); band.appendChild(tip);
       fzG.appendChild(band);
       const lbl=(f.title||'').trim();
-      if(lbl && lbl.length*taskFontSize*0.58 < (x2-x1)-8) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FH/2+taskFontSize*0.35,'text-anchor':'middle','font-size':taskFontSize,'font-weight':'bold',fill:'#263238','pointer-events':'none'},lbl));
-      if(f.full) fzOver.appendChild(el('rect',{x:x1,y:fzY+FH,width:x2-x1,height:Math.max(0,VH-(fzY+FH)),fill:col,'fill-opacity':op})); // le prolongement démarre sous la ligne de gel : la barre de temps reste intacte
+      if(lbl && lbl.length*fzFont*0.58 < (x2-x1)-6) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:showTimeBar?'#fff':'#263238','pointer-events':'none'},lbl));
+      if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // sous la barre de temps
     });
     svg.appendChild(fzG);
     if(fzOver.childNodes.length) svg.appendChild(fzOver);
@@ -3576,7 +3578,7 @@ function renderFreezePanel(){
     +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(freezes.length?'8':'0')+'px;">'
     +'<div style="font-weight:700;font-size:14px;color:#2c3e50;">❄️ Périodes de gel</div>'
     +'<button type="button" onclick="addFreeze()" style="padding:4px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;">+ Période de gel</button>'
-    +(freezes.length?'':'<span style="font-size:12px;color:#888;">Aucune. Elles s\'affichent sur une ligne juste sous la barre de temps.</span>')
+    +(freezes.length?'':'<span style="font-size:12px;color:#888;">Aucune. Elles s\'affichent dans le bas de la barre de temps.</span>')
     +'</div>';
   freezes.forEach(f=>{
     h+='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #eee;font-size:12px;">'
