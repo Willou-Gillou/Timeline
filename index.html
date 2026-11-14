@@ -292,6 +292,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
         </div>
 
         <label><input type="checkbox" id="chk-lane-col" checked onchange="renderTimeline(); saveState()"/> Phases (colonne)</label>
+        <label style="display:flex;align-items:center;gap:6px;padding-left:22px;font-size:11px;color:#555;">Largeur <input type="range" id="lane-col-w" min="80" max="400" step="10" value="130" oninput="laneColW=+this.value;document.getElementById('lane-col-w-val').textContent=this.value;renderTimeline();saveState()" style="flex:1;min-width:0;"/><span id="lane-col-w-val" style="min-width:26px;text-align:right;">130</span></label>
         <label><input type="checkbox" id="chk-taches-master" checked onchange="toggleTachesOptions(); renderTimeline(); saveState()"/> Tâches (barres)</label>
         <div class="sub-options" id="taches-sub">
           <label><input type="checkbox" id="chk-task-label" checked onchange="toggleTaskLabelOptions()"/> Titre des tâches</label>
@@ -309,11 +310,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
           </div>
         </div>
 
-        <div style="display:flex;gap:6px;margin-top:10px;">
-          <button class="btn" style="flex:1;justify-content:center;font-size:11px;padding:6px 4px;" title="Masque la colonne des phases, les barres de tâches et les drapeaux : seuls les losanges des jalons restent" onclick="presetView('milestones')">◆ Jalons seuls</button>
-          <button class="btn" style="flex:1;justify-content:center;font-size:11px;padding:6px 4px;" title="Réaffiche phases, tâches, jalons et drapeaux" onclick="presetView('all')">Tout afficher</button>
-        </div>
-        <button class="btn" style="justify-content:center;margin-top:6px;" onclick="resetAfficherDefaults()">Valeurs par défaut</button>
+        <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetAfficherDefaults()">Valeurs par défaut</button>
       </div>
     </div>
     <hr class="sidebar-sep adv" style="margin:12px 0;">
@@ -591,7 +588,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
       <div style="font-weight:700;margin:8px 0 6px;">V4.7:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Affichages : « Tâches (barres) » ne masque plus que les barres de tâches (les losanges de jalons restent) ; « Phases (colonne) » devient une case indépendante, visible aussi en mode simplifié ; boutons « ◆ Jalons seuls » et « Tout afficher ».</li>
+        <li>Affichages : « Tâches (barres) » ne masque plus que les barres de tâches (les losanges de jalons restent) ; « Phases (colonne) » devient une case indépendante, visible aussi en mode simplifié  ; largeur de la colonne des phases réglable.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.6:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
@@ -711,7 +708,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 let lanes=[], lid=1, tid=1;
 try{ localStorage.removeItem('test_mp_anthropic_key_v1'); sessionStorage.removeItem('test_mp_anthropic_key_v1'); }catch(e){} // purge de la clé API de l'ancien import photo
 let freezes=[]; // périodes de gel : {id,title,start,end,color,opacity,full}
-const FREEZE_DEFAULT_COLOR='#2980B9', FREEZE_DEFAULT_OPACITY=0.3;
+const FREEZE_DEFAULT_COLOR='#BDBDBD', FREEZE_DEFAULT_OPACITY=0.5;
 let dragLaneId=null, dragTaskId=null, laneDragIdx=null;
 
 window._colorPickerActive = false;
@@ -887,7 +884,7 @@ function changeTaskSize(d){ taskRH=Math.max(8,Math.min(80,taskRH+d)); document.g
 function changeJalonSize(d){ jalonRH=Math.max(4,Math.min(80,jalonRH+d)); document.getElementById('jalon-size-val').textContent=jalonRH; saveState(); renderTimeline(); }
 function changeJalonS(d){ jalonS=Math.max(5,Math.min(20,jalonS+d)); document.getElementById('jalon-s-val').textContent=jalonS; saveState(); renderTimeline(); }
 let dashLen=4, dashGap=3, flagPadH=6, flagPadV=6, lineW=2, flagW=1.5, flagRowGap=7;
-let laneFontSize=13, taskFontSize=11, taskDateFontSize=8, jalonFontSize=11, jalonDateFontSize=8, todayFontSize=8, tMajorFontSize=10, tMinorUpFontSize=8.5, tMinorLblFontSize=9, headerH=36, sepMargin=0, phaseGap=6, timelineGap=8, todayArrowSize=4;
+let laneColW=130, laneFontSize=13, taskFontSize=11, taskDateFontSize=8, jalonFontSize=11, jalonDateFontSize=8, todayFontSize=8, tMajorFontSize=10, tMinorUpFontSize=8.5, tMinorLblFontSize=9, headerH=36, sepMargin=0, phaseGap=6, timelineGap=8, todayArrowSize=4;
 function applyHeaderHeight(){ document.body.style.setProperty('--header-h', headerH+'px'); }
 function changeSepMargin(d){
   sepMargin=Math.max(0,Math.min(30,sepMargin+d));
@@ -1418,7 +1415,7 @@ function renderTimeline(){
   const totalDays=Math.round((maxD-minD)/86400000)+1;
   const tlSvgParent = document.getElementById("tl-svg").parentElement;
   const showLaneCol=document.getElementById('chk-lane-col')?.checked??true;
-  const LL=showLaneCol?130:0, TH0=showTimeBar?52:0, RH=taskRH;
+  const LL=showLaneCol?laneColW:0, TH0=showTimeBar?52:0, RH=taskRH;
   const _fzList=freezes.filter(f=>validISO(f.start)&&validISO(f.end));
   const fzFont=Math.max(7,Math.round(taskFontSize*0.72)); // police réduite pour les périodes de gel
   const FZ=_fzList.length?fzFont+8:0; // bandeau des gels, en bas de la barre de temps
@@ -1593,7 +1590,7 @@ function renderTimeline(){
   lanes.forEach((lane,li)=>{
     const rows=laneRowsCache[lane.id];
     if (rows.length === 0) return; // Ignore completely if no rows
-    const laneH=rows.reduce((s,row)=>s+getRowH(row),0);
+    const laneH=Math.max(rows.reduce((s,row)=>s+getRowH(row),0), String(lane.name||'').split('\n').length*Math.max(12,laneFontSize+2)+8);
     const lc=lane.color||'#2c3e50';
     svg.appendChild(el('rect',{x:LL,y:rowY,width:VW-LL,height:laneH,fill:li%2===0?'#fff':'#f8f8f8'}));
     const laneColorRect=el('rect',{x:0,y:rowY,width:LL,height:laneH,fill:lc});
@@ -2142,6 +2139,7 @@ function resetDefaults() {
   document.getElementById('chk-todayline').checked = true;
   const cTachesMaster=document.getElementById('chk-taches-master'); if(cTachesMaster) cTachesMaster.checked = true;
   const cLaneCol=document.getElementById('chk-lane-col'); if(cLaneCol) cLaneCol.checked = true;
+  laneColW=130; { const e=document.getElementById('lane-col-w'); if(e) e.value=130; const v=document.getElementById('lane-col-w-val'); if(v) v.textContent=130; }
   document.getElementById('chk-dates').checked = true;
   document.getElementById('chk-task-label').checked = true;
   const r1=document.querySelector('input[name="dates-pos"][value="right"]'); if(r1) r1.checked=true;
@@ -2431,6 +2429,7 @@ function saveState() {
     defaultTaskJalonPalette,
     showTitle: document.getElementById('chk-title')?.checked,
     showLaneCol: document.getElementById('chk-lane-col')?.checked,
+    laneColW,
     showTimeBar: document.getElementById('chk-timebar')?.checked,
     showTodayLine: document.getElementById('chk-todayline')?.checked,
     showTodayLineVline: document.getElementById('chk-todayline-vline')?.checked,
@@ -2499,6 +2498,7 @@ saveState._orig = function(){
       defaultTaskJalonPalette,
       showTitle: document.getElementById('chk-title')?.checked,
       showLaneCol: document.getElementById('chk-lane-col')?.checked,
+      laneColW,
       showTimeBar: document.getElementById('chk-timebar')?.checked,
       showTodayLine: document.getElementById('chk-todayline')?.checked,
       showTodayLineVline: document.getElementById('chk-todayline-vline')?.checked,
@@ -2576,6 +2576,7 @@ function restoreSidebar(s) {
   // Checkboxes affichage
   setChk('chk-title', s.showTitle);
   setChk('chk-lane-col', s.showLaneCol);
+  laneColW=Math.min(400,Math.max(80,+s.laneColW||130)); { const e=document.getElementById('lane-col-w'); if(e) e.value=laneColW; const v=document.getElementById('lane-col-w-val'); if(v) v.textContent=laneColW; }
   setChk('chk-timebar', s.showTimeBar);
   setChk('chk-todayline', s.showTodayLine);
   setChk('chk-todayline-vline', s.showTodayLineVline ?? true);
@@ -3641,13 +3642,17 @@ function openFreezePop(id,x,y){
   closeFreezePop();
   const f=freezes.find(v=>v.id===id); if(!f) return;
   const d=document.createElement('div'); d.id='freeze-pop';
-  d.style.cssText='position:fixed;z-index:10050;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px;width:256px;font-size:12px;color:#333;';
+  d.style.cssText='position:fixed;z-index:10050;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px;width:280px;max-width:calc(100vw - 16px);box-sizing:border-box;font-size:12px;color:#333;';
   const pc=Math.round(f.opacity*100);
+  const di='style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #ccc;border-radius:5px;font-size:12px;"';
   d.innerHTML='<div style="font-weight:700;margin-bottom:8px;">❄️ Période de gel</div>'
-    +'<input type="text" value="'+esc(f.title)+'" placeholder="Titre..." oninput="setFreeze('+id+',\'title\',this.value)" style="width:100%;padding:5px 7px;border:1px solid #ccc;border-radius:5px;margin-bottom:6px;font-size:12px;">'
-    +'<div style="color:#777;margin-bottom:8px;">'+f.start+' → '+f.end+' ('+dur(f.start,f.end)+')<br><span style="font-size:11px;">Glisser pour déplacer, tirer les bords pour ajuster.</span></div>'
-    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><label>Couleur <input type="color" value="'+f.color+'" onchange="setFreeze('+id+',\'color\',this.value)" style="width:30px;height:22px;padding:0;border:1px solid #ccc;vertical-align:middle;"></label>'
-    +'<label style="flex:1;display:flex;align-items:center;gap:5px;">Opacité <input type="range" min="5" max="100" step="5" value="'+pc+'" oninput="this.nextElementSibling.textContent=this.value+\'%\';setFreeze('+id+',\'opacity\',this.value)" style="flex:1;min-width:0;"><span style="min-width:30px;">'+pc+'%</span></label></div>'
+    +'<input type="text" value="'+esc(f.title)+'" placeholder="Titre..." oninput="setFreeze('+id+',\'title\',this.value)" style="width:100%;box-sizing:border-box;padding:5px 7px;border:1px solid #ccc;border-radius:5px;margin-bottom:8px;font-size:12px;">'
+    +'<div style="display:flex;gap:8px;margin-bottom:4px;">'
+    +'<label style="flex:1;min-width:0;">Début<input type="date" id="fz-start" value="'+f.start+'" onchange="fzPopDate('+id+',\'start\',this.value)" '+di+'></label>'
+    +'<label style="flex:1;min-width:0;">Fin<input type="date" id="fz-end" value="'+f.end+'" onchange="fzPopDate('+id+',\'end\',this.value)" '+di+'></label></div>'
+    +'<div id="fz-dur" style="color:#777;font-size:11px;margin-bottom:8px;">Durée : '+dur(f.start,f.end)+'</div>'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><label style="display:flex;align-items:center;gap:6px;">Couleur <input type="color" value="'+f.color+'" onchange="setFreeze('+id+',\'color\',this.value)" style="width:30px;height:22px;padding:0;border:1px solid #ccc;"></label></div>'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><span>Opacité</span><input type="range" min="5" max="100" step="5" value="'+pc+'" oninput="document.getElementById(\'fz-op\').textContent=this.value+\'%\';setFreeze('+id+',\'opacity\',this.value)" style="flex:1;min-width:0;"><span id="fz-op" style="min-width:34px;text-align:right;">'+pc+'%</span></div>'
     +'<label style="display:block;margin-bottom:10px;cursor:pointer;"><input type="checkbox" '+(f.full?'checked':'')+' onchange="setFreeze('+id+',\'full\',this.checked)"> Sur toute la hauteur</label>'
     +'<div style="display:flex;justify-content:space-between;"><button type="button" onclick="delFreeze('+id+');closeFreezePop()" style="padding:5px 10px;border:1px solid #e0b4b4;background:#fff5f5;color:#c0392b;border-radius:6px;cursor:pointer;font-size:12px;">Supprimer</button><button type="button" onclick="closeFreezePop()" style="padding:5px 14px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;font-size:12px;">OK</button></div>';
   document.body.appendChild(d);
@@ -3656,24 +3661,18 @@ function openFreezePop(id,x,y){
   d.style.top=((y+14+r.height>window.innerHeight-8)?Math.max(8,y-r.height-14):y+14)+'px';
   setTimeout(()=>document.addEventListener('mousedown',fzPopOutside,true),0);
 }
+function fzPopDate(id,k,v){
+  if(!validISO(v)) return;
+  setFreeze(id,k,v);
+  const f=freezes.find(x=>x.id===id); if(!f) return;
+  const a=document.getElementById('fz-start'), b=document.getElementById('fz-end'), d=document.getElementById('fz-dur');
+  if(a) a.value=f.start; if(b) b.value=f.end; if(d) d.textContent='Durée : '+dur(f.start,f.end);
+}
 function addFreezeFromGantt(){
   addFreeze();
   showToast('Période de gel ajoutée : cliquez dessus dans la barre de temps pour la modifier.');
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeFreezePop(); });
-
-// ═══ PRÉRÉGLAGES DE VUE ══════════════════════════════════════
-function presetView(kind){
-  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.checked=v; };
-  const onlyDiamonds=(kind==='milestones');
-  set('chk-jalons-master',true);          // losanges des jalons
-  set('chk-jalon-lines',true);            // ligne des losanges (nécessaire pour les voir quand les tâches sont masquées)
-  set('chk-jalons-flags',!onlyDiamonds);  // drapeaux/étiquettes
-  set('chk-lane-col',!onlyDiamonds);      // colonne des phases
-  set('chk-taches-master',!onlyDiamonds); // barres de tâches
-  toggleJalonsOptions(); toggleJalonsLinesOptions(); toggleTachesOptions();
-  saveState(); renderTimeline();
-}
 
 // ═══ MODE D'INTERFACE : SIMPLIFIÉ / AVANCÉ ═══════════════════
 const UIMODE_KEY='test_mp_uimode_v1';
