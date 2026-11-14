@@ -3573,25 +3573,39 @@ function afterFreezeChange(){
 }
 function renderFreezePanel(){
   const host=document.getElementById('freezes-panel'); if(!host) return;
-  if(host.contains(document.activeElement) && document.activeElement.tagName==='INPUT' && document.activeElement.type==='text') return; // ne pas casser la saisie en cours
-  let h='<div class="phase" style="padding:10px 14px;">'
-    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(freezes.length?'8':'0')+'px;">'
-    +'<div style="font-weight:700;font-size:14px;color:#2c3e50;">❄️ Périodes de gel</div>'
-    +'<button type="button" onclick="addFreeze()" style="padding:4px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;">+ Période de gel</button>'
-    +(freezes.length?'':'<span style="font-size:12px;color:#888;">Aucune. Elles s\'affichent dans le bas de la barre de temps.</span>')
+  const ae=document.activeElement;
+  if(ae && host.contains(ae) && ae.tagName==='TEXTAREA') return; // ne pas casser la saisie en cours
+  const HDR='#607D8B';
+  let h='<div class="phase">'
+    +'<div class="phase-header" style="background:'+HDR+'">'
+    +'<span style="position:absolute;left:12px;top:8px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;">❄️</span>'
+    +'<div class="phase-title-wrap"><div class="phase-title-display">Périodes de gel</div></div>'
+    +'<button class="btn-add-task" style="width:auto;padding:2px 7px;font-size:11px;color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:4px;" title="Ajouter une période de gel" onclick="event.stopPropagation();addFreeze()">＋</button>'
     +'</div>';
-  freezes.forEach(f=>{
-    h+='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #eee;font-size:12px;">'
-      +'<input type="text" value="'+esc(f.title)+'" placeholder="Nom (ex. Gel production)" oninput="setFreeze('+f.id+',\'title\',this.value)" style="width:190px;padding:4px 6px;border:1px solid #ccc;border-radius:5px;">'
-      +'<label>Du <input type="date" value="'+f.start+'" onchange="setFreeze('+f.id+',\'start\',this.value)"></label>'
-      +'<label>au <input type="date" value="'+f.end+'" onchange="setFreeze('+f.id+',\'end\',this.value)"></label>'
-      +'<label title="Couleur"><input type="color" value="'+f.color+'" oninput="setFreeze('+f.id+',\'color\',this.value)" style="width:30px;height:24px;padding:0;border:1px solid #ccc;"></label>'
-      +'<label title="Opacité" style="display:flex;align-items:center;gap:4px;">Opacité <input type="range" min="5" max="100" step="5" value="'+Math.round(f.opacity*100)+'" oninput="this.nextElementSibling.textContent=this.value+\'%\';setFreeze('+f.id+',\'opacity\',this.value)" style="width:90px;"><span style="min-width:34px;">'+Math.round(f.opacity*100)+'%</span></label>'
-      +'<label style="cursor:pointer;"><input type="checkbox" '+(f.full?'checked':'')+' onchange="setFreeze('+f.id+',\'full\',this.checked)"> Sur toute la hauteur</label>'
-      +'<button type="button" class="btn-del-row" onclick="delFreeze('+f.id+')" title="Supprimer">🗑</button>'
-      +'</div>';
-  });
+  if(!freezes.length){
+    h+='<div style="padding:12px 14px;font-size:12px;color:#888;">Aucune période de gel. Cliquez sur ＋ pour en ajouter : elles s\'affichent dans le bas de la barre de temps.</div>';
+  } else {
+    h+='<table><thead><tr>'
+      +'<th style="width:16px"></th><th style="width:24%">Titre</th><th>Couleur</th><th>Durée</th><th>Début</th><th>Fin</th><th>Opacité %</th><th>Toute la hauteur</th><th></th>'
+      +'</tr></thead><tbody>';
+    freezes.forEach(f=>{
+      const pc=Math.round(f.opacity*100);
+      h+='<tr class="task-row">'
+        +'<td><span class="drag-handle" style="visibility:hidden">⠿</span></td>'
+        +'<td><textarea rows="1" placeholder="Titre..." oninput="setFreeze('+f.id+',\'title\',this.value);autoResize(this)">'+esc(f.title)+'</textarea></td>'
+        +'<td><div class="type-badge"><input type="color" value="'+f.color+'" onchange="setFreeze('+f.id+',\'color\',this.value)"/></div></td>'
+        +'<td>'+dur(f.start,f.end)+'</td>'
+        +'<td><input type="date" value="'+f.start+'" onchange="setFreeze('+f.id+',\'start\',this.value)"/></td>'
+        +'<td><input type="date" value="'+f.end+'" onchange="setFreeze('+f.id+',\'end\',this.value)"/></td>'
+        +'<td><div class="pct-wrap"><input type="number" style="width:40px" min="5" max="100" step="5" value="'+pc+'" onchange="setFreeze('+f.id+',\'opacity\',this.value);this.value=Math.round(freezes.find(x=>x.id==='+f.id+').opacity*100);this.nextElementSibling.firstElementChild.style.width=this.value+\'%\'"/><div class="pct-bar"><div class="pct-fill" style="width:'+pc+'%"></div></div></div></td>'
+        +'<td><input type="checkbox" style="width:auto;cursor:pointer;" '+(f.full?'checked':'')+' onchange="setFreeze('+f.id+',\'full\',this.checked)"/></td>'
+        +'<td><button class="btn-del-row" onclick="delFreeze('+f.id+')" title="Supprimer">🗑</button></td>'
+        +'</tr>';
+    });
+    h+='</tbody></table>';
+  }
   host.innerHTML=h+'</div>';
+  host.querySelectorAll('textarea').forEach(t=>autoResize(t));
 }
 
 // ═══ IMPORT D'UNE TIMELINE DEPUIS UNE PHOTO (vision IA) ══════
