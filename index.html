@@ -127,7 +127,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 .uimode button.active { background:#2c3e50; color:#fff; border-color:#2c3e50; }
 .simple-hint { display:none; font-size:10px; color:#888; margin-top:6px; line-height:1.35; }
 .sidebar.simple .simple-hint { display:block; }
-.sidebar.simple .adv, .sidebar.simple .sub-options { display:none !important; }
+.sidebar.simple .adv, .sidebar.simple .sub-options:not(#jalons-sub) { display:none !important; }
 #print-root { display:none; }
 @media print {
   body > *:not(#print-root) { display:none !important; }
@@ -172,7 +172,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.6 &mdash; Accès sécurisé
+      v4.7 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -213,7 +213,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 <div class="app-shell">
 <div class="app-body">
   <div class="sidebar">
-    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.6</div>
+    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.7</div>
     <div class="uimode"><button type="button" id="uimode-simple" onclick="applyUIMode('simple')">Simplifié</button><button type="button" id="uimode-adv" onclick="applyUIMode('advanced')">Avancé</button></div>
     <div class="simple-hint">Mode simplifié : tailles, palette et options détaillées sont masquées. Passez en « Avancé » pour tout afficher.</div>
     <hr class="sidebar-sep" style="margin:12px 0;">
@@ -283,17 +283,17 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
         <label><input type="checkbox" id="chk-jalons-master" checked onchange="toggleJalonsOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Jalons</label>
         <div class="sub-options" id="jalons-sub">
           <label><input type="checkbox" id="chk-jalons-flags" checked onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Drapeaux jalons</label>
-          <label><input type="checkbox" id="chk-dash-dot" onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
-          <label><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
+          <label class="adv"><input type="checkbox" id="chk-dash-dot" onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
+          <label class="adv"><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
           <div class="sub-options" id="jalon-lines-sub">
             <label><input type="radio" name="jalon-line-pos" value="first" onchange="renderTimeline(); saveState()"/> Première ligne</label>
             <label><input type="radio" name="jalon-line-pos" value="last" checked onchange="renderTimeline(); saveState()"/> Dernière ligne</label>
           </div>
         </div>
 
-        <label><input type="checkbox" id="chk-taches-master" checked onchange="toggleTachesOptions(); renderTimeline(); saveState()"/> Tâches et Phases</label>
+        <label><input type="checkbox" id="chk-lane-col" checked onchange="renderTimeline(); saveState()"/> Phases (colonne)</label>
+        <label><input type="checkbox" id="chk-taches-master" checked onchange="toggleTachesOptions(); renderTimeline(); saveState()"/> Tâches (barres)</label>
         <div class="sub-options" id="taches-sub">
-          <label><input type="checkbox" id="chk-lane-col" checked onchange="renderTimeline(); saveState()"/> Colonne Phases</label>
           <label><input type="checkbox" id="chk-task-label" checked onchange="toggleTaskLabelOptions()"/> Titre des tâches</label>
           <div class="sub-options" id="task-label-sub">
             <label><input type="radio" name="task-label-pos" value="inside" onchange="renderTimeline(); saveState()"/> Dans la barre</label>
@@ -309,7 +309,11 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
           </div>
         </div>
 
-        <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetAfficherDefaults()">Valeurs par défaut</button>
+        <div style="display:flex;gap:6px;margin-top:10px;">
+          <button class="btn" style="flex:1;justify-content:center;font-size:11px;padding:6px 4px;" title="Masque la colonne des phases, les barres de tâches et les drapeaux : seuls les losanges des jalons restent" onclick="presetView('milestones')">◆ Jalons seuls</button>
+          <button class="btn" style="flex:1;justify-content:center;font-size:11px;padding:6px 4px;" title="Réaffiche phases, tâches, jalons et drapeaux" onclick="presetView('all')">Tout afficher</button>
+        </div>
+        <button class="btn" style="justify-content:center;margin-top:6px;" onclick="resetAfficherDefaults()">Valeurs par défaut</button>
       </div>
     </div>
     <hr class="sidebar-sep adv" style="margin:12px 0;">
@@ -585,6 +589,10 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.7:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Affichages : « Tâches (barres) » ne masque plus que les barres de tâches (les losanges de jalons restent) ; « Phases (colonne) » devient une case indépendante, visible aussi en mode simplifié ; boutons « ◆ Jalons seuls » et « Tout afficher ».</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.6:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : export SVG vectoriel (boutons SVG) et PDF vectoriel (bouton PDF, via la fenêtre d'impression), avec titre, périodes de gel incluses et sans éléments interactifs.</li>
@@ -1344,14 +1352,15 @@ function tlPointerUp(){ try{if(tlDrag){renderData();tlDrag=null;}
 function computeLaneRows(lane){
   const rows=[];
   const showTaches = document.getElementById('chk-taches-master')?.checked !== false;
-
-  if(!showTaches) {
-    return rows;
-  }
-
   const showJalonRow = document.getElementById('chk-jalon-lines')?.checked !== false;
   const jalonLinePos = document.querySelector('input[name="jalon-line-pos"]:checked')?.value || 'last';
   const jalons=lane.tasks.filter(t=>t.type==='J');
+
+  if(!showTaches) {
+    // Barres de tâches masquées : on conserve la ligne des losanges de jalons de la phase
+    if(showJalonRow && jalons.length>0) rows.push({tasks:jalons});
+    return rows;
+  }
 
   if(showJalonRow && jalons.length>0 && jalonLinePos === 'first') {
     rows.push({tasks:jalons});
@@ -3651,6 +3660,19 @@ function addFreezeFromGantt(){
   showToast('Période de gel ajoutée : cliquez dessus dans la barre de temps pour la modifier.');
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeFreezePop(); });
+
+// ═══ PRÉRÉGLAGES DE VUE ══════════════════════════════════════
+function presetView(kind){
+  const set=(id,v)=>{ const e=document.getElementById(id); if(e) e.checked=v; };
+  const onlyDiamonds=(kind==='milestones');
+  set('chk-jalons-master',true);          // losanges des jalons
+  set('chk-jalon-lines',true);            // ligne des losanges (nécessaire pour les voir quand les tâches sont masquées)
+  set('chk-jalons-flags',!onlyDiamonds);  // drapeaux/étiquettes
+  set('chk-lane-col',!onlyDiamonds);      // colonne des phases
+  set('chk-taches-master',!onlyDiamonds); // barres de tâches
+  toggleJalonsOptions(); toggleJalonsLinesOptions(); toggleTachesOptions();
+  saveState(); renderTimeline();
+}
 
 // ═══ MODE D'INTERFACE : SIMPLIFIÉ / AVANCÉ ═══════════════════
 const UIMODE_KEY='test_mp_uimode_v1';
