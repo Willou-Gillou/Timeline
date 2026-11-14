@@ -1359,6 +1359,7 @@ function computeLaneRows(lane){
   if(!showTaches) {
     // Barres de tâches masquées : on conserve la ligne des losanges de jalons de la phase
     if(showJalonRow && jalons.length>0) rows.push({tasks:jalons});
+    if(rows.length===0) rows.push({tasks:[]}); // phase sans jalon : on garde sa ligne pour qu'elle reste visible
     return rows;
   }
 
