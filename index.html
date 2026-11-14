@@ -197,7 +197,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 <div class="app-shell">
 <div class="app-body">
   <div class="sidebar">
-    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.3</div>
+    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.4</div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
       <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">DEPLACEMENT PLANNING</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
@@ -539,7 +539,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     <div id="planning-title-wrap">
       <input id="planning-title" type="text" value="Macro-planning projet" placeholder="Titre du planning..."/>
     </div>
-    <div class="view" id="view-data"><div id="lanes"></div></div>
+    <div class="view" id="view-data"><div id="freezes-panel"></div><div id="lanes"></div></div>
     <div class="view active" id="view-timeline">
       <div class="tl-outer"><svg id="tl-svg"></svg></div>
     </div>
@@ -567,6 +567,11 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.4:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Nouveau : périodes de gel. Gérées dans l'onglet Données (nom, dates, couleur, opacité), elles s'affichent sur une ligne dédiée juste sous la barre de temps, avec option « Sur toute la hauteur » pour les prolonger sur tout le Gantt.</li>
+        <li>Les périodes de gel sont sauvegardées, exportées/importées avec le planning, prises en compte par l'annulation, et reconnues par l'import depuis une photo.</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.3:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : import d'une timeline depuis une photo (bouton 📷). L'IA de Claude extrait phases, tâches et jalons, avec aperçu avant import (ajout ou remplacement du planning). Nécessite une clé API Anthropic.</li>
@@ -696,6 +701,8 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 <script>
 // ═══ STATE ═══════════════════════════════════════════════════
 let lanes=[], lid=1, tid=1;
+let freezes=[]; // périodes de gel : {id,title,start,end,color,opacity,full}
+const FREEZE_DEFAULT_COLOR='#2980B9', FREEZE_DEFAULT_OPACITY=0.3;
 let dragLaneId=null, dragTaskId=null, laneDragIdx=null;
 
 window._colorPickerActive = false;
@@ -1188,6 +1195,7 @@ window.moveLaneDown = function(idx) {
 };
 
 function renderData(){
+  renderFreezePanel();
   const _vd=document.getElementById('view-data'); const _st=_vd?_vd.scrollTop:0; const _hasScroll=_vd&&_vd.scrollHeight>_vd.clientHeight;
   const c=document.getElementById('lanes'); c.innerHTML='';
   lanes.forEach((lane,li)=>{
@@ -1389,6 +1397,7 @@ function renderTimeline(){
   lanes.forEach(l=>l.tasks.forEach(t=>{ if(t.start)allD.push(parseD(t.start)); if(t.end)allD.push(parseD(t.end)); }));
   if(!allD.length){ svg.setAttribute('viewBox','0 0 600 80'); svg.appendChild(el('text',{x:300,y:45,'text-anchor':'middle',fill:'#aaa','font-size':14},'Aucune tâche définie, appuyez sur + Phase ou chargez un modèle prédéfinis')); return; }
 
+  freezes.forEach(f=>{ if(validISO(f.start)&&validISO(f.end)){ allD.push(parseD(f.start)); allD.push(parseD(f.end)); } });
   const rawMin=new Date(Math.min(...allD)), rawMax=new Date(Math.max(...allD));
   const startOpt=+document.querySelector('input[name="tl-start"]:checked').value;
   const endOpt=+document.querySelector('input[name="tl-end"]:checked').value;
@@ -1451,7 +1460,9 @@ function renderTimeline(){
     return renderTimeline();
   }
   const MA=rows.length===0?0:rows.reduce((a,r)=>Math.max(a,r.topY+r.h),0)+8+3;
-  const TOTAL_TOP=MA+TH+timelineGap;
+  const _fzList=freezes.filter(f=>validISO(f.start)&&validISO(f.end));
+  const FH=_fzList.length?Math.round(taskFontSize*1.2+10):0; // ligne dédiée aux périodes de gel, juste sous la barre de temps
+  const TOTAL_TOP=MA+TH+FH+timelineGap;
 
   const laneRowsCache={};
   let totalRows=0;
@@ -2022,6 +2033,27 @@ function renderTimeline(){
     svg.appendChild(flagGroup);
   }
   svg.appendChild(timebarGroup);
+  if(FH>0){
+    const fzY=MA+TH;
+    const fzG=document.createElementNS(NS,'g'); fzG.setAttribute('id','freeze-row-group');
+    fzG.appendChild(el('rect',{x:0,y:fzY,width:VW,height:FH,fill:'#eceff1'}));
+    fzG.appendChild(el('rect',{x:0,y:fzY,width:LL,height:FH,fill:'#b0bec5'}));
+    if(LL>0) fzG.appendChild(el('text',{x:LL/2,y:fzY+FH/2+taskFontSize*0.35,'text-anchor':'middle','font-size':Math.max(9,taskFontSize),'font-weight':'bold',fill:'#fff'},'Gel'));
+    const fzOver=document.createElementNS(NS,'g'); fzOver.setAttribute('id','freeze-overlay-group'); fzOver.setAttribute('pointer-events','none');
+    _fzList.forEach(f=>{
+      const x1=Math.max(LL,dX(f.start)), x2=Math.min(VW,dX(f.end)+PPD);
+      if(x2<=x1) return;
+      const col=f.color||FREEZE_DEFAULT_COLOR, op=Math.min(1,Math.max(0.05,+f.opacity||FREEZE_DEFAULT_OPACITY));
+      const band=el('rect',{x:x1,y:fzY+2,width:x2-x1,height:FH-4,rx:3,fill:col,'fill-opacity':op,stroke:col,'stroke-opacity':Math.min(1,op+0.35),'stroke-width':1});
+      const tip=document.createElementNS(NS,'title'); tip.textContent=(f.title||'Gel')+' : '+f.start+' → '+f.end+(f.full?' (toute la hauteur)':''); band.appendChild(tip);
+      fzG.appendChild(band);
+      const lbl=(f.title||'').trim();
+      if(lbl && lbl.length*taskFontSize*0.58 < (x2-x1)-8) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FH/2+taskFontSize*0.35,'text-anchor':'middle','font-size':taskFontSize,'font-weight':'bold',fill:'#263238','pointer-events':'none'},lbl));
+      if(f.full) fzOver.appendChild(el('rect',{x:x1,y:fzY+FH,width:x2-x1,height:Math.max(0,VH-(fzY+FH)),fill:col,'fill-opacity':op}));
+    });
+    svg.appendChild(fzG);
+    if(fzOver.childNodes.length) svg.appendChild(fzOver);
+  }
   if(todayLabel) svg.appendChild(todayLabel);
   if(typeof _delGroups!=='undefined') _delGroups.forEach(g=>svg.appendChild(g));
   if(todayMarker) svg.appendChild(todayMarker);
@@ -2199,6 +2231,7 @@ function importModelByIndex(idx) {
     lid   = state.lid   || 1;
     tid   = state.tid   || 1;
     jalonColorIdx = state.jalonColorIdx || 0;
+    freezes = sanitizeFreezes(state.freezes);
     if (state.sidebar) restoreSidebar(state.sidebar);
 
     const titleEl = document.getElementById('planning-title');
@@ -2239,7 +2272,7 @@ function checkModelsFolder() {
 function clearMacroPlanning() {
   if (!confirm('Etes vous sur ?')) return;
   try { _saveUIPrefs(); } catch(e){}
-  lanes = []; lid = 1; tid = 1; jalonColorIdx = 0;
+  lanes = []; freezes = []; lid = 1; tid = 1; jalonColorIdx = 0;
   const titleEl = document.getElementById('planning-title');
   if (titleEl) titleEl.value = 'Macro-planning projet';
   saveState();
@@ -2259,6 +2292,7 @@ function cloneJSON(v){ return JSON.parse(JSON.stringify(v)); }
 function getPlanningSnapshot(){
   return {
     lanes: cloneJSON(lanes || []),
+    freezes: cloneJSON(freezes || []),
     lid: lid || 1,
     tid: tid || 1,
     jalonColorIdx: jalonColorIdx || 0,
@@ -2306,6 +2340,7 @@ function applyPlanningSnapshot(snapshot){
   lid = snapshot?.lid || 1;
   tid = snapshot?.tid || 1;
   jalonColorIdx = snapshot?.jalonColorIdx || 0;
+  freezes = sanitizeFreezes(snapshot?.freezes);
   const titleEl=document.getElementById('planning-title');
   if(titleEl && snapshot && typeof snapshot.planningTitle === 'string') titleEl.value = snapshot.planningTitle;
   renderData();
@@ -2403,7 +2438,7 @@ function saveState() {
     activeTab: document.getElementById('view-data').classList.contains('active') ? 'data' : 'timeline',
     menuOpen: !document.querySelector('.app-body')?.classList.contains('sidebar-closed'),
   };
-  const state = { lanes, lid, tid, jalonColorIdx, sidebar };
+  const state = { lanes, freezes, lid, tid, jalonColorIdx, sidebar };
   const raw = JSON.stringify(state);
   localStorage.setItem(MP_PLANNING_KEY, raw);
   localStorage.setItem(MP_SETTINGS_KEY, JSON.stringify(sidebar));
@@ -2471,7 +2506,7 @@ saveState._orig = function(){
       activeTab: document.getElementById('view-data').classList.contains('active') ? 'data' : 'timeline',
       menuOpen: !document.querySelector('.app-body')?.classList.contains('sidebar-closed'),
     };
-    const state = { lanes, lid, tid, jalonColorIdx, sidebar };
+    const state = { lanes, freezes, lid, tid, jalonColorIdx, sidebar };
     const raw = JSON.stringify(state);
     localStorage.setItem(MP_PLANNING_KEY, raw);
     localStorage.setItem(MP_SETTINGS_KEY, JSON.stringify(sidebar));
@@ -2614,6 +2649,7 @@ function loadState() {
     lid   = state.lid   || 1;
     tid   = state.tid   || 1;
     jalonColorIdx = state.jalonColorIdx || 0;
+    freezes = sanitizeFreezes(state.freezes);
     const _sb = state.sidebar || JSON.parse(localStorage.getItem(MP_SETTINGS_KEY) || 'null');
     if (_sb) restoreSidebar(_sb);
     else applyHeaderHeight();
@@ -2631,6 +2667,7 @@ function loadState() {
         lid   = state.lid   || 1;
         tid   = state.tid   || 1;
         jalonColorIdx = state.jalonColorIdx || 0;
+        freezes = sanitizeFreezes(state.freezes);
         // Ne pas écraser les réglages sidebar lors d'un import planning
         return { tab: state.sidebar?.activeTab || 'timeline' };
       }
@@ -2759,7 +2796,7 @@ function exportJSON(customFileName) {
   saveState();
   const _full = JSON.parse(localStorage.getItem(MP_PLANNING_KEY) || '{}');
   // Export planning uniquement (sans réglages sidebar)
-  const state = { lanes: _full.lanes || [], lid: _full.lid || lid, tid: _full.tid || tid, jalonColorIdx: _full.jalonColorIdx || jalonColorIdx };
+  const state = { lanes: _full.lanes || [], freezes: _full.freezes || [], lid: _full.lid || lid, tid: _full.tid || tid, jalonColorIdx: _full.jalonColorIdx || jalonColorIdx };
   const content = JSON.stringify(state, null, 2);
   const defaultName = customFileName || ('planning_' + new Date().toISOString().slice(0, 10) + '.json');
 
@@ -2890,12 +2927,13 @@ function importJSON(event) {
     try {
       const state = JSON.parse(e.target.result);
       // Import planning uniquement — les réglages sidebar sont préservés
-      const planningOnly = { lanes: state.lanes || [], lid: state.lid || 1, tid: state.tid || 1, jalonColorIdx: state.jalonColorIdx || 0 };
+      const planningOnly = { lanes: state.lanes || [], freezes: sanitizeFreezes(state.freezes), lid: state.lid || 1, tid: state.tid || 1, jalonColorIdx: state.jalonColorIdx || 0 };
       localStorage.setItem(MP_PLANNING_KEY, JSON.stringify(planningOnly));
       lanes = planningOnly.lanes;
       lid   = planningOnly.lid;
       tid   = planningOnly.tid;
       jalonColorIdx = planningOnly.jalonColorIdx;
+      freezes = planningOnly.freezes;
       renderData();
       requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ renderTimeline(); }); });
       updateT0Display();
@@ -3496,6 +3534,67 @@ window.addEventListener('resize', () => {
     renderTimeline();
   }
 });
+// ═══ PÉRIODES DE GEL ═════════════════════════════════════════
+function sanitizeFreezes(arr){
+  const out=[]; let maxId=0;
+  (Array.isArray(arr)?arr:[]).forEach(f=>{
+    if(!f||!validISO(f.start)||!validISO(f.end)) return;
+    let st=f.start, en=f.end; if(en<st){ const x=st; st=en; en=x; }
+    const id=(Number.isFinite(+f.id)&&+f.id>0&&!out.some(o=>o.id===+f.id))?+f.id:null;
+    out.push({ id, title:String(f.title||'').slice(0,120), start:st, end:en,
+      color:/^#[0-9a-fA-F]{6}$/.test(f.color||'')?f.color:FREEZE_DEFAULT_COLOR,
+      opacity:Math.min(1,Math.max(0.05,+f.opacity||FREEZE_DEFAULT_OPACITY)), full:!!f.full });
+    if(id) maxId=Math.max(maxId,id);
+  });
+  out.forEach(o=>{ if(!o.id) o.id=++maxId; });
+  return out;
+}
+function nextFreezeId(){ return freezes.reduce((m,f)=>Math.max(m,+f.id||0),0)+1; }
+function addFreeze(preset){
+  let base=null;
+  lanes.forEach(l=>(l.tasks||[]).forEach(t=>{ if(validISO(t.start)){ const d=parseD(t.start); if(!base||d<base) base=d; } }));
+  const st=base||new Date(); const en=addDays(st,13);
+  freezes.push(Object.assign({ id:nextFreezeId(), title:'Gel', start:fmt(st), end:fmt(en), color:FREEZE_DEFAULT_COLOR, opacity:FREEZE_DEFAULT_OPACITY, full:false }, preset||{}));
+  renderFreezePanel(); afterFreezeChange();
+}
+function delFreeze(id){ freezes=freezes.filter(f=>f.id!==id); renderFreezePanel(); afterFreezeChange(); }
+function setFreeze(id,k,v){
+  const f=freezes.find(x=>x.id===id); if(!f) return;
+  if(k==='opacity') v=Math.min(1,Math.max(0.05,(+v||0)/100));
+  if((k==='start'||k==='end') && !validISO(v)) return;
+  f[k]=v;
+  if(k==='start' && f.end<f.start) f.end=f.start;
+  if(k==='end' && f.end<f.start) f.start=f.end;
+  if(k==='start'||k==='end') renderFreezePanel();
+  afterFreezeChange();
+}
+function afterFreezeChange(){
+  saveState();
+  if(document.getElementById('view-timeline').classList.contains('active')) renderTimeline();
+}
+function renderFreezePanel(){
+  const host=document.getElementById('freezes-panel'); if(!host) return;
+  if(host.contains(document.activeElement) && document.activeElement.tagName==='INPUT' && document.activeElement.type==='text') return; // ne pas casser la saisie en cours
+  let h='<div class="phase" style="padding:10px 14px;">'
+    +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(freezes.length?'8':'0')+'px;">'
+    +'<div style="font-weight:700;font-size:14px;color:#2c3e50;">❄️ Périodes de gel</div>'
+    +'<button type="button" onclick="addFreeze()" style="padding:4px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;">+ Période de gel</button>'
+    +(freezes.length?'':'<span style="font-size:12px;color:#888;">Aucune. Elles s\'affichent sur une ligne juste sous la barre de temps.</span>')
+    +'</div>';
+  freezes.forEach(f=>{
+    h+='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #eee;font-size:12px;">'
+      +'<input type="text" value="'+esc(f.title)+'" placeholder="Nom (ex. Gel production)" oninput="setFreeze('+f.id+',\'title\',this.value)" style="width:190px;padding:4px 6px;border:1px solid #ccc;border-radius:5px;">'
+      +'<label>Du <input type="date" value="'+f.start+'" onchange="setFreeze('+f.id+',\'start\',this.value)"></label>'
+      +'<label>au <input type="date" value="'+f.end+'" onchange="setFreeze('+f.id+',\'end\',this.value)"></label>'
+      +'<label title="Couleur"><input type="color" value="'+f.color+'" oninput="setFreeze('+f.id+',\'color\',this.value)" style="width:30px;height:24px;padding:0;border:1px solid #ccc;"></label>'
+      +'<label title="Opacité" style="display:flex;align-items:center;gap:4px;">Opacité <input type="range" min="5" max="100" step="5" value="'+Math.round(f.opacity*100)+'" oninput="this.nextElementSibling.textContent=this.value+\'%\';setFreeze('+f.id+',\'opacity\',this.value)" style="width:90px;"><span style="min-width:34px;">'+Math.round(f.opacity*100)+'%</span></label>'
+      +'<label style="cursor:pointer;"><input type="checkbox" '+(f.full?'checked':'')+' onchange="setFreeze('+f.id+',\'full\',this.checked)"> Sur toute la hauteur</label>'
+      +'<button type="button" class="btn-del-row" onclick="delFreeze('+f.id+')" title="Supprimer">🗑</button>'
+      +'</div>';
+  });
+  host.innerHTML=h+'</div>';
+}
+
 // ═══ IMPORT D'UNE TIMELINE DEPUIS UNE PHOTO (vision IA) ══════
 const PHOTO_KEY_STORAGE = 'test_mp_anthropic_key_v1';
 const PHOTO_MODEL = 'claude-sonnet-5-5';
@@ -3558,10 +3657,11 @@ function photoPrompt(){
   const today=fmt(new Date());
   return 'Tu analyses la photo d\'un planning / diagramme de Gantt / timeline de projet. Extrais sa structure pour la reproduire.\n'
   +'Réponds UNIQUEMENT par un objet JSON valide (aucun texte autour, pas de ```), de la forme :\n'
-  +'{"title":"titre du planning ou chaîne vide","lanes":[{"name":"nom de la phase","tasks":[{"title":"libellé","type":"T","start":"AAAA-MM-JJ","end":"AAAA-MM-JJ"}]}],"notes":"hypothèses faites, dates estimées, éléments illisibles"}\n'
+  +'{"title":"titre du planning ou chaîne vide","lanes":[{"name":"nom de la phase","tasks":[{"title":"libellé","type":"T","start":"AAAA-MM-JJ","end":"AAAA-MM-JJ"}]}],"freezes":[{"title":"libellé","start":"AAAA-MM-JJ","end":"AAAA-MM-JJ"}],"notes":"hypothèses faites, dates estimées, éléments illisibles"}\n'
   +'Règles :\n'
   +'- Une "lane" = une phase / un groupe / une ligne de regroupement. S\'il n\'y en a pas, utilise une seule lane "Phase 1".\n'
   +'- type "T" = barre ayant une durée ; type "J" = jalon (losange, drapeau, point) avec start = end.\n'
+  +'- "freezes" = périodes de gel (freeze, code freeze, blocage, zones ombrées ou hachurées proches de l\'axe du temps). Liste vide s\'il n\'y en a pas.\n'
   +'- Recopie les libellés tels qu\'ils sont écrits (langue d\'origine). Ne traduis pas.\n'
   +'- Dates : lis l\'axe du temps (jours, semaines, mois, trimestres) et estime les dates de début et de fin de chaque élément à partir de sa position. Si l\'année n\'est pas visible, déduis-la du contexte, sinon prends l\'année la plus plausible par rapport à aujourd\'hui ('+today+'). Si l\'axe n\'a que des semaines, utilise le lundi de la semaine pour start et le vendredi pour end.\n'
   +'- N\'invente aucun élément absent de l\'image. Si un élément est illisible, ignore-le et signale-le dans "notes".\n'
@@ -3577,7 +3677,7 @@ function extractJSON(text){
 function validISO(s){ if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false; const d=parseD(s); return !isNaN(d) && fmt(d)===s; }
 
 function sanitizePhotoPlan(raw){
-  const out={ title:(typeof raw.title==='string'?raw.title.trim().slice(0,120):''), lanes:[], skipped:0, notes:(typeof raw.notes==='string'?raw.notes.trim():'') };
+  const out={ title:(typeof raw.title==='string'?raw.title.trim().slice(0,120):''), lanes:[], freezes:sanitizeFreezes(raw.freezes).map(f=>({title:f.title,start:f.start,end:f.end})), skipped:0, notes:(typeof raw.notes==='string'?raw.notes.trim():'') };
   (Array.isArray(raw.lanes)?raw.lanes:[]).forEach((l,i)=>{
     const lane={ name:String((l&&l.name)||('Phase '+(i+1))).trim().slice(0,120)||('Phase '+(i+1)), tasks:[] };
     (Array.isArray(l&&l.tasks)?l.tasks:[]).forEach(tk=>{
@@ -3643,6 +3743,7 @@ function renderPhotoPreview(plan){
       h+='<div style="padding-left:10px;color:#444;">'+(t.type==='J'?'◆ ':'▬ ')+esc(t.title)+' <span style="color:#888;">'+(t.type==='J'?t.start:t.start+' → '+t.end)+'</span></div>';
     });
   });
+  if(plan.freezes&&plan.freezes.length){ h+='<div style="margin:8px 0 2px;font-weight:700;color:#333;">❄️ Périodes de gel</div>'; plan.freezes.forEach(f=>{ h+='<div style="padding-left:10px;color:#444;">'+esc(f.title||'Gel')+' <span style="color:#888;">'+f.start+' → '+f.end+'</span></div>'; }); }
   if(plan.notes) h+='<div style="margin-top:8px;padding:6px 8px;background:#fff8e1;border-radius:4px;color:#7a5b00;"><b>Remarques de l\'IA :</b> '+esc(plan.notes)+'</div>';
   h+='<div style="margin-top:6px;color:#888;">Les dates sont estimées d\'après la position sur l\'image ; vous pourrez les ajuster ensuite.</div>';
   const box=photoEl('photo-result'); box.innerHTML=h; box.style.display='block';
@@ -3654,7 +3755,7 @@ function applyPhotoImport(){
   if(!photoPlan) return;
   const mode=(document.querySelector('input[name="photo-mode"]:checked')||{}).value||'append';
   if(mode==='replace' && lanes.length>0 && !confirm('Remplacer le planning actuel par celui de la photo ?')) return;
-  if(mode==='replace'){ lanes=[]; lid=1; tid=1; jalonColorIdx=0; }
+  if(mode==='replace'){ lanes=[]; freezes=[]; lid=1; tid=1; jalonColorIdx=0; }
   const palette=(defaultTaskJalonPalette&&defaultTaskJalonPalette.length)?defaultTaskJalonPalette:LANE_COLORS;
   photoPlan.lanes.forEach(l=>{
     const color=palette[lanes.length%palette.length];
@@ -3664,6 +3765,7 @@ function applyPhotoImport(){
     });
     lanes.push(lane);
   });
+  (photoPlan.freezes||[]).forEach(f=>freezes.push({ id:nextFreezeId(), title:f.title||'Gel', start:f.start, end:f.end, color:FREEZE_DEFAULT_COLOR, opacity:FREEZE_DEFAULT_OPACITY, full:false }));
   if(mode==='replace' && photoPlan.title){ const te=photoEl('planning-title'); if(te) te.value=photoPlan.title; }
   renderData();
   requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ renderTimeline(); }); });
