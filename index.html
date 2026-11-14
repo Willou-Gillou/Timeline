@@ -120,6 +120,20 @@ td input[type=color] { width:28px; height:22px; padding:1px; border:1px solid #d
 .task-size-row button:hover { background:#fff5f5; }
 .task-size-val { font-size:12px; color:#555; min-width:28px; text-align:center; }
 svg text, svg tspan { text-rendering: geometricPrecision; }
+
+.uimode { display:flex; margin:8px 0 0; }
+.uimode button { flex:1; padding:5px 6px; font-size:11px; border:1px solid #ccc; background:#fff; color:#555; cursor:pointer; }
+.uimode button:first-child { border-radius:6px 0 0 6px; } .uimode button:last-child { border-radius:0 6px 6px 0; border-left:none; }
+.uimode button.active { background:#2c3e50; color:#fff; border-color:#2c3e50; }
+.simple-hint { display:none; font-size:10px; color:#888; margin-top:6px; line-height:1.35; }
+.sidebar.simple .simple-hint { display:block; }
+.sidebar.simple .adv, .sidebar.simple .sub-options { display:none !important; }
+#print-root { display:none; }
+@media print {
+  body > *:not(#print-root) { display:none !important; }
+  #print-root { display:block !important; }
+  html, body { height:auto !important; overflow:visible !important; background:#fff !important; }
+}
 </style>
 </head>
 <body>
@@ -158,7 +172,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.5 &mdash; Accès sécurisé
+      v4.6 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -176,7 +190,10 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     <button class="btn btn-icon" onclick="promptSaveJSON()" title="Sauvegarder le planning en JSON" aria-label="Sauvegarder le planning">💾</button>
     <label class="btn btn-icon" style="cursor:pointer;" title="Charger un planning JSON" aria-label="Charger un planning">📂<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
     <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle">🧩</button>
+    <button class="btn btn-icon" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" aria-label="Ajouter une période de gel">❄️</button>
     <button class="btn btn-icon" onclick="copyMacroPlanningImage()" title="Exporter le planning en PNG" aria-label="Exporter le planning en PNG">🖼️</button>
+    <button class="btn btn-icon" onclick="exportSVG()" title="Exporter en SVG vectoriel" aria-label="Exporter en SVG vectoriel" style="font-size:10px;font-weight:700;">SVG</button>
+    <button class="btn btn-icon" onclick="exportPDF()" title="Exporter en PDF vectoriel (via l'impression)" aria-label="Exporter en PDF" style="font-size:10px;font-weight:700;">PDF</button>
   </div>
 
   <div class="topbar-sep"></div>
@@ -196,7 +213,9 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 <div class="app-shell">
 <div class="app-body">
   <div class="sidebar">
-    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.5</div>
+    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.6</div>
+    <div class="uimode"><button type="button" id="uimode-simple" onclick="applyUIMode('simple')">Simplifié</button><button type="button" id="uimode-adv" onclick="applyUIMode('advanced')">Avancé</button></div>
+    <div class="simple-hint">Mode simplifié : tailles, palette et options détaillées sont masquées. Passez en « Avancé » pour tout afficher.</div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
       <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">DEPLACEMENT PLANNING</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
@@ -215,7 +234,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
           <input type="range" id="scale-slider" min="0" max="7" step="1" value="2" oninput="onScaleChange(+this.value)"/>
           <div class="scale-labels"><span>J</span><span>J-i</span><span>S</span><span>S-i</span><span>M</span><span>M-i</span><span>Tri</span><span>An</span></div>
         </div>
-        <div id="day-step-wrap" style="margin-top:10px;">
+        <div id="day-step-wrap" class="adv" style="margin-top:10px;">
           <div style="font-size:12px;font-weight:700;color:#333;">Graduation jours</div>
           <div class="scale-cur" id="day-step-cur-lbl">Multiples de 5</div>
           <input type="range" id="day-step-slider" min="0" max="3" step="1" value="2" oninput="onDayStepChange(+this.value)"/>
@@ -227,14 +246,14 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
             <input type="radio" name="day-step" value="10"/>
           </div>
         </div>
-        <div style="margin-top:12px;">
+        <div class="adv" style="margin-top:12px;">
           <div style="font-size:12px;font-weight:700;color:#333;">Début de la barre</div>
           <div class="radio-group">
             <label><input type="radio" name="tl-start" value="0" onchange="renderTimeline(); saveState()"/> Début 1er mois</label>
             <label><input type="radio" name="tl-start" value="1" checked onchange="renderTimeline(); saveState()"/> Début 1er mois − 1</label>
           </div>
         </div>
-        <div style="margin-top:12px;">
+        <div class="adv" style="margin-top:12px;">
           <div style="font-size:12px;font-weight:700;color:#333;">Fin de la barre</div>
           <div class="radio-group">
             <label><input type="radio" name="tl-end" value="2" onchange="renderTimeline(); saveState()"/> Dernier jour</label>
@@ -242,7 +261,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
             <label><input type="radio" name="tl-end" value="1" onchange="renderTimeline(); saveState()"/> Fin dernier mois + 1</label>
           </div>
         </div>
-        <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetTimeScaleDefaults()">Valeurs par défaut</button>
+        <button class="btn adv" style="justify-content:center;margin-top:10px;" onclick="resetTimeScaleDefaults()">Valeurs par défaut</button>
       </div>
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
@@ -293,8 +312,8 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
         <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetAfficherDefaults()">Valeurs par défaut</button>
       </div>
     </div>
-    <hr class="sidebar-sep" style="margin:12px 0;">
-    <div>
+    <hr class="sidebar-sep adv" style="margin:12px 0;">
+    <div class="adv">
       <div class="collapsible-head" onclick="toggleSection('sizes-body','sizes-chev')"><h3 style="margin:0;">TAILLES</h3><span class="chev" id="sizes-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="sizes-body" style="display:flex;flex-direction:column;gap:7px;margin-top:10px;">
         <div style="font-weight:700; color:#555; font-size:11px; margin-top:8px; border-bottom:1px solid #ddd; padding-bottom:2px; text-transform:uppercase;">Global</div>
@@ -486,8 +505,8 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
         <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetSizesDefaults()">Valeurs par défaut</button>
       </div>
     </div>
-    <hr class="sidebar-sep" style="margin:12px 0;">
-    <div>
+    <hr class="sidebar-sep adv" style="margin:12px 0;">
+    <div class="adv">
       <div class="collapsible-head" onclick="toggleSection('palette-body','palette-chev')"><h3 style="margin:0;">PALETTE DE COULEURS</h3><span class="chev" id="palette-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="palette-body" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
         <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">Couleur barre de temps <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="timebar-color" value="#0b0f14" onchange="setTimebarColor(this.value)"/></label>
@@ -566,6 +585,12 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.6:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Nouveau : export SVG vectoriel (boutons SVG) et PDF vectoriel (bouton PDF, via la fenêtre d'impression), avec titre, périodes de gel incluses et sans éléments interactifs.</li>
+        <li>Périodes de gel : édition directe dans le Gantt (glisser pour déplacer, tirer les bords pour ajuster, clic pour modifier le nom, la couleur, l'opacité ou supprimer) et bouton ❄️ pour en ajouter. Les gels ne sont jamais décalés par le déplacement du planning ni d'une phase.</li>
+        <li>Barre latérale : mode « Simplifié » (par défaut) qui masque les tailles, la palette et les options détaillées, et mode « Avancé » pour tout retrouver. Le choix est mémorisé.</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.5:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Retrait de l'import d'une timeline depuis une photo (API Claude) : bouton, fenêtre et code supprimés. La politique de sécurité (CSP) retrouve sa version stricte, sans accès réseau externe, et toute clé API mémorisée est effacée du navigateur.</li>
@@ -2021,7 +2046,10 @@ function renderTimeline(){
       const col=f.color||FREEZE_DEFAULT_COLOR, op=Math.min(1,Math.max(0.05,+f.opacity||FREEZE_DEFAULT_OPACITY));
       const band=el('rect',{x:x1,y:fzY+2,width:x2-x1,height:FZ-4,rx:2,fill:col,'fill-opacity':op,stroke:col,'stroke-opacity':Math.min(1,op+0.45),'stroke-width':1});
       const tip=document.createElementNS(NS,'title'); tip.textContent=(f.title||'Gel')+' : '+f.start+' → '+f.end+(f.full?' (toute la hauteur)':''); band.appendChild(tip);
+      band.style.cursor='grab'; band.addEventListener('pointerdown',ev=>fzPointerDown(ev,'move',f.id));
       fzG.appendChild(band);
+      const hw=Math.min(6,(x2-x1)/3);
+      [['resize-l',x1],['resize-r',x2-hw]].forEach(([m,hx])=>{ const hd=el('rect',{x:hx,y:fzY+2,width:hw,height:FZ-4,fill:'#ffffff','fill-opacity':0.001}); hd.style.cursor='ew-resize'; hd.addEventListener('pointerdown',ev=>fzPointerDown(ev,m,f.id)); fzG.appendChild(hd); });
       const lbl=(f.title||'').trim();
       if(lbl && lbl.length*fzFont*0.58 < (x2-x1)-6) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:showTimeBar?'#fff':'#263238','pointer-events':'none'},lbl));
       if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // sous la barre de temps
@@ -3509,6 +3537,132 @@ window.addEventListener('resize', () => {
     renderTimeline();
   }
 });
+// ═══ EXPORT SVG / PDF VECTORIELS ═════════════════════════════
+function exportFileBase(){
+  const raw=(document.getElementById('planning-title')?.value||'macro-planning').trim();
+  const safe=raw.replace(/[\/:*?"<>|]+/g,'-').replace(/\s+/g,' ').slice(0,80)||'macro-planning';
+  return safe+' - '+fmt(new Date());
+}
+function buildExportSvg(){
+  if(lanes.length) renderTimeline(); // rendu frais : fiable même si l'onglet Données est actif, et sans boutons de survol
+  const src=document.getElementById('tl-svg');
+  if(!src||!src.getAttribute('viewBox')||!lanes.length) return null;
+  const vb=src.getAttribute('viewBox').trim().split(/\s+/).map(Number);
+  const W=Math.max(1,vb[2]||1000), H=Math.max(1,vb[3]||600);
+  const clone=src.cloneNode(true);
+  clone.querySelectorAll('foreignObject').forEach(n=>n.remove());   // sélecteurs de couleur interactifs
+  clone.querySelectorAll('g[style*="cursor"]').forEach(n=>n.remove()); // boutons au survol (supprimer, dupliquer, ...)
+  const NS='http://www.w3.org/2000/svg';
+  const withTitle=document.getElementById('chk-title')?.checked!==false;
+  const title=(document.getElementById('planning-title')?.value||'').trim();
+  const T=(withTitle&&title)?44:0;
+  const out=document.createElementNS(NS,'svg');
+  out.setAttribute('xmlns',NS);
+  out.setAttribute('viewBox','0 0 '+W+' '+(H+T));
+  out.setAttribute('width',W); out.setAttribute('height',H+T);
+  out.setAttribute('font-family',"'Segoe UI', Arial, Helvetica, sans-serif");
+  const bg=document.createElementNS(NS,'rect'); bg.setAttribute('width',W); bg.setAttribute('height',H+T); bg.setAttribute('fill','#ffffff'); out.appendChild(bg);
+  if(T){ const t=document.createElementNS(NS,'text'); t.setAttribute('x',W/2); t.setAttribute('y',29); t.setAttribute('text-anchor','middle'); t.setAttribute('font-size',20); t.setAttribute('font-weight','bold'); t.setAttribute('fill','#2c3e50'); t.textContent=title; out.appendChild(t); }
+  const g=document.createElementNS(NS,'g'); g.setAttribute('transform','translate(0,'+T+')');
+  while(clone.firstChild) g.appendChild(clone.firstChild);
+  out.appendChild(g);
+  return { svg:out, W, H:H+T };
+}
+function exportSVG(){
+  const b=buildExportSvg(); if(!b){ showToast('Rien à exporter : planning vide.'); return; }
+  const xml='<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(b.svg);
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([xml],{type:'image/svg+xml;charset=utf-8'}));
+  a.download=exportFileBase()+'.svg';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(a.href),2000);
+  showToast('SVG vectoriel exporté.');
+}
+function cleanupPrint(){ document.getElementById('print-root')?.remove(); document.getElementById('print-page-style')?.remove(); }
+function preparePrintDoc(){
+  const b=buildExportSvg(); if(!b) return false;
+  cleanupPrint();
+  const land=b.W>=b.H, svg=b.svg;
+  svg.removeAttribute('width'); svg.removeAttribute('height'); svg.setAttribute('preserveAspectRatio','xMidYMid meet');
+  svg.style.cssText='display:block;width:100%;height:auto;max-height:'+(land?'192mm':'279mm');
+  const root=document.createElement('div'); root.id='print-root'; root.appendChild(svg); document.body.appendChild(root);
+  const st=document.createElement('style'); st.id='print-page-style'; st.textContent='@page{size:A4 '+(land?'landscape':'portrait')+';margin:8mm}'; document.head.appendChild(st);
+  return true;
+}
+function exportPDF(){
+  if(!preparePrintDoc()){ showToast('Rien à exporter : planning vide.'); return; }
+  window.addEventListener('afterprint',cleanupPrint,{once:true});
+  showToast('Choisissez « Enregistrer au format PDF » dans la fenêtre d\'impression.');
+  setTimeout(()=>window.print(),350);
+}
+
+// ═══ GELS : ÉDITION DIRECTE DANS LE GANTT ════════════════════
+let fzDrag=null;
+function fzPointerDown(e,mode,id){
+  if(e.button!==0) return;
+  const f=freezes.find(x=>x.id===id); if(!f) return;
+  closeFreezePop();
+  fzDrag={mode,id,startX:e.clientX,origStart:f.start,origEnd:f.end,moved:false};
+  e.preventDefault(); e.stopPropagation();
+  document.addEventListener('pointermove',fzPointerMove,{passive:false});
+  document.addEventListener('pointerup',fzPointerUp);
+}
+function fzPointerMove(e){
+  if(!fzDrag) return; e.preventDefault();
+  const dx=e.clientX-fzDrag.startX;
+  if(Math.abs(dx)>3) fzDrag.moved=true;
+  if(!fzDrag.moved) return;
+  const f=freezes.find(x=>x.id===fzDrag.id); if(!f) return;
+  const scale=document.getElementById('tl-svg').getBoundingClientRect().width/tlVW;
+  const dd=Math.round(dx/scale*tlDPP);
+  if(fzDrag.mode==='move'){ f.start=fmt(addDays(parseD(fzDrag.origStart),dd)); f.end=fmt(addDays(parseD(fzDrag.origEnd),dd)); }
+  else if(fzDrag.mode==='resize-r'){ const ne=fmt(addDays(parseD(fzDrag.origEnd),dd)); if(ne>=f.start) f.end=ne; }
+  else if(fzDrag.mode==='resize-l'){ const ns=fmt(addDays(parseD(fzDrag.origStart),dd)); if(ns<=f.end) f.start=ns; }
+  renderTimeline();
+}
+function fzPointerUp(e){
+  document.removeEventListener('pointermove',fzPointerMove); document.removeEventListener('pointerup',fzPointerUp);
+  const d=fzDrag; fzDrag=null; if(!d) return;
+  if(d.moved){ renderFreezePanel(); afterFreezeChange(); } else openFreezePop(d.id,e.clientX,e.clientY);
+}
+function closeFreezePop(){ document.getElementById('freeze-pop')?.remove(); document.removeEventListener('mousedown',fzPopOutside,true); }
+function fzPopOutside(e){ const p=document.getElementById('freeze-pop'); if(p&&!p.contains(e.target)) closeFreezePop(); }
+function openFreezePop(id,x,y){
+  closeFreezePop();
+  const f=freezes.find(v=>v.id===id); if(!f) return;
+  const d=document.createElement('div'); d.id='freeze-pop';
+  d.style.cssText='position:fixed;z-index:10050;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px;width:256px;font-size:12px;color:#333;';
+  const pc=Math.round(f.opacity*100);
+  d.innerHTML='<div style="font-weight:700;margin-bottom:8px;">❄️ Période de gel</div>'
+    +'<input type="text" value="'+esc(f.title)+'" placeholder="Titre..." oninput="setFreeze('+id+',\'title\',this.value)" style="width:100%;padding:5px 7px;border:1px solid #ccc;border-radius:5px;margin-bottom:6px;font-size:12px;">'
+    +'<div style="color:#777;margin-bottom:8px;">'+f.start+' → '+f.end+' ('+dur(f.start,f.end)+')<br><span style="font-size:11px;">Glisser pour déplacer, tirer les bords pour ajuster.</span></div>'
+    +'<div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;"><label>Couleur <input type="color" value="'+f.color+'" onchange="setFreeze('+id+',\'color\',this.value)" style="width:30px;height:22px;padding:0;border:1px solid #ccc;vertical-align:middle;"></label>'
+    +'<label style="flex:1;display:flex;align-items:center;gap:5px;">Opacité <input type="range" min="5" max="100" step="5" value="'+pc+'" oninput="this.nextElementSibling.textContent=this.value+\'%\';setFreeze('+id+',\'opacity\',this.value)" style="flex:1;min-width:0;"><span style="min-width:30px;">'+pc+'%</span></label></div>'
+    +'<label style="display:block;margin-bottom:10px;cursor:pointer;"><input type="checkbox" '+(f.full?'checked':'')+' onchange="setFreeze('+id+',\'full\',this.checked)"> Sur toute la hauteur</label>'
+    +'<div style="display:flex;justify-content:space-between;"><button type="button" onclick="delFreeze('+id+');closeFreezePop()" style="padding:5px 10px;border:1px solid #e0b4b4;background:#fff5f5;color:#c0392b;border-radius:6px;cursor:pointer;font-size:12px;">Supprimer</button><button type="button" onclick="closeFreezePop()" style="padding:5px 14px;border:1px solid #ccc;background:#fff;border-radius:6px;cursor:pointer;font-size:12px;">OK</button></div>';
+  document.body.appendChild(d);
+  const r=d.getBoundingClientRect();
+  d.style.left=Math.max(8,Math.min(x-20,window.innerWidth-r.width-8))+'px';
+  d.style.top=((y+14+r.height>window.innerHeight-8)?Math.max(8,y-r.height-14):y+14)+'px';
+  setTimeout(()=>document.addEventListener('mousedown',fzPopOutside,true),0);
+}
+function addFreezeFromGantt(){
+  addFreeze();
+  showToast('Période de gel ajoutée : cliquez dessus dans la barre de temps pour la modifier.');
+}
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeFreezePop(); });
+
+// ═══ MODE D'INTERFACE : SIMPLIFIÉ / AVANCÉ ═══════════════════
+const UIMODE_KEY='test_mp_uimode_v1';
+function applyUIMode(mode){
+  mode=(mode==='advanced')?'advanced':'simple';
+  document.querySelector('.sidebar')?.classList.toggle('simple',mode==='simple');
+  document.getElementById('uimode-simple')?.classList.toggle('active',mode==='simple');
+  document.getElementById('uimode-adv')?.classList.toggle('active',mode==='advanced');
+  try{ localStorage.setItem(UIMODE_KEY,mode); }catch(e){}
+}
+try{ applyUIMode(localStorage.getItem(UIMODE_KEY)||'simple'); }catch(e){ applyUIMode('simple'); }
+
 // ═══ PÉRIODES DE GEL ═════════════════════════════════════════
 function validISO(s){ if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false; const d=parseD(s); return !isNaN(d) && fmt(d)===s; }
 function sanitizeFreezes(arr){
