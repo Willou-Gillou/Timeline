@@ -569,7 +569,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
       <div style="font-weight:700;margin:8px 0 6px;">V4.4:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : périodes de gel. Gérées dans l'onglet Données (nom, dates, couleur, opacité), elles s'affichent sur une ligne dédiée juste sous la barre de temps, avec option « Sur toute la hauteur » pour les prolonger sur tout le Gantt.</li>
+        <li>Nouveau : périodes de gel. Gérées dans l'onglet Données (nom, dates, couleur, opacité), elles s'affichent sur une ligne juste au-dessus de la barre de temps, avec option « Sur toute la hauteur » pour les prolonger sur tout le Gantt (la barre de temps reste toujours visible).</li>
         <li>Les périodes de gel sont sauvegardées, exportées/importées avec le planning, prises en compte par l'annulation, et reconnues par l'import depuis une photo.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.3:</div>
@@ -1459,10 +1459,11 @@ function renderTimeline(){
     const endPlusOne = document.querySelector('input[name="tl-end"][value="1"]'); if(endPlusOne) endPlusOne.checked = true;
     return renderTimeline();
   }
-  const MA=rows.length===0?0:rows.reduce((a,r)=>Math.max(a,r.topY+r.h),0)+8+3;
+  const MA0=rows.length===0?0:rows.reduce((a,r)=>Math.max(a,r.topY+r.h),0)+8+3;
   const _fzList=freezes.filter(f=>validISO(f.start)&&validISO(f.end));
-  const FH=_fzList.length?Math.round(taskFontSize*1.2+10):0; // ligne dédiée aux périodes de gel, juste sous la barre de temps
-  const TOTAL_TOP=MA+TH+FH+timelineGap;
+  const FH=_fzList.length?Math.round(taskFontSize*1.2+10):0; // ligne des périodes de gel : juste AU-DESSUS de la barre de temps
+  const MA=MA0+FH;
+  const TOTAL_TOP=MA+TH+timelineGap;
 
   const laneRowsCache={};
   let totalRows=0;
@@ -2034,11 +2035,8 @@ function renderTimeline(){
   }
   svg.appendChild(timebarGroup);
   if(FH>0){
-    const fzY=MA+TH;
+    const fzY=MA-FH;
     const fzG=document.createElementNS(NS,'g'); fzG.setAttribute('id','freeze-row-group');
-    fzG.appendChild(el('rect',{x:0,y:fzY,width:VW,height:FH,fill:'#eceff1'}));
-    fzG.appendChild(el('rect',{x:0,y:fzY,width:LL,height:FH,fill:'#b0bec5'}));
-    if(LL>0) fzG.appendChild(el('text',{x:LL/2,y:fzY+FH/2+taskFontSize*0.35,'text-anchor':'middle','font-size':Math.max(9,taskFontSize),'font-weight':'bold',fill:'#fff'},'Gel'));
     const fzOver=document.createElementNS(NS,'g'); fzOver.setAttribute('id','freeze-overlay-group'); fzOver.setAttribute('pointer-events','none');
     _fzList.forEach(f=>{
       const x1=Math.max(LL,dX(f.start)), x2=Math.min(VW,dX(f.end)+PPD);
@@ -2049,7 +2047,7 @@ function renderTimeline(){
       fzG.appendChild(band);
       const lbl=(f.title||'').trim();
       if(lbl && lbl.length*taskFontSize*0.58 < (x2-x1)-8) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FH/2+taskFontSize*0.35,'text-anchor':'middle','font-size':taskFontSize,'font-weight':'bold',fill:'#263238','pointer-events':'none'},lbl));
-      if(f.full) fzOver.appendChild(el('rect',{x:x1,y:fzY+FH,width:x2-x1,height:Math.max(0,VH-(fzY+FH)),fill:col,'fill-opacity':op}));
+      if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // démarre sous la barre de temps : elle reste toujours lisible
     });
     svg.appendChild(fzG);
     if(fzOver.childNodes.length) svg.appendChild(fzOver);
@@ -3579,7 +3577,7 @@ function renderFreezePanel(){
     +'<div style="display:flex;align-items:center;gap:10px;margin-bottom:'+(freezes.length?'8':'0')+'px;">'
     +'<div style="font-weight:700;font-size:14px;color:#2c3e50;">❄️ Périodes de gel</div>'
     +'<button type="button" onclick="addFreeze()" style="padding:4px 12px;border:1px solid #ccc;border-radius:6px;background:#fff;cursor:pointer;font-size:12px;">+ Période de gel</button>'
-    +(freezes.length?'':'<span style="font-size:12px;color:#888;">Aucune. Elles s\'affichent sur une ligne juste sous la barre de temps.</span>')
+    +(freezes.length?'':'<span style="font-size:12px;color:#888;">Aucune. Elles s\'affichent sur une ligne juste au-dessus de la barre de temps.</span>')
     +'</div>';
   freezes.forEach(f=>{
     h+='<div style="display:flex;flex-wrap:wrap;align-items:center;gap:8px;padding:6px 0;border-top:1px solid #eee;font-size:12px;">'
