@@ -2,6 +2,8 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
+<title>Macro Planning</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none';">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -134,6 +136,42 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   #print-root { display:block !important; }
   html, body { height:auto !important; overflow:visible !important; background:#fff !important; }
 }
+/* ═══ Thème v4.8 : finition visuelle ═══ */
+body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif; background:#f4f5f7; color:#1f2937; -webkit-font-smoothing:antialiased; }
+.app-shell { background:#f4f5f7; }
+.header-shell { border-bottom-color:#e5e7eb; box-shadow:0 1px 2px rgba(16,24,40,.04); }
+.ic { display:block; flex-shrink:0; }
+.brand { display:flex; align-items:center; gap:8px; flex-shrink:0; user-select:none; }
+.brand-name { font-size:13.5px; font-weight:700; color:#111827; letter-spacing:-.01em; white-space:nowrap; }
+.brand-ver { font-size:10px; font-weight:600; color:#6b7280; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:999px; padding:1px 7px; }
+@media (max-width:1180px){ .brand-name, .brand-ver { display:none; } }
+.btn { border-radius:6px; border-color:#d1d5db; color:#374151; font-family:inherit; transition:background .12s, border-color .12s, color .12s, box-shadow .12s; }
+.btn:hover { background:#f3f4f6; border-color:#c4c9d1; }
+.btn:focus-visible, .tab:focus-visible, input:focus-visible, select:focus-visible { outline:2px solid #c0392b55; outline-offset:1px; }
+.btn-icon { color:#4b5563; border-color:transparent; background:transparent; }
+.btn-icon:hover { background:#f3f4f6; border-color:#e5e7eb; color:#111827; }
+.btn-primary { background:#c0392b; color:#fff; border-color:#c0392b; box-shadow:0 1px 2px rgba(192,57,43,.25); }
+.btn-primary:hover { background:#a93226; border-color:#a93226; }
+.btn-danger, .btn-warn, .btn-muted { background:transparent; border-color:transparent; color:#6b7280; justify-content:flex-start !important; font-weight:500; }
+.btn-danger:hover { background:#fef2f2; color:#b91c1c; border-color:transparent; }
+.btn-warn:hover { background:#fff7ed; color:#c2410c; border-color:transparent; }
+.btn-muted:hover { background:#f3f4f6; color:#111827; border-color:transparent; }
+.burger-btn { border-color:transparent; }
+.topbar-sep { background:#e5e7eb; }
+.topbar-group-label { color:#9ca3af; letter-spacing:.08em; margin-right:2px; }
+.tab-bar { gap:0; background:#f3f4f6; border:1px solid #e5e7eb; border-radius:8px; padding:2px; }
+.tab { display:inline-flex; align-items:center; gap:6px; border:none; background:transparent; color:#4b5563; border-radius:6px; padding:5px 14px; font-family:inherit; font-weight:600; transition:background .12s,color .12s; }
+.tab:hover { color:#111827; }
+.tab.active { background:#fff; color:#c0392b; box-shadow:0 1px 2px rgba(16,24,40,.12); }
+.sidebar { border-right-color:#e5e7eb; }
+.sidebar h3 { color:#6b7280; letter-spacing:.07em; font-size:10.5px; }
+.collapsible-head { padding:2px 0; border-radius:4px; }
+.collapsible-head:hover h3 { color:#111827; }
+.sidebar-sep { border-top-color:#eef0f3; }
+.phase { border-radius:10px; box-shadow:0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.06); border:1px solid #e5e7eb; }
+::-webkit-scrollbar { width:10px; height:10px; }
+::-webkit-scrollbar-thumb { background:#cfd4dc; border-radius:8px; border:2px solid transparent; background-clip:content-box; }
+::-webkit-scrollbar-thumb:hover { background:#aeb5c0; background-clip:content-box; border:2px solid transparent; }
 </style>
 </head>
 <body>
@@ -148,7 +186,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     background:#1c1b19; border:1px solid #393836; border-radius:12px;
     padding:36px 40px; max-width:360px; width:90%; box-shadow:0 8px 40px rgba(0,0,0,0.6);
     text-align:center;">
-    <div style="font-size:28px; margin-bottom:8px;">🔐</div>
+    <div style="margin-bottom:12px;"><svg width="44" height="44" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg></div>
     <h2 style="color:#cdccca; font-size:16px; font-weight:700; margin:0 0 4px 0;">Macro Planning</h2>
     <p style="color:#797876; font-size:12px; margin:0 0 24px 0;">Code d'accès requis</p>
     <input id="license-input" type="password" placeholder="Entrez votre code d'accès"
@@ -172,7 +210,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.7 &mdash; Accès sécurisé
+      v4.8 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -180,18 +218,20 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 <div class="header-shell">
 <div class="topbar">
   <button class="btn burger-btn" id="burger-btn" type="button" onclick="toggleSidebar()" title="Ouvrir / fermer le menu" aria-label="Ouvrir / fermer le menu"><span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
-  <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase">＋ Phase</button>
+  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.8</span></div>
+  <div class="topbar-sep"></div>
+  <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Phase</button>
 
   <div class="topbar-sep"></div>
   <div class="topbar-group">
     <span class="topbar-group-label">Planning</span>
-    <button class="btn btn-icon" id="btn-undo" onclick="undoPlanning()" title="Retour : revenir incrémentalement aux dernières modifications" aria-label="Retour">↶</button>
-    <button class="btn btn-icon" id="btn-redo" onclick="redoPlanning()" title="Annuler retour : rétablir le ou les retours effectués" aria-label="Annuler retour">↷</button>
-    <button class="btn btn-icon" onclick="promptSaveJSON()" title="Sauvegarder le planning en JSON" aria-label="Sauvegarder le planning">💾</button>
-    <label class="btn btn-icon" style="cursor:pointer;" title="Charger un planning JSON" aria-label="Charger un planning">📂<input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
-    <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle">🧩</button>
-    <button class="btn btn-icon" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" aria-label="Ajouter une période de gel">❄️</button>
-    <button class="btn btn-icon" onclick="copyMacroPlanningImage()" title="Exporter le planning en PNG" aria-label="Exporter le planning en PNG">🖼️</button>
+    <button class="btn btn-icon" id="btn-undo" onclick="undoPlanning()" title="Retour : revenir incrémentalement aux dernières modifications" aria-label="Retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
+    <button class="btn btn-icon" id="btn-redo" onclick="redoPlanning()" title="Annuler retour : rétablir le ou les retours effectués" aria-label="Annuler retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+    <button class="btn btn-icon" onclick="promptSaveJSON()" title="Sauvegarder le planning en JSON" aria-label="Sauvegarder le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></button>
+    <label class="btn btn-icon" style="cursor:pointer;" title="Charger un planning JSON" aria-label="Charger un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+    <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></button>
+    <button class="btn btn-icon" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" aria-label="Ajouter une période de gel"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg></button>
+    <button class="btn btn-icon" onclick="copyMacroPlanningImage()" title="Exporter le planning en PNG" aria-label="Exporter le planning en PNG"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></button>
     <button class="btn btn-icon" onclick="exportSVG()" title="Exporter en SVG vectoriel" aria-label="Exporter en SVG vectoriel" style="font-size:10px;font-weight:700;">SVG</button>
     <button class="btn btn-icon" onclick="exportPDF()" title="Exporter en PDF vectoriel (via l'impression)" aria-label="Exporter en PDF" style="font-size:10px;font-weight:700;">PDF</button>
   </div>
@@ -199,26 +239,25 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   <div class="topbar-sep"></div>
   <div class="topbar-group">
     <span class="topbar-group-label">Réglages</span>
-    <button class="btn btn-icon" onclick="promptSaveSettingsJSON()" title="Sauvegarder les réglages" aria-label="Sauvegarder les réglages">⚙️</button>
-    <label class="btn btn-icon" style="cursor:pointer;" title="Importer les réglages" aria-label="Importer les réglages">📂<input type="file" accept=".json" style="display:none" onchange="importSettingsJSON(event)"></label>
-    <button class="btn btn-icon" onclick="openVersionHistory()" title="Historique des versions" aria-label="Historique des versions">📋</button>
-    <button class="btn btn-icon" onclick="openMemoryDiagnostic()" title="Diagnostic mémoire locale" aria-label="Diagnostic mémoire locale">🗄️</button>
+    <button class="btn btn-icon" onclick="promptSaveSettingsJSON()" title="Sauvegarder les réglages" aria-label="Sauvegarder les réglages"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h8"/><path d="M16 6h4"/><path d="M4 12h2"/><path d="M10 12h10"/><path d="M4 18h10"/><path d="M18 18h2"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="18" r="2"/></svg></button>
+    <label class="btn btn-icon" style="cursor:pointer;" title="Importer les réglages" aria-label="Importer les réglages"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg><input type="file" accept=".json" style="display:none" onchange="importSettingsJSON(event)"></label>
+    <button class="btn btn-icon" onclick="openVersionHistory()" title="Historique des versions" aria-label="Historique des versions"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
+    <button class="btn btn-icon" onclick="openMemoryDiagnostic()" title="Diagnostic mémoire locale" aria-label="Diagnostic mémoire locale"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></button>
   </div>
   <div class="tab-bar">
-    <button class="tab" id="tab-d" onclick="showTab('data')">☰ Données</button>
-    <button class="tab active" id="tab-t" onclick="showTab('timeline')">⟶ Gantt</button>
+    <button class="tab" id="tab-d" onclick="showTab('data')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg> Données</button>
+    <button class="tab active" id="tab-t" onclick="showTab('timeline')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9"/><path d="M9 12h11"/><path d="M6 18h8"/></svg> Gantt</button>
   </div>
 </div>
 </div>
 <div class="app-shell">
 <div class="app-body">
   <div class="sidebar">
-    <div style="padding:8px 0 0 0;font-size:11px;font-weight:700;color:#000;letter-spacing:0.05em;">v4.7</div>
     <div class="uimode"><button type="button" id="uimode-simple" onclick="applyUIMode('simple')">Simplifié</button><button type="button" id="uimode-adv" onclick="applyUIMode('advanced')">Avancé</button></div>
     <div class="simple-hint">Mode simplifié : tailles, palette et options détaillées sont masquées. Passez en « Avancé » pour tout afficher.</div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">DEPLACEMENT PLANNING</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
+      <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">DÉPLACEMENT DU PLANNING</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="deplacement-planning-body" style="margin-top:10px;">
         <div style="font-size:12px;font-weight:700;color:#333;">Sauts de puce</div><div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"><div style="display:flex;gap:6px;"><button type="button" onclick="shiftPlanningDays(-1)"   style="font-size:11px;padding:3px 8px;flex:1;">- 1 jour</button><button type="button" onclick="shiftPlanningDays(1)"    style="font-size:11px;padding:3px 8px;flex:1;">+ 1 jour</button></div><div style="display:flex;gap:6px;"><button type="button" onclick="shiftPlanningWeeks(-1)"  style="font-size:11px;padding:3px 8px;flex:1;">- 1 sem.</button><button type="button" onclick="shiftPlanningWeeks(1)"   style="font-size:11px;padding:3px 8px;flex:1;">+ 1 sem.</button></div><div style="display:flex;gap:6px;"><button type="button" onclick="shiftPlanningMonths(-1)" style="font-size:11px;padding:3px 8px;flex:1;">- 1 mois</button><button type="button" onclick="shiftPlanningMonths(1)"  style="font-size:11px;padding:3px 8px;flex:1;">+ 1 mois</button></div></div>
         <div style="margin-top:10px;"><div style="font-size:12px;font-weight:700;color:#333;">Changer le T0</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><input type="date" id="t0-new-date" style="font-size:11px;padding:2px 4px;"></div></div>
@@ -226,7 +265,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('time-scale-body','time-scale-chev')"><h3 style="margin:0;">ECHELLE DE TEMPS</h3><span class="chev" id="time-scale-chev">▸</span></div>
+      <div class="collapsible-head" onclick="toggleSection('time-scale-body','time-scale-chev')"><h3 style="margin:0;">ÉCHELLE DE TEMPS</h3><span class="chev" id="time-scale-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="time-scale-body" style="margin-top:10px;">
         <div>
           <div style="font-size:12px;font-weight:700;color:#333;">Graduations principales</div>
@@ -540,7 +579,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('models-body','models-chev')"><h3 style="margin:0;">MES MODELES</h3><span class="chev" id="models-chev">▸</span></div>
+      <div class="collapsible-head" onclick="toggleSection('models-body','models-chev')"><h3 style="margin:0;">MES MODÈLES</h3><span class="chev" id="models-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="models-body" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
         <label class="btn" style="justify-content:center;width:100%;font-size:11px;cursor:pointer;margin:0;">➕ Ajout répertoire local<input type="file" webkitdirectory directory multiple style="display:none;" onchange="handleLocalDirSelect(event)"></label>
         <div id="local-dirs-container" style="display:flex;flex-direction:column;gap:4px;"></div>
@@ -548,9 +587,9 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div style="display:flex;flex-direction:column;gap:6px;padding:10px 0 4px 0;">
-    <button class="btn btn-danger" style="justify-content:center;width:100%;" onclick="clearMacroPlanning()">🗑️ Supprimer le macro planning</button>
-    <button class="btn btn-warn" style="justify-content:center;width:100%;" onclick="resetAll()">↺ RaZ complet</button>
-    <button class="btn btn-muted" style="justify-content:center;width:100%;margin-top:2px;" onclick="logoutApp()">⎋ Me déconnecter</button>
+    <button class="btn btn-danger" style="justify-content:center;width:100%;" onclick="clearMacroPlanning()"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/></svg> Supprimer le planning</button>
+    <button class="btn btn-warn" style="justify-content:center;width:100%;" onclick="resetAll()" title="Efface le planning et remet tous les réglages par défaut"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Tout réinitialiser</button>
+    <button class="btn btn-muted" style="justify-content:center;width:100%;margin-top:2px;" onclick="logoutApp()"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg> Se déconnecter</button>
 
   </div>
   </div>
@@ -586,6 +625,11 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Finition visuelle : icônes vectorielles homogènes dans la barre d'outils, nom de l'application et version dans l'en-tête, onglets Données / Gantt en sélecteur, typographie et couleurs harmonisées, libellés corrigés, titre d'onglet et icône du site.</li>
+        <li>Périodes de gel : gris clair par défaut, dates de début et de fin modifiables depuis le Gantt. Colonne des phases de largeur réglable.</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.7:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Affichages : « Tâches (barres) » ne masque plus que les barres de tâches (les losanges de jalons restent) ; « Phases (colonne) » devient une case indépendante, visible aussi en mode simplifié  ; largeur de la colonne des phases réglable.</li>
@@ -3645,7 +3689,7 @@ function openFreezePop(id,x,y){
   d.style.cssText='position:fixed;z-index:10050;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,.18);padding:12px;width:280px;max-width:calc(100vw - 16px);box-sizing:border-box;font-size:12px;color:#333;';
   const pc=Math.round(f.opacity*100);
   const di='style="width:100%;box-sizing:border-box;padding:4px 6px;border:1px solid #ccc;border-radius:5px;font-size:12px;"';
-  d.innerHTML='<div style="font-weight:700;margin-bottom:8px;">❄️ Période de gel</div>'
+  d.innerHTML='<div style="font-weight:700;margin-bottom:8px;">Période de gel</div>'
     +'<input type="text" value="'+esc(f.title)+'" placeholder="Titre..." oninput="setFreeze('+id+',\'title\',this.value)" style="width:100%;box-sizing:border-box;padding:5px 7px;border:1px solid #ccc;border-radius:5px;margin-bottom:8px;font-size:12px;">'
     +'<div style="display:flex;gap:8px;margin-bottom:4px;">'
     +'<label style="flex:1;min-width:0;">Début<input type="date" id="fz-start" value="'+f.start+'" onchange="fzPopDate('+id+',\'start\',this.value)" '+di+'></label>'
@@ -3731,7 +3775,7 @@ function renderFreezePanel(){
   const HDR='#607D8B';
   let h='<div class="phase">'
     +'<div class="phase-header" style="background:'+HDR+'">'
-    +'<span style="position:absolute;left:12px;top:8px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;font-size:15px;line-height:1;">❄️</span>'
+    +'<span style="position:absolute;left:12px;top:8px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#fff;"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg></span>'
     +'<div class="phase-title-wrap"><div class="phase-title-display">Périodes de gel</div></div>'
     +'<button class="btn-add-task" style="width:auto;padding:2px 7px;font-size:11px;color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:4px;" title="Ajouter une période de gel" onclick="event.stopPropagation();addFreeze()">＋</button>'
     +'</div>';
@@ -3750,7 +3794,7 @@ function renderFreezePanel(){
         +'<td>'+dur(f.start,f.end)+'</td>'
         +'<td><input type="date" value="'+f.start+'" onchange="setFreeze('+f.id+',\'start\',this.value)"/></td>'
         +'<td><input type="date" value="'+f.end+'" onchange="setFreeze('+f.id+',\'end\',this.value)"/></td>'
-        +'<td><div class="pct-wrap"><input type="number" style="width:40px" min="5" max="100" step="5" value="'+pc+'" onchange="setFreeze('+f.id+',\'opacity\',this.value);this.value=Math.round(freezes.find(x=>x.id==='+f.id+').opacity*100);this.nextElementSibling.firstElementChild.style.width=this.value+\'%\'"/><div class="pct-bar"><div class="pct-fill" style="width:'+pc+'%"></div></div></div></td>'
+        +'<td><div class="pct-wrap"><input type="number" style="width:52px" min="5" max="100" step="5" value="'+pc+'" onchange="setFreeze('+f.id+',\'opacity\',this.value);this.value=Math.round(freezes.find(x=>x.id==='+f.id+').opacity*100);this.nextElementSibling.firstElementChild.style.width=this.value+\'%\'"/><div class="pct-bar"><div class="pct-fill" style="width:'+pc+'%"></div></div></div></td>'
         +'<td><input type="checkbox" style="width:auto;cursor:pointer;" '+(f.full?'checked':'')+' onchange="setFreeze('+f.id+',\'full\',this.checked)"/></td>'
         +'<td><button class="btn-del-row" onclick="delFreeze('+f.id+')" title="Supprimer">🗑</button></td>'
         +'</tr>';
@@ -3767,7 +3811,7 @@ function renderFreezePanel(){
 <!-- ═══ MODAL CHECK DOSSIER ═══════════════════════════════════ -->
 <div id="modal-save-overlay" style="display:none;position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,0.45);align-items:center;justify-content:center;">
   <div style="background:#fff;border-radius:10px;padding:24px;width:380px;box-shadow:0 8px 32px rgba(0,0,0,0.22);position:relative;">
-    <h3 style="margin:0 0 16px 0;font-size:15px;color:#2c3e50;">💾 Nom de la sauvegarde</h3>
+    <h3 style="margin:0 0 16px 0;font-size:15px;color:#2c3e50;">Nom de la sauvegarde</h3>
     <input type="text" id="save-filename-input" onkeydown="if(event.key==='Enter') confirmSaveJSON()" style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ccc;border-radius:5px;font-size:13px;margin-bottom:20px;outline:none;" onfocus="this.style.borderColor='#c0392b'" onblur="this.style.borderColor='#ccc'">
     <div style="display:flex;justify-content:flex-end;gap:10px;">
       <button onclick="document.getElementById('modal-save-overlay').style.display='none'" style="padding:7px 16px;border-radius:5px;border:1px solid #ccc;cursor:pointer;font-size:12px;background:#f5f5f5;font-weight:600;color:#555;">Annuler</button>
@@ -3784,7 +3828,7 @@ function renderFreezePanel(){
   </style>
   <div style="background:#fff;border-radius:10px;padding:24px;width:400px;height:420px;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,0.22);position:relative;">
     <div style="display:flex;justify-content:space-between;align-items:center;margin:0 0 10px 0;flex-shrink:0;">
-        <h3 id="modal-folder-title" style="margin:0;font-size:15px;color:#2c3e50;">🗂 Choisir un modèle</h3>
+        <h3 id="modal-folder-title" style="margin:0;font-size:15px;color:#2c3e50;">Choisir un modèle</h3>
         <select id="modal-sort-select" onchange="if(window.CURRENT_MODELS_FETCH) _renderModelsList(window.CURRENT_MODELS_FETCH, window.CURRENT_MODELS_SOURCE);" style="font-size:11px;padding:4px 8px;border:1px solid #ccc;border-radius:4px;outline:none;cursor:pointer;background:#f9f9f9;color:#333;margin-left:10px;">
           <option value="az">A-Z</option>
           <option value="za">Z-A</option>
