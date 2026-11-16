@@ -2657,6 +2657,8 @@ function restoreSidebar(s) {
    applyHeaderHeight();
   sepMargin = s.sepMargin ?? 0; document.getElementById('sep-margin-val').textContent = sepMargin; document.documentElement.style.setProperty('--sep-margin',sepMargin+'px');
   phaseGap = s.phaseGap ?? 1; const pgv=document.getElementById('phase-gap-val'); if(pgv) pgv.textContent = phaseGap;
+  // Migration unique v4.4 : l'espace entre phases passe à 1 une fois, puis le choix de l'utilisateur est conservé
+  try{ if(!localStorage.getItem('test_mp_phasegap_v44')){ phaseGap=1; if(pgv) pgv.textContent=1; localStorage.setItem('test_mp_phasegap_v44','1'); } }catch(_){}
   timelineGap = s.timelineGap ?? 8; const tgv=document.getElementById('timeline-gap-val'); if(tgv) tgv.textContent = timelineGap;
   todayArrowSize = s.todayArrowSize ?? 4; const tas=document.getElementById('today-arrow-size-val'); if(tas) tas.textContent = todayArrowSize;
   const appBody=document.querySelector('.app-body');
