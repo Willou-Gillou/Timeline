@@ -172,14 +172,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 ::-webkit-scrollbar { width:10px; height:10px; }
 ::-webkit-scrollbar-thumb { background:#cfd4dc; border-radius:8px; border:2px solid transparent; background-clip:content-box; }
 ::-webkit-scrollbar-thumb:hover { background:#aeb5c0; background-clip:content-box; border:2px solid transparent; }
-#sel-bar { position:fixed; z-index:10030; width:max-content; bottom:18px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:10px; background:#111827; color:#fff; border-radius:10px; padding:7px 10px; box-shadow:0 10px 30px rgba(16,24,40,.35); font-size:12px; max-width:calc(100vw - 16px); flex-wrap:wrap; }
-#sel-bar .sel-count { font-weight:700; padding:0 4px; white-space:nowrap; }
-#sel-bar .sel-grp { display:flex; align-items:center; gap:3px; padding-left:10px; border-left:1px solid #374151; }
-#sel-bar .btn { background:#1f2937; border-color:#374151; color:#f9fafb; padding:4px 9px; font-size:11.5px; font-weight:600; }
-#sel-bar .btn:hover { background:#374151; }
-#sel-bar input[type=number], #sel-bar select { background:#1f2937; color:#fff; border:1px solid #374151; border-radius:5px; padding:3px 4px; font-size:11.5px; }
-#sel-bar input[type=number] { width:50px; }
-#sel-bar .sel-biz { display:flex; align-items:center; gap:5px; padding-left:10px; border-left:1px solid #374151; cursor:pointer; white-space:nowrap; }
+#sel-menu button { cursor:pointer; }
+#drag-tip { position:fixed; z-index:10050; pointer-events:none; background:#111827; color:#fff; font-size:11px; font-weight:600; padding:4px 8px; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.25); white-space:nowrap; display:none; }
 #export-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
 #export-menu .btn { border-color:transparent; justify-content:center; font-size:10.5px; font-weight:700; letter-spacing:.04em; width:44px; height:28px; padding:0; }
 #export-menu .btn:hover { background:#f3f4f6; }
@@ -260,26 +254,28 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   </div>
 </div>
 </div>
-<div id="sel-bar" style="display:none;" role="toolbar" aria-label="Décaler les activités sélectionnées">
-  <span id="sel-count" class="sel-count"></span>
-  <span class="sel-grp">
-    <button class="btn" onclick="shiftSel(-1,'m')" title="Reculer d'un mois">−1 m</button>
-    <button class="btn" onclick="shiftSel(-1,'w')" title="Reculer d'une semaine">−1 sem</button>
-    <button class="btn" onclick="shiftSel(-1,'d')" title="Reculer d'un jour">−1 j</button>
-  </span>
-  <span class="sel-grp">
-    <button class="btn" onclick="shiftSel(1,'d')" title="Avancer d'un jour">+1 j</button>
-    <button class="btn" onclick="shiftSel(1,'w')" title="Avancer d'une semaine">+1 sem</button>
-    <button class="btn" onclick="shiftSel(1,'m')" title="Avancer d'un mois">+1 m</button>
-  </span>
-  <span class="sel-grp">
-    <button class="btn" onclick="shiftSelCustom(-1)" title="Reculer de N">−</button>
-    <input id="sel-n" type="number" min="1" max="999" value="5" title="Nombre">
-    <select id="sel-unit" title="Unité"><option value="d">jours</option><option value="w">semaines</option><option value="m">mois</option></select>
-    <button class="btn" onclick="shiftSelCustom(1)" title="Avancer de N">+</button>
-  </span>
-  <label class="sel-biz" title="Les décalages en jours et semaines sautent les samedis et dimanches"><input type="checkbox" id="sel-biz"> Jours ouvrés</label>
-  <button class="btn btn-icon" onclick="clearSelection()" title="Désélectionner (Échap)" aria-label="Désélectionner" style="width:26px;min-width:26px;height:26px;">✕</button>
+<div id="drag-tip"></div>
+<div id="sel-menu" role="dialog" aria-label="Déplacement de tâches" style="display:none;position:fixed;z-index:10030;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);padding:10px;min-width:220px;">
+  <div id="sel-menu-head" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;cursor:move;user-select:none;">
+    <div style="font-size:12px;font-weight:700;color:#333;">Déplacement de tâches</div>
+    <button type="button" onclick="clearSelection()" title="Désélectionner (Échap)" aria-label="Fermer" style="border:none;background:transparent;cursor:pointer;font-size:13px;color:#888;padding:0 2px;">✕</button>
+  </div>
+  <div id="sel-count" style="font-size:11px;color:#666;margin-bottom:8px;"></div>
+  <div style="font-size:11px;font-weight:700;color:#333;">Sauts de puce</div>
+  <div style="display:flex;flex-direction:column;gap:4px;margin:6px 0 10px;">
+    <div style="display:flex;gap:6px;"><button type="button" onclick="shiftSel(-1,'d')" style="font-size:11px;padding:4px 8px;flex:1;">- 1 jour</button><button type="button" onclick="shiftSel(1,'d')" style="font-size:11px;padding:4px 8px;flex:1;">+ 1 jour</button></div>
+    <div style="display:flex;gap:6px;"><button type="button" onclick="shiftSel(-1,'w')" style="font-size:11px;padding:4px 8px;flex:1;">- 1 sem.</button><button type="button" onclick="shiftSel(1,'w')" style="font-size:11px;padding:4px 8px;flex:1;">+ 1 sem.</button></div>
+    <div style="display:flex;gap:6px;"><button type="button" onclick="shiftSel(-1,'m')" style="font-size:11px;padding:4px 8px;flex:1;">- 1 mois</button><button type="button" onclick="shiftSel(1,'m')" style="font-size:11px;padding:4px 8px;flex:1;">+ 1 mois</button></div>
+    <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#555;margin-top:2px;cursor:pointer;" title="Les sauts en jours et en semaines ignorent les samedis et dimanches"><input type="checkbox" id="sel-biz"> Jours ouvrés (jours / sem.)</label>
+  </div>
+  <div style="margin-top:4px;">
+    <div style="font-size:11px;font-weight:700;color:#333;margin-bottom:6px;">Changer la date de début</div>
+    <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;">
+      <input type="date" id="sel-t0" style="font-size:11px;padding:2px 4px;">
+      <button type="button" onclick="changeSelT0()" style="font-size:11px;padding:4px 8px;">Appliquer</button>
+    </div>
+  </div>
+  <div style="font-size:10.5px;color:#888;margin-top:10px;line-height:1.35;">Astuce : faites glisser une barre sélectionnée pour déplacer tout le groupe.</div>
 </div>
 <div id="export-menu" role="menu" style="display:none;">
   <button class="btn" role="menuitem" onclick="closeExportMenu();copyMacroPlanningImage()" title="Image PNG">PNG</button>
@@ -664,7 +660,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <div style="font-weight:700;margin:8px 0 6px;">V4.4:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : sélection d'activités par encerclement dans le Gantt (tracer un cadre sur le fond d'une phase ; Maj ou Ctrl pour ajouter à la sélection). La sélection reste dans une seule phase.</li>
-        <li>Nouveau : décalage des activités sélectionnées (tâches et jalons) depuis une barre flottante : ±1 jour, ±1 semaine, ±1 mois ou un pas personnalisé, avec option « Jours ouvrés ». Un décalage = une étape d'annulation ; les périodes de gel ne bougent pas.</li>
+        <li>Nouveau : fenêtre « Déplacement de tâches » pour les activités sélectionnées (tâches et jalons) : sauts de ±1 jour, ±1 semaine, ±1 mois, option « Jours ouvrés », changement de la date de début du groupe. La fenêtre est déplaçable.</li>
+        <li>Nouveau : déplacement groupé à la souris, horizontalement, en faisant glisser une barre sélectionnée ; les dates sont recalculées en direct avec une info-bulle (décalage et nouvelle date de début). Un déplacement = une étape d'annulation ; les périodes de gel ne bougent pas.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.3:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
@@ -1389,20 +1386,28 @@ function commitEdit(){ if(!editorCtx){editorWrap.style.display='none';return;} c
 
 // ═══ TIMELINE POINTER DRAG ═══════════════════════════════════
 let tlDrag=null, tlDPP=1, tlVW=1000;
-function tlPointerDown(e,mode,laneId,taskId){ if(e.button!==0)return; const t=getTask(laneId,taskId); if(!t)return; tlDrag={mode,laneId,taskId,startX:e.clientX,origStart:t.start,origEnd:t.end}; e.preventDefault(); e.stopPropagation(); document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); }
+function tlPointerDown(e,mode,laneId,taskId){ if(e.button!==0)return; const t=getTask(laneId,taskId); if(!t)return; tlDrag={mode,laneId,taskId,startX:e.clientX,origStart:t.start,origEnd:t.end}; if((mode==='move'||mode==='move-milestone')&&tlSel.laneId===laneId&&tlSel.ids.has(taskId)&&tlSel.ids.size>1){ tlDrag.mode='move-group'; tlDrag.origs=getLane(laneId).tasks.filter(x=>tlSel.ids.has(x.id)).map(x=>({id:x.id,start:x.start,end:x.end})); } e.preventDefault(); e.stopPropagation(); document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); }
 function tlPointerMove(e){
   if(!tlDrag)return; e.preventDefault();
   const svgEl=document.getElementById('tl-svg');
   const scale=svgEl.getBoundingClientRect().width/tlVW;
   const dd=Math.round((e.clientX-tlDrag.startX)/scale*tlDPP);
   const t=getTask(tlDrag.laneId,tlDrag.taskId); if(!t)return;
+  if(tlDrag.mode==='move-group'){
+    const lane=getLane(tlDrag.laneId); if(!lane) return;
+    tlDrag.origs.forEach(o=>{ const x=lane.tasks.find(k=>k.id===o.id); if(!x) return; if(o.start) x.start=fmt(addDays(parseD(o.start),dd)); if(o.end) x.end=fmt(addDays(parseD(o.end),dd)); syncDataFields(tlDrag.laneId,o.id); });
+    tlDrag.dd=dd; renderTimeline();
+    const tip=document.getElementById('drag-tip'); const first=tlDrag.origs.filter(o=>o.start).map(o=>parseD(o.start).getTime());
+    if(tip&&first.length){ const ns=addDays(new Date(Math.min(...first)),dd); tip.textContent=(dd>0?'+':dd<0?'−':'')+Math.abs(dd)+' j · début '+String(ns.getDate()).padStart(2,'0')+'/'+String(ns.getMonth()+1).padStart(2,'0')+'/'+ns.getFullYear(); tip.style.left=(e.clientX+16)+'px'; tip.style.top=(e.clientY-30)+'px'; tip.style.display='block'; }
+    return;
+  }
   if(tlDrag.mode==='move'){t.start=fmt(addDays(parseD(tlDrag.origStart),dd));t.end=fmt(addDays(parseD(tlDrag.origEnd),dd));}
   else if(tlDrag.mode==='resize-r'){const ne=addDays(parseD(tlDrag.origEnd),dd);if(ne>parseD(t.start))t.end=fmt(ne);}
   else if(tlDrag.mode==='resize-l'){const ns=addDays(parseD(tlDrag.origStart),dd);if(ns<parseD(t.end))t.start=fmt(ns);}
   else if(tlDrag.mode==='move-milestone'){const nd=addDays(parseD(tlDrag.origEnd),dd);t.start=fmt(nd);t.end=fmt(nd);}
   syncDataFields(tlDrag.laneId,tlDrag.taskId); renderTimeline();
 }
-function tlPointerUp(){ try{if(tlDrag){renderData();tlDrag=null;}
+function tlPointerUp(){ try{if(tlDrag){const tip=document.getElementById('drag-tip'); if(tip) tip.style.display='none'; renderData(); if(tlDrag.mode==='move-group') saveState(); tlDrag=null;}
 
 }finally{document.removeEventListener('pointermove',tlPointerMove); document.removeEventListener('pointerup',tlPointerUp);} }
 
@@ -1869,7 +1874,7 @@ function renderTimeline(){
             if(showDashDot) svg.appendChild(el('line',{x1:mx,y1:MA+TH,x2:mx,y2:my-s,stroke:tc,'stroke-width':1.5,'stroke-dasharray':`${dashLen},${dashGap}`}));
             const poly=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s} ${mx-s},${my}`,fill:tc,stroke:'white','stroke-width':2,cursor:'grab'});
             poly.style.touchAction='none';
-            poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
+            poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; if(tlSel.laneId===lane.id&&tlSel.ids.has(task.id)&&tlSel.ids.size>1){ tlDrag.mode='move-group'; tlDrag.origs=lane.tasks.filter(x=>tlSel.ids.has(x.id)).map(x=>({id:x.id,start:x.start,end:x.end})); } document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
             svg.appendChild(poly);
             _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:mx-s,x1:mx+s,y0:my-s,y1:my+s});
           }
@@ -3743,7 +3748,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeFreezePop(); 
 
 // ═══ SÉLECTION PAR ENCERCLEMENT + DÉCALAGE ════════════════════
 let tlBands=[], tlBoxes=[], tlLLv=0, tlVBw=1000, tlVBh=600;
-const tlSel={ laneId:null, ids:new Set() };
+const tlSel={ laneId:null, ids:new Set(), anchor:null };
 const SVGNS='http://www.w3.org/2000/svg';
 function selPrune(){
   if(tlSel.laneId===null) return;
@@ -3752,7 +3757,7 @@ function selPrune(){
   [...tlSel.ids].forEach(id=>{ if(!lane.tasks.some(t=>t.id===id)) tlSel.ids.delete(id); });
   if(!tlSel.ids.size) tlSel.laneId=null;
 }
-function clearSelection(){ tlSel.laneId=null; tlSel.ids.clear(); renderSelectionUI(); }
+function clearSelection(){ tlSel.laneId=null; tlSel.ids.clear(); tlSel.anchor=null; renderSelectionUI(); }
 function renderSelectionUI(){
   selPrune();
   const svg=document.getElementById('tl-svg');
@@ -3766,13 +3771,31 @@ function renderSelectionUI(){
       svg.appendChild(r);
     });
   }
-  const bar=document.getElementById('sel-bar'); if(!bar) return;
+  const menu=document.getElementById('sel-menu'); if(!menu) return;
   const n=tlSel.ids.size, tabOn=document.getElementById('view-timeline')?.classList.contains('active');
-  if(!n||!tabOn){ bar.style.display='none'; return; }
+  if(!n||!tabOn){ menu.style.display='none'; return; }
   const lane=getLane(tlSel.laneId);
-  document.getElementById('sel-count').textContent=n+(n>1?' sélectionnées':' sélectionnée')+(lane?' · '+String(lane.name||'').replace(/\n/g,' '):'');
-  bar.style.display='flex';
-  const m=document.querySelector('.main')?.getBoundingClientRect(); if(m) bar.style.left=Math.round(m.left+m.width/2)+'px';
+  document.getElementById('sel-count').textContent=n+(n>1?' activités sélectionnées':' activité sélectionnée')+(lane?' · '+String(lane.name||'').replace(/\n/g,' '):'');
+  const t0=selMinStart(); const inp=document.getElementById('sel-t0'); if(inp&&t0) inp.value=fmt(t0);
+  if(menu.style.display==='none'){
+    menu.style.visibility='hidden'; menu.style.display='block';
+    const w=menu.offsetWidth, h=menu.offsetHeight;
+    let x=tlSel.anchor?tlSel.anchor.x:80, y=tlSel.anchor?tlSel.anchor.y:120;
+    x=Math.max(8,Math.min(window.innerWidth-w-8,x)); y=Math.max(8,Math.min(window.innerHeight-h-8,y));
+    menu.style.left=x+'px'; menu.style.top=y+'px'; menu.style.visibility='visible';
+  }
+}
+function selMinStart(){
+  const lane=getLane(tlSel.laneId); if(!lane) return null;
+  const ds=lane.tasks.filter(t=>tlSel.ids.has(t.id)&&t.start).map(t=>parseD(t.start).getTime());
+  return ds.length?new Date(Math.min(...ds)):null;
+}
+function changeSelT0(){
+  const v=document.getElementById('sel-t0').value, t0=selMinStart(); if(!v||!t0) return;
+  const delta=Math.round((parseD(v)-t0)/86400000); if(!delta) return;
+  const lane=getLane(tlSel.laneId); if(!lane) return;
+  lane.tasks.forEach(t=>{ if(!tlSel.ids.has(t.id)) return; if(t.start) t.start=fmt(addDays(parseD(t.start),delta)); if(t.end) t.end=fmt(addDays(parseD(t.end),delta)); });
+  saveState(); renderData(); renderTimeline();
 }
 function addMonthsClamped(d,n){
   const r=new Date(d.getFullYear(),d.getMonth()+n,1), last=new Date(r.getFullYear(),r.getMonth()+1,0).getDate();
@@ -3798,7 +3821,6 @@ function shiftSel(sign,unit,count){
   saveState(); renderData(); renderTimeline();
   showToast((sign>0?'+':'−')+n+' '+(unit==='m'?'mois':unit==='w'?'sem.':'j')+(biz&&unit!=='m'?' ouvrés':'')+' appliqué à '+tlSel.ids.size+' activité'+(tlSel.ids.size>1?'s':''));
 }
-function shiftSelCustom(sign){ shiftSel(sign,document.getElementById('sel-unit').value,document.getElementById('sel-n').value); }
 (function initLasso(){
   const svg=document.getElementById('tl-svg'); if(!svg) return;
   const pt=e=>{ const r=svg.getBoundingClientRect(); return { x:(e.clientX-r.left)*(tlVBw/r.width), y:(e.clientY-r.top)*(tlVBh/r.height) }; };
@@ -3830,11 +3852,17 @@ function shiftSelCustom(sign){ shiftSel(sign,document.getElementById('sel-unit')
     if(!(s0.add&&tlSel.laneId===s0.band.laneId)) tlSel.ids.clear();
     tlSel.laneId=hit.length||tlSel.ids.size?s0.band.laneId:null;
     hit.forEach(id=>tlSel.ids.add(id));
+    tlSel.anchor={x:e.clientX+14,y:e.clientY+14}; if(!tlSel.ids.size) tlSel.anchor=null;
     renderSelectionUI();
   };
   svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&tlSel.ids.size&&!e.target.closest?.('input,textarea,select')) clearSelection(); });
   window.addEventListener('resize',()=>renderSelectionUI());
+  const head=document.getElementById('sel-menu-head'), menu=document.getElementById('sel-menu');
+  let mv=null;
+  head.addEventListener('pointerdown',e=>{ if(e.target.closest('button')) return; const r=menu.getBoundingClientRect(); mv={dx:e.clientX-r.left,dy:e.clientY-r.top,id:e.pointerId}; head.setPointerCapture(e.pointerId); });
+  head.addEventListener('pointermove',e=>{ if(!mv) return; menu.style.left=Math.max(0,Math.min(window.innerWidth-60,e.clientX-mv.dx))+'px'; menu.style.top=Math.max(0,Math.min(window.innerHeight-40,e.clientY-mv.dy))+'px'; });
+  head.addEventListener('pointerup',()=>{ mv=null; });
 })();
 
 // ═══ MENU EXPORT ═════════════════════════════════════════════
