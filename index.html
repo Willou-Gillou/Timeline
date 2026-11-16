@@ -173,6 +173,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 ::-webkit-scrollbar-thumb { background:#cfd4dc; border-radius:8px; border:2px solid transparent; background-clip:content-box; }
 ::-webkit-scrollbar-thumb:hover { background:#aeb5c0; background-clip:content-box; border:2px solid transparent; }
 #sel-menu button { cursor:pointer; }
+#sel-menu.shift-through { pointer-events:none; opacity:.35; transition:opacity .1s; }
 #drag-tip { position:fixed; z-index:10050; pointer-events:none; background:#111827; color:#fff; font-size:11px; font-weight:600; padding:4px 8px; border-radius:6px; box-shadow:0 4px 12px rgba(0,0,0,.25); white-space:nowrap; display:none; }
 #export-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
 #export-menu .btn { border-color:transparent; justify-content:center; font-size:10.5px; font-weight:700; letter-spacing:.04em; width:44px; height:28px; padding:0; }
@@ -275,7 +276,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <button type="button" onclick="changeSelT0()" style="font-size:11px;padding:4px 8px;">Appliquer</button>
     </div>
   </div>
-  <div style="font-size:10.5px;color:#888;margin-top:10px;line-height:1.35;">Astuce : faites glisser une barre sélectionnée pour déplacer tout le groupe.</div>
+  <div style="font-size:10.5px;color:#888;margin-top:10px;line-height:1.35;">Astuce : Maj + clic sur une activité pour l'ajouter ou la retirer ; faites glisser une barre sélectionnée pour déplacer tout le groupe.</div>
 </div>
 <div id="export-menu" role="menu" style="display:none;">
   <button class="btn" role="menuitem" onclick="closeExportMenu();copyMacroPlanningImage()" title="Image PNG">PNG</button>
@@ -659,8 +660,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
       <div style="font-weight:700;margin:8px 0 6px;">V4.4:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : sélection d'activités par encerclement dans le Gantt (tracer un cadre sur le fond d'une phase ; Maj ou Ctrl pour ajouter à la sélection). La sélection reste dans une seule phase.</li>
-        <li>Nouveau : fenêtre « Déplacement de tâches » pour les activités sélectionnées (tâches et jalons) : sauts de ±1 jour, ±1 semaine, ±1 mois, option « Jours ouvrés », changement de la date de début du groupe. La fenêtre est déplaçable.</li>
+        <li>Nouveau : sélection d'activités par encerclement dans le Gantt (tracer un cadre sur le fond d'une phase ; Maj + clic sur une activité pour l'ajouter ou la retirer). La sélection reste dans une seule phase.</li>
+        <li>Nouveau : fenêtre « Déplacement de tâches » pour les activités sélectionnées (tâches et jalons) : sauts de ±1 jour, ±1 semaine, ±1 mois, option « Jours ouvrés », changement de la date de début du groupe. La fenêtre s'affiche sous la dernière activité sélectionnée et reste déplaçable.</li>
         <li>Nouveau : déplacement groupé à la souris, horizontalement, en faisant glisser une barre sélectionnée ; les dates sont recalculées en direct avec une info-bulle (décalage et nouvelle date de début). Un déplacement = une étape d'annulation ; les périodes de gel ne bougent pas.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.3:</div>
@@ -1386,7 +1387,7 @@ function commitEdit(){ if(!editorCtx){editorWrap.style.display='none';return;} c
 
 // ═══ TIMELINE POINTER DRAG ═══════════════════════════════════
 let tlDrag=null, tlDPP=1, tlVW=1000;
-function tlPointerDown(e,mode,laneId,taskId){ if(e.button!==0)return; const t=getTask(laneId,taskId); if(!t)return; tlDrag={mode,laneId,taskId,startX:e.clientX,origStart:t.start,origEnd:t.end}; if((mode==='move'||mode==='move-milestone')&&tlSel.laneId===laneId&&tlSel.ids.has(taskId)&&tlSel.ids.size>1){ tlDrag.mode='move-group'; tlDrag.origs=getLane(laneId).tasks.filter(x=>tlSel.ids.has(x.id)).map(x=>({id:x.id,start:x.start,end:x.end})); } e.preventDefault(); e.stopPropagation(); document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); }
+function tlPointerDown(e,mode,laneId,taskId){ if(e.button!==0)return; const t=getTask(laneId,taskId); if(!t)return; if(e.shiftKey||e.ctrlKey||e.metaKey){ e.preventDefault(); e.stopPropagation(); toggleSelected(laneId,taskId); return; } tlDrag={mode,laneId,taskId,startX:e.clientX,origStart:t.start,origEnd:t.end}; if((mode==='move'||mode==='move-milestone')&&tlSel.laneId===laneId&&tlSel.ids.has(taskId)&&tlSel.ids.size>1){ tlDrag.mode='move-group'; tlDrag.origs=getLane(laneId).tasks.filter(x=>tlSel.ids.has(x.id)).map(x=>({id:x.id,start:x.start,end:x.end})); } e.preventDefault(); e.stopPropagation(); document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); }
 function tlPointerMove(e){
   if(!tlDrag)return; e.preventDefault();
   const svgEl=document.getElementById('tl-svg');
@@ -1874,7 +1875,7 @@ function renderTimeline(){
             if(showDashDot) svg.appendChild(el('line',{x1:mx,y1:MA+TH,x2:mx,y2:my-s,stroke:tc,'stroke-width':1.5,'stroke-dasharray':`${dashLen},${dashGap}`}));
             const poly=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s} ${mx-s},${my}`,fill:tc,stroke:'white','stroke-width':2,cursor:'grab'});
             poly.style.touchAction='none';
-            poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; if(tlSel.laneId===lane.id&&tlSel.ids.has(task.id)&&tlSel.ids.size>1){ tlDrag.mode='move-group'; tlDrag.origs=lane.tasks.filter(x=>tlSel.ids.has(x.id)).map(x=>({id:x.id,start:x.start,end:x.end})); } document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
+            poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); if(e.shiftKey||e.ctrlKey||e.metaKey){ toggleSelected(lane.id,task.id); return; } const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; if(tlSel.laneId===lane.id&&tlSel.ids.has(task.id)&&tlSel.ids.size>1){ tlDrag.mode='move-group'; tlDrag.origs=lane.tasks.filter(x=>tlSel.ids.has(x.id)).map(x=>({id:x.id,start:x.start,end:x.end})); } document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
             svg.appendChild(poly);
             _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:mx-s,x1:mx+s,y0:my-s,y1:my+s});
           }
@@ -3748,7 +3749,7 @@ document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeFreezePop(); 
 
 // ═══ SÉLECTION PAR ENCERCLEMENT + DÉCALAGE ════════════════════
 let tlBands=[], tlBoxes=[], tlLLv=0, tlVBw=1000, tlVBh=600;
-const tlSel={ laneId:null, ids:new Set(), anchor:null };
+const tlSel={ laneId:null, ids:new Set(), anchor:null, manual:false };
 const SVGNS='http://www.w3.org/2000/svg';
 function selPrune(){
   if(tlSel.laneId===null) return;
@@ -3757,7 +3758,13 @@ function selPrune(){
   [...tlSel.ids].forEach(id=>{ if(!lane.tasks.some(t=>t.id===id)) tlSel.ids.delete(id); });
   if(!tlSel.ids.size) tlSel.laneId=null;
 }
-function clearSelection(){ tlSel.laneId=null; tlSel.ids.clear(); tlSel.anchor=null; renderSelectionUI(); }
+function toggleSelected(laneId,taskId){
+  if(tlSel.laneId!==laneId){ tlSel.ids.clear(); tlSel.laneId=laneId; tlSel.manual=false; }
+  if(tlSel.ids.has(taskId)) tlSel.ids.delete(taskId); else tlSel.ids.add(taskId);
+  if(!tlSel.ids.size) tlSel.laneId=null;
+  renderSelectionUI();
+}
+function clearSelection(){ tlSel.laneId=null; tlSel.ids.clear(); tlSel.anchor=null; tlSel.manual=false; renderSelectionUI(); }
 function renderSelectionUI(){
   selPrune();
   const svg=document.getElementById('tl-svg');
@@ -3777,13 +3784,21 @@ function renderSelectionUI(){
   const lane=getLane(tlSel.laneId);
   document.getElementById('sel-count').textContent=n+(n>1?' activités sélectionnées':' activité sélectionnée')+(lane?' · '+String(lane.name||'').replace(/\n/g,' '):'');
   const t0=selMinStart(); const inp=document.getElementById('sel-t0'); if(inp&&t0) inp.value=fmt(t0);
-  if(menu.style.display==='none'){
-    menu.style.visibility='hidden'; menu.style.display='block';
-    const w=menu.offsetWidth, h=menu.offsetHeight;
-    let x=tlSel.anchor?tlSel.anchor.x:80, y=tlSel.anchor?tlSel.anchor.y:120;
-    x=Math.max(8,Math.min(window.innerWidth-w-8,x)); y=Math.max(8,Math.min(window.innerHeight-h-8,y));
-    menu.style.left=x+'px'; menu.style.top=y+'px'; menu.style.visibility='visible';
-  }
+  if(menu.style.display==='none'){ menu.style.visibility='hidden'; menu.style.display='block'; tlSel.manual=false; }
+  placeSelMenu();
+  menu.style.visibility='visible';
+}
+function placeSelMenu(){
+  const menu=document.getElementById('sel-menu'), svg=document.getElementById('tl-svg');
+  if(!menu||menu.style.display==='none'||!svg||tlSel.manual) return;
+  const bs=tlBoxes.filter(b=>b.laneId===tlSel.laneId&&tlSel.ids.has(b.taskId)); if(!bs.length) return;
+  const r=svg.getBoundingClientRect(), k=r.width/tlVBw;
+  const minX=Math.min(...bs.map(b=>b.x0)), minY=Math.min(...bs.map(b=>b.y0)), maxY=Math.max(...bs.map(b=>b.y1));
+  const w=menu.offsetWidth, h=menu.offsetHeight;
+  let x=r.left+minX*k, y=r.top+(maxY+8)*k;
+  if(y+h>window.innerHeight-8){ const above=r.top+(minY-8)*k-h; y=above>=8?above:Math.max(8,window.innerHeight-h-8); }
+  x=Math.max(8,Math.min(window.innerWidth-w-8,x));
+  menu.style.left=Math.round(x)+'px'; menu.style.top=Math.round(y)+'px';
 }
 function selMinStart(){
   const lane=getLane(tlSel.laneId); if(!lane) return null;
@@ -3858,9 +3873,15 @@ function shiftSel(sign,unit,count){
   svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&tlSel.ids.size&&!e.target.closest?.('input,textarea,select')) clearSelection(); });
   window.addEventListener('resize',()=>renderSelectionUI());
+  document.getElementById('view-timeline')?.addEventListener('scroll',()=>placeSelMenu(),{passive:true});
   const head=document.getElementById('sel-menu-head'), menu=document.getElementById('sel-menu');
+  // Maj enfoncée : la fenêtre devient transparente aux clics, pour atteindre les activités qu'elle recouvre
+  const shiftMode=on=>menu.classList.toggle('shift-through',on);
+  document.addEventListener('keydown',e=>{ if(e.key==='Shift'||e.key==='Control'||e.key==='Meta') shiftMode(true); });
+  document.addEventListener('keyup',e=>{ if(e.key==='Shift'||e.key==='Control'||e.key==='Meta') shiftMode(false); });
+  window.addEventListener('blur',()=>shiftMode(false));
   let mv=null;
-  head.addEventListener('pointerdown',e=>{ if(e.target.closest('button')) return; const r=menu.getBoundingClientRect(); mv={dx:e.clientX-r.left,dy:e.clientY-r.top,id:e.pointerId}; head.setPointerCapture(e.pointerId); });
+  head.addEventListener('pointerdown',e=>{ if(e.target.closest('button')) return; tlSel.manual=true; const r=menu.getBoundingClientRect(); mv={dx:e.clientX-r.left,dy:e.clientY-r.top,id:e.pointerId}; head.setPointerCapture(e.pointerId); });
   head.addEventListener('pointermove',e=>{ if(!mv) return; menu.style.left=Math.max(0,Math.min(window.innerWidth-60,e.clientX-mv.dx))+'px'; menu.style.top=Math.max(0,Math.min(window.innerHeight-40,e.clientY-mv.dy))+'px'; });
   head.addEventListener('pointerup',()=>{ mv=null; });
 })();
