@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Macro Planning</title>
 <link rel="icon" type="image/svg+xml" href="favicon.svg">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; object-src 'none'; base-uri 'none';">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self' 'unsafe-inline'; img-src 'self' data:; object-src 'none'; base-uri 'none';">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body { width:100%; height:100%; margin:0; overflow:hidden !important; overscroll-behavior:none; }
@@ -328,9 +328,9 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 
         <label><input type="checkbox" id="chk-jalons-master" checked onchange="toggleJalonsOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Jalons</label>
         <div class="sub-options" id="jalons-sub">
-          <label><input type="checkbox" id="chk-jalons-flags" checked onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Drapeaux jalons</label>
+          <label class="adv"><input type="checkbox" id="chk-jalons-flags" checked onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Drapeaux jalons</label>
           <label class="adv"><input type="checkbox" id="chk-dash-dot" onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
-          <label class="adv"><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
+          <label><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
           <div class="sub-options" id="jalon-lines-sub">
             <label><input type="radio" name="jalon-line-pos" value="first" onchange="renderTimeline(); saveState()"/> Première ligne</label>
             <label><input type="radio" name="jalon-line-pos" value="last" checked onchange="renderTimeline(); saveState()"/> Dernière ligne</label>
@@ -1409,7 +1409,7 @@ function renderTimeline(){
   window._colorPickerActive = false;
 
   const svg=document.getElementById('tl-svg'); svg.innerHTML='';
-  const _delGroups=[];
+  const _delGroups=[]; const _quickAdd=[];
   const NS='http://www.w3.org/2000/svg';
   const showTimeBar=document.getElementById('chk-timebar').checked;
   const showTodayLine=document.getElementById('chk-todayline').checked;
@@ -1668,6 +1668,19 @@ function renderTimeline(){
     const showMFn=ev=>{ ev.stopPropagation(); const sr=document.getElementById('tl-svg').getBoundingClientRect(); showAddMenu(lane.id, sr.left + ((lacx-4) * (sr.width/VW)), sr.top + ((lacy+12) * (sr.height/VH))); };
     laneAddG.addEventListener('click',showMFn);
     phaseHeaderG.appendChild(laneAddG); _delGroups.push(laneAddG);
+    if(LL===0){
+      // Colonne des phases masquée : petit « + » discret au début de chaque phase pour ajouter une tâche ou un jalon
+      const qG=document.createElementNS('http://www.w3.org/2000/svg','g');
+      qG.style.cursor='pointer'; qG.style.opacity='0.55';
+      const qx=VW-14, qy=rowY+11;
+      qG.appendChild(el('circle',{cx:qx,cy:qy,r:7.5,fill:lc,stroke:'white','stroke-width':1.5}));
+      qG.appendChild(el('line',{x1:qx,y1:qy-3.5,x2:qx,y2:qy+3.5,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
+      qG.appendChild(el('line',{x1:qx-3.5,y1:qy,x2:qx+3.5,y2:qy,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
+      const qT=document.createElementNS('http://www.w3.org/2000/svg','title'); qT.textContent='Ajouter une tâche ou un jalon dans « '+String(lane.name||'').replace(/\n/g,' ')+' »'; qG.appendChild(qT);
+      qG.addEventListener('mouseenter',()=>qG.style.opacity='1'); qG.addEventListener('mouseleave',()=>qG.style.opacity='0.55');
+      qG.addEventListener('click',ev=>{ ev.stopPropagation(); const r=qG.getBoundingClientRect(); showAddMenu(lane.id, r.left, r.bottom+4); });
+      _quickAdd.push(qG);
+    }
     let _lAddT;
     const showLAdd = () => { clearTimeout(_lAddT); laneDupG.style.display='block'; laneAddG.style.display='block'; };
     const hideLAdd = () => { _lAddT = setTimeout(() => { laneDupG.style.display='none'; laneAddG.style.display='none'; }, 50); };
@@ -2096,6 +2109,7 @@ function renderTimeline(){
   }
   if(todayLabel) svg.appendChild(todayLabel);
   if(typeof _delGroups!=='undefined') _delGroups.forEach(g=>svg.appendChild(g));
+  _quickAdd.forEach(g=>svg.appendChild(g));
   if(todayMarker) svg.appendChild(todayMarker);
   if(todayArrow) svg.appendChild(todayArrow);
 }
@@ -2757,49 +2771,25 @@ function showToast(msg){
 
 async function copyMacroPlanningImage(){
   try {
-    const svg=document.getElementById('tl-svg');
-    if(!svg){ showToast('Macro planning introuvable.'); return; }
-    await new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(r)));
-    const serializer = new XMLSerializer();
-    let source = serializer.serializeToString(svg);
-    if(!source.includes('xmlns=')) source = source.replace('<svg', '<svg xmlns="http://www.w3.org/2000/svg"');
-    if(!source.includes('xmlns:xlink=')) source = source.replace('<svg', '<svg xmlns:xlink="http://www.w3.org/1999/xlink"');
-    const vb=(svg.getAttribute('viewBox')||'0 0 1200 800').trim().split(/\s+/).map(Number);
-    const srcW=Math.max(1, vb[2]||1200), srcH=Math.max(1, vb[3]||800);
-    const scale=2;
-    const svg64 = 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent('<?xml version="1.0" encoding="UTF-8"?>' + source);
-    const img = new Image();
-    img.onload = function(){
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(srcW*scale);
-      canvas.height = Math.round(srcH*scale);
-      const ctx = canvas.getContext('2d');
-      if(!ctx){ showToast('Impossible de générer le PNG.'); return; }
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0,0,canvas.width,canvas.height);
-      ctx.drawImage(img,0,0,canvas.width,canvas.height);
-      const a = document.createElement('a');
-      a.href = canvas.toDataURL('image/png');
-      const rawTitle = (document.getElementById('planning-title')?.value || 'macro-planning').trim();
-      const safeTitle = rawTitle.replace(/[\/:*?"<>|]+/g,'-').replace(/\s+/g,' ').slice(0,80);
-      const d = new Date();
-      const usDate = [d.getFullYear(), String(d.getMonth()+1).padStart(2,'0'), String(d.getDate()).padStart(2,'0')].join('-');
-      a.download = `${safeTitle} - ${usDate}.png`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      showToast('PNG exporté sur le poste.');
+    const b=buildExportSvg(); if(!b){ showToast('Rien à exporter : planning vide.'); return; }
+    const xml=new XMLSerializer().serializeToString(b.svg);
+    const img=new Image();
+    img.onload=function(){
+      try {
+        const scale=2, canvas=document.createElement('canvas');
+        canvas.width=Math.round(b.W*scale); canvas.height=Math.round(b.H*scale);
+        const ctx=canvas.getContext('2d');
+        ctx.fillStyle='#ffffff'; ctx.fillRect(0,0,canvas.width,canvas.height);
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        const a=document.createElement('a');
+        a.href=canvas.toDataURL('image/png');
+        a.download=exportFileBase()+'.png';
+        document.body.appendChild(a); a.click(); a.remove();
+        showToast('PNG exporté.');
+      } catch(e){ showToast('Impossible de générer le PNG.'); }
     };
-    img.onerror = function(){
-      const a = document.createElement('a');
-      a.href = svg64;
-      a.download = 'macro-planning.svg';
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      showToast('PNG impossible ici, export SVG téléchargé.');
-    };
-    img.src = svg64;
+    img.onerror=function(){ showToast('Impossible de générer le PNG.'); };
+    img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
   } catch(err) {
     showToast('Impossible de générer le PNG.');
   }
