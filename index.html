@@ -102,7 +102,7 @@ td input[type=color] { width:28px; height:22px; padding:1px; border:1px solid #d
 .pct-bar { height:4px; background:#eee; border-radius:3px; width:40px; }
 .pct-fill { height:4px; background:#27ae60; border-radius:3px; }
 .tl-outer { flex:1; background:#fff; border-radius:8px; box-shadow:0 1px 4px rgba(0,0,0,.08); overflow-y:auto !important; overflow-x:hidden; display:flex; flex-direction:column; min-height:0; overscroll-behavior:auto; }
-#tl-svg { display:block; width:100%; flex-shrink:0; }
+#tl-svg { display:block; width:100%; flex-shrink:0; user-select:none; -webkit-user-select:none; }
 #tl-svg text, #tl-svg tspan { font-size-adjust:none; }
 #tl-editor-wrap { position:fixed; display:none; z-index:9999; }
 #tl-editor { border:2px solid #c0392b; border-radius:5px; padding:3px 7px; font-family:'Segoe UI',sans-serif; font-size:12px; font-weight:700; outline:none; min-width:70px; box-shadow:0 3px 12px rgba(0,0,0,.15); resize:none; overflow:hidden; background:#fff; }
@@ -172,6 +172,14 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 ::-webkit-scrollbar { width:10px; height:10px; }
 ::-webkit-scrollbar-thumb { background:#cfd4dc; border-radius:8px; border:2px solid transparent; background-clip:content-box; }
 ::-webkit-scrollbar-thumb:hover { background:#aeb5c0; background-clip:content-box; border:2px solid transparent; }
+#sel-bar { position:fixed; z-index:10030; width:max-content; bottom:18px; left:50%; transform:translateX(-50%); display:flex; align-items:center; gap:10px; background:#111827; color:#fff; border-radius:10px; padding:7px 10px; box-shadow:0 10px 30px rgba(16,24,40,.35); font-size:12px; max-width:calc(100vw - 16px); flex-wrap:wrap; }
+#sel-bar .sel-count { font-weight:700; padding:0 4px; white-space:nowrap; }
+#sel-bar .sel-grp { display:flex; align-items:center; gap:3px; padding-left:10px; border-left:1px solid #374151; }
+#sel-bar .btn { background:#1f2937; border-color:#374151; color:#f9fafb; padding:4px 9px; font-size:11.5px; font-weight:600; }
+#sel-bar .btn:hover { background:#374151; }
+#sel-bar input[type=number], #sel-bar select { background:#1f2937; color:#fff; border:1px solid #374151; border-radius:5px; padding:3px 4px; font-size:11.5px; }
+#sel-bar input[type=number] { width:50px; }
+#sel-bar .sel-biz { display:flex; align-items:center; gap:5px; padding-left:10px; border-left:1px solid #374151; cursor:pointer; white-space:nowrap; }
 #export-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
 #export-menu .btn { border-color:transparent; justify-content:center; font-size:10.5px; font-weight:700; letter-spacing:.04em; width:44px; height:28px; padding:0; }
 #export-menu .btn:hover { background:#f3f4f6; }
@@ -214,7 +222,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.3 &mdash; Accès sécurisé
+      v4.4 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -222,7 +230,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="header-shell">
 <div class="topbar">
   <button class="btn burger-btn" id="burger-btn" type="button" onclick="toggleSidebar()" title="Ouvrir / fermer le menu" aria-label="Ouvrir / fermer le menu"><span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
-  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.3</span></div>
+  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.4</span></div>
   <div class="topbar-sep"></div>
   <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Phase</button>
   <button class="btn" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" style="font-weight:600;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg> Gel</button>
@@ -251,6 +259,27 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <button class="tab active" id="tab-t" onclick="showTab('timeline')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9"/><path d="M9 12h11"/><path d="M6 18h8"/></svg> Gantt</button>
   </div>
 </div>
+</div>
+<div id="sel-bar" style="display:none;" role="toolbar" aria-label="Décaler les activités sélectionnées">
+  <span id="sel-count" class="sel-count"></span>
+  <span class="sel-grp">
+    <button class="btn" onclick="shiftSel(-1,'m')" title="Reculer d'un mois">−1 m</button>
+    <button class="btn" onclick="shiftSel(-1,'w')" title="Reculer d'une semaine">−1 sem</button>
+    <button class="btn" onclick="shiftSel(-1,'d')" title="Reculer d'un jour">−1 j</button>
+  </span>
+  <span class="sel-grp">
+    <button class="btn" onclick="shiftSel(1,'d')" title="Avancer d'un jour">+1 j</button>
+    <button class="btn" onclick="shiftSel(1,'w')" title="Avancer d'une semaine">+1 sem</button>
+    <button class="btn" onclick="shiftSel(1,'m')" title="Avancer d'un mois">+1 m</button>
+  </span>
+  <span class="sel-grp">
+    <button class="btn" onclick="shiftSelCustom(-1)" title="Reculer de N">−</button>
+    <input id="sel-n" type="number" min="1" max="999" value="5" title="Nombre">
+    <select id="sel-unit" title="Unité"><option value="d">jours</option><option value="w">semaines</option><option value="m">mois</option></select>
+    <button class="btn" onclick="shiftSelCustom(1)" title="Avancer de N">+</button>
+  </span>
+  <label class="sel-biz" title="Les décalages en jours et semaines sautent les samedis et dimanches"><input type="checkbox" id="sel-biz"> Jours ouvrés</label>
+  <button class="btn btn-icon" onclick="clearSelection()" title="Désélectionner (Échap)" aria-label="Désélectionner" style="width:26px;min-width:26px;height:26px;">✕</button>
 </div>
 <div id="export-menu" role="menu" style="display:none;">
   <button class="btn" role="menuitem" onclick="closeExportMenu();copyMacroPlanningImage()" title="Image PNG">PNG</button>
@@ -632,6 +661,11 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.4:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Nouveau : sélection d'activités par encerclement dans le Gantt (tracer un cadre sur le fond d'une phase ; Maj ou Ctrl pour ajouter à la sélection). La sélection reste dans une seule phase.</li>
+        <li>Nouveau : décalage des activités sélectionnées (tâches et jalons) depuis une barre flottante : ±1 jour, ±1 semaine, ±1 mois ou un pas personnalisé, avec option « Jours ouvrés ». Un décalage = une étape d'annulation ; les périodes de gel ne bougent pas.</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.3:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : périodes de gel. Affichées dans le bas de la barre de temps (gris clair par défaut, couleur et opacité réglables), avec option « Sur toute la hauteur ». Ajout par le bouton « Gel », édition directe dans le Gantt (glisser, tirer les bords, clic pour modifier nom, dates, couleur, opacité) ou dans l'onglet Données. Elles sont sauvegardées avec le planning et ne sont jamais décalées par le déplacement du planning ou d'une phase.</li>
@@ -1300,6 +1334,7 @@ function showAddMenuData(laneId,evt){ const r=(evt.currentTarget||evt.target).ge
 
 // ═══ TAB / SCALE ═════════════════════════════════════════════
 function showTab(tab){
+  setTimeout(()=>{ if(typeof renderSelectionUI==='function') renderSelectionUI(); },0);
   document.getElementById('view-data').classList.toggle('active',tab==='data');
   document.getElementById('view-timeline').classList.toggle('active',tab==='timeline');
   document.getElementById('tab-d').classList.toggle('active',tab==='data');
@@ -1409,7 +1444,7 @@ function renderTimeline(){
   window._colorPickerActive = false;
 
   const svg=document.getElementById('tl-svg'); svg.innerHTML='';
-  const _delGroups=[]; const _quickAdd=[]; const _laneBands=[];
+  const _delGroups=[]; const _quickAdd=[]; const _laneBands=[]; const _taskBoxes=[];
   const NS='http://www.w3.org/2000/svg';
   const showTimeBar=document.getElementById('chk-timebar').checked;
   const showTodayLine=document.getElementById('chk-todayline').checked;
@@ -1677,7 +1712,7 @@ function renderTimeline(){
       qG.appendChild(el('text',{x:qx+qw/2,y:qy+10.5,'text-anchor':'middle','font-size':10,'font-weight':'bold',fill:lc,'font-family':'inherit'},'＋ Ajouter'));
       const qT=document.createElementNS('http://www.w3.org/2000/svg','title'); qT.textContent='Ajouter une tâche dans « '+String(lane.name||'').replace(/\n/g,' ')+' »'; qG.appendChild(qT);
       qG.addEventListener('click',ev=>{ ev.stopPropagation(); addTask(lane.id,'T'); });
-      _quickAdd.push(qG); _laneBands.push({y0:rowY,y1:rowY+laneH,g:qG,px0:qx,px1:qx+qw,ph:qh/2});
+      _quickAdd.push(qG); _laneBands.push({laneId:lane.id,y0:rowY,y1:rowY+laneH,g:qG,px0:qx,px1:qx+qw,ph:qh/2});
     }
     let _lAddT;
     const showLAdd = () => { clearTimeout(_lAddT); laneDupG.style.display='block'; laneAddG.style.display='block'; };
@@ -1836,6 +1871,7 @@ function renderTimeline(){
             poly.style.touchAction='none';
             poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
             svg.appendChild(poly);
+            _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:mx-s,x1:mx+s,y0:my-s,y1:my+s});
           }
 
 
@@ -1846,6 +1882,7 @@ function renderTimeline(){
           const x1=dX(task.start), x2=dX(task.end);
           const rowHh=getRowH(row); const bw=Math.max(8,x2-x1), bh=rowHh*0.55, by=ty+(rowHh-bh)/2;
           svg.appendChild(el('rect',{x:x1+2,y:by+2,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.07)'}));
+          _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:x1,x1:x1+bw,y0:by,y1:by+bh});
           const barEl=el('rect',{x:x1,y:by,width:bw,height:bh,rx:4,fill:tc,cursor:'grab'});
           barEl.style.touchAction='none';
           barEl.addEventListener('pointerdown',e=>{ if(e.button!==0)return; const br=barEl.getBoundingClientRect(),rx=(e.clientX-br.left)/br.width; if(rx<0.08)tlPointerDown(e,'resize-l',lane.id,task.id); else if(rx>0.92)tlPointerDown(e,'resize-r',lane.id,task.id); else tlPointerDown(e,'move',lane.id,task.id); });
@@ -2108,6 +2145,8 @@ function renderTimeline(){
   if(todayLabel) svg.appendChild(todayLabel);
   if(typeof _delGroups!=='undefined') _delGroups.forEach(g=>svg.appendChild(g));
   _quickAdd.forEach(g=>svg.appendChild(g));
+  tlBands=_laneBands; tlBoxes=_taskBoxes; tlLLv=LL; tlVBw=VW; tlVBh=VH;
+  renderSelectionUI();
   svg.onmousemove=svg.onmouseleave=ev=>{
     if(!_laneBands.length) return;
     const r=svg.getBoundingClientRect(); const k=VH/r.height;
@@ -3588,6 +3627,7 @@ function buildExportSvg(){
   const vb=src.getAttribute('viewBox').trim().split(/\s+/).map(Number);
   const W=Math.max(1,vb[2]||1000), H=Math.max(1,vb[3]||600);
   const clone=src.cloneNode(true);
+  clone.querySelectorAll('.sel-ui').forEach(n=>n.remove());
   clone.querySelectorAll('foreignObject').forEach(n=>n.remove());   // sélecteurs de couleur interactifs
   clone.querySelectorAll('g[style*="cursor"]').forEach(n=>n.remove()); // boutons au survol (supprimer, dupliquer, ...)
   const NS='http://www.w3.org/2000/svg';
@@ -3700,6 +3740,102 @@ function addFreezeFromGantt(){
   showToast('Période de gel ajoutée : cliquez dessus dans la barre de temps pour la modifier.');
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeFreezePop(); });
+
+// ═══ SÉLECTION PAR ENCERCLEMENT + DÉCALAGE ════════════════════
+let tlBands=[], tlBoxes=[], tlLLv=0, tlVBw=1000, tlVBh=600;
+const tlSel={ laneId:null, ids:new Set() };
+const SVGNS='http://www.w3.org/2000/svg';
+function selPrune(){
+  if(tlSel.laneId===null) return;
+  const lane=getLane(tlSel.laneId);
+  if(!lane){ tlSel.laneId=null; tlSel.ids.clear(); return; }
+  [...tlSel.ids].forEach(id=>{ if(!lane.tasks.some(t=>t.id===id)) tlSel.ids.delete(id); });
+  if(!tlSel.ids.size) tlSel.laneId=null;
+}
+function clearSelection(){ tlSel.laneId=null; tlSel.ids.clear(); renderSelectionUI(); }
+function renderSelectionUI(){
+  selPrune();
+  const svg=document.getElementById('tl-svg');
+  if(svg){
+    svg.querySelectorAll('.sel-ui').forEach(n=>n.remove());
+    tlBoxes.forEach(b=>{
+      if(b.laneId!==tlSel.laneId||!tlSel.ids.has(b.taskId)) return;
+      const r=document.createElementNS(SVGNS,'rect');
+      r.setAttribute('class','sel-ui'); r.setAttribute('x',b.x0-3); r.setAttribute('y',b.y0-3); r.setAttribute('width',b.x1-b.x0+6); r.setAttribute('height',b.y1-b.y0+6); r.setAttribute('rx',5);
+      r.setAttribute('fill','rgba(37,99,235,0.10)'); r.setAttribute('stroke','#2563eb'); r.setAttribute('stroke-width','1.6'); r.setAttribute('stroke-dasharray','4,2'); r.style.pointerEvents='none';
+      svg.appendChild(r);
+    });
+  }
+  const bar=document.getElementById('sel-bar'); if(!bar) return;
+  const n=tlSel.ids.size, tabOn=document.getElementById('view-timeline')?.classList.contains('active');
+  if(!n||!tabOn){ bar.style.display='none'; return; }
+  const lane=getLane(tlSel.laneId);
+  document.getElementById('sel-count').textContent=n+(n>1?' sélectionnées':' sélectionnée')+(lane?' · '+String(lane.name||'').replace(/\n/g,' '):'');
+  bar.style.display='flex';
+  const m=document.querySelector('.main')?.getBoundingClientRect(); if(m) bar.style.left=Math.round(m.left+m.width/2)+'px';
+}
+function addMonthsClamped(d,n){
+  const r=new Date(d.getFullYear(),d.getMonth()+n,1), last=new Date(r.getFullYear(),r.getMonth()+1,0).getDate();
+  r.setDate(Math.min(d.getDate(),last)); return r;
+}
+function addBusinessDays(d,n){
+  const r=new Date(d), step=n<0?-1:1; let left=Math.abs(n);
+  while(left>0){ r.setDate(r.getDate()+step); const w=r.getDay(); if(w!==0&&w!==6) left--; }
+  return r;
+}
+function shiftSel(sign,unit,count){
+  const n=Math.max(1,Math.min(999,Math.round(+count||1)));
+  const lane=getLane(tlSel.laneId); if(!lane||!tlSel.ids.size) return;
+  const biz=!!document.getElementById('sel-biz')?.checked;
+  const move=ds=>{
+    const d=parseD(ds);
+    if(unit==='m') return fmt(addMonthsClamped(d,sign*n));
+    const days=unit==='w'?n*5:n; // en jours ouvrés, une semaine = 5 jours
+    if(biz) return fmt(addBusinessDays(d,sign*days));
+    return fmt(addDays(d,sign*(unit==='w'?n*7:n)));
+  };
+  lane.tasks.forEach(t=>{ if(!tlSel.ids.has(t.id)) return; if(t.start) t.start=move(t.start); if(t.end) t.end=move(t.end); });
+  saveState(); renderData(); renderTimeline();
+  showToast((sign>0?'+':'−')+n+' '+(unit==='m'?'mois':unit==='w'?'sem.':'j')+(biz&&unit!=='m'?' ouvrés':'')+' appliqué à '+tlSel.ids.size+' activité'+(tlSel.ids.size>1?'s':''));
+}
+function shiftSelCustom(sign){ shiftSel(sign,document.getElementById('sel-unit').value,document.getElementById('sel-n').value); }
+(function initLasso(){
+  const svg=document.getElementById('tl-svg'); if(!svg) return;
+  const pt=e=>{ const r=svg.getBoundingClientRect(); return { x:(e.clientX-r.left)*(tlVBw/r.width), y:(e.clientY-r.top)*(tlVBh/r.height) }; };
+  let st=null, box=null;
+  svg.addEventListener('pointerdown',e=>{
+    if(e.button!==0||tlDrag) return;
+    if(e.target.closest&&e.target.closest('g[style*="cursor"]')) return;
+    const p=pt(e);
+    if(p.x<tlLLv) return;
+    const band=tlBands.find(b=>p.y>=b.y0&&p.y<b.y1); if(!band) return;
+    st={ id:e.pointerId, x:p.x, y:p.y, cx:e.clientX, cy:e.clientY, band, moved:false, add:e.shiftKey||e.ctrlKey||e.metaKey };
+    try{ svg.setPointerCapture(e.pointerId); }catch(_){}
+  });
+  svg.addEventListener('pointermove',e=>{
+    if(!st||e.pointerId!==st.id) return;
+    if(!st.moved){ if(Math.hypot(e.clientX-st.cx,e.clientY-st.cy)<5) return; st.moved=true;
+      box=document.createElementNS(SVGNS,'rect'); box.setAttribute('class','sel-ui'); box.setAttribute('fill','rgba(37,99,235,0.12)'); box.setAttribute('stroke','#2563eb'); box.setAttribute('stroke-width','1.2'); box.setAttribute('stroke-dasharray','5,3'); box.style.pointerEvents='none'; svg.appendChild(box); }
+    const p=pt(e), y=Math.max(st.band.y0,Math.min(st.band.y1,p.y)), x=Math.max(tlLLv,Math.min(tlVBw,p.x));
+    box.setAttribute('x',Math.min(st.x,x)); box.setAttribute('y',Math.min(st.y,y)); box.setAttribute('width',Math.abs(x-st.x)); box.setAttribute('height',Math.abs(y-st.y));
+  });
+  const end=e=>{
+    if(!st||e.pointerId!==st.id) return;
+    const s0=st; st=null;
+    try{ svg.releasePointerCapture(e.pointerId); }catch(_){}
+    if(!s0.moved){ if(!s0.add) clearSelection(); return; }
+    const p=pt(e), y=Math.max(s0.band.y0,Math.min(s0.band.y1,p.y)), x=Math.max(tlLLv,Math.min(tlVBw,p.x));
+    const x0=Math.min(s0.x,x), x1=Math.max(s0.x,x), y0=Math.min(s0.y,y), y1=Math.max(s0.y,y);
+    const hit=tlBoxes.filter(b=>b.laneId===s0.band.laneId&&b.x1>=x0&&b.x0<=x1&&b.y1>=y0&&b.y0<=y1).map(b=>b.taskId);
+    if(!(s0.add&&tlSel.laneId===s0.band.laneId)) tlSel.ids.clear();
+    tlSel.laneId=hit.length||tlSel.ids.size?s0.band.laneId:null;
+    hit.forEach(id=>tlSel.ids.add(id));
+    renderSelectionUI();
+  };
+  svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
+  document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&tlSel.ids.size&&!e.target.closest?.('input,textarea,select')) clearSelection(); });
+  window.addEventListener('resize',()=>renderSelectionUI());
+})();
 
 // ═══ MENU EXPORT ═════════════════════════════════════════════
 function closeExportMenu(){
