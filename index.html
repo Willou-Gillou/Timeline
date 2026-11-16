@@ -1409,7 +1409,7 @@ function renderTimeline(){
   window._colorPickerActive = false;
 
   const svg=document.getElementById('tl-svg'); svg.innerHTML='';
-  const _delGroups=[]; const _quickAdd=[];
+  const _delGroups=[]; const _quickAdd=[]; const _laneBands=[]; const QADD_H=18;
   const NS='http://www.w3.org/2000/svg';
   const showTimeBar=document.getElementById('chk-timebar').checked;
   const showTodayLine=document.getElementById('chk-todayline').checked;
@@ -1620,7 +1620,7 @@ function renderTimeline(){
   lanes.forEach((lane,li)=>{
     const rows=laneRowsCache[lane.id];
     if (rows.length === 0) return; // Ignore completely if no rows
-    const laneH=Math.max(rows.reduce((s,row)=>s+getRowH(row),0), String(lane.name||'').split('\n').length*Math.max(12,laneFontSize+2)+8);
+    const laneH=Math.max(rows.reduce((s,row)=>s+getRowH(row),0), String(lane.name||'').split('\n').length*Math.max(12,laneFontSize+2)+8) + (LL===0?QADD_H:0); // bande réservée au bouton « Ajouter » (colonne des phases masquée)
     const lc=lane.color||'#2c3e50';
     svg.appendChild(el('rect',{x:LL,y:rowY,width:VW-LL,height:laneH,fill:li%2===0?'#fff':'#f8f8f8'}));
     const laneColorRect=el('rect',{x:0,y:rowY,width:LL,height:laneH,fill:lc});
@@ -1669,17 +1669,15 @@ function renderTimeline(){
     laneAddG.addEventListener('click',showMFn);
     phaseHeaderG.appendChild(laneAddG); _delGroups.push(laneAddG);
     if(LL===0){
-      // Colonne des phases masquée : petit « + » discret au début de chaque phase pour ajouter une tâche ou un jalon
+      // Colonne des phases masquée : au survol de la phase, une pastille « + Ajouter » apparaît sous sa dernière ligne
       const qG=document.createElementNS('http://www.w3.org/2000/svg','g');
-      qG.style.cursor='pointer'; qG.style.opacity='0.55';
-      const qx=VW-14, qy=rowY+11;
-      qG.appendChild(el('circle',{cx:qx,cy:qy,r:7.5,fill:lc,stroke:'white','stroke-width':1.5}));
-      qG.appendChild(el('line',{x1:qx,y1:qy-3.5,x2:qx,y2:qy+3.5,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
-      qG.appendChild(el('line',{x1:qx-3.5,y1:qy,x2:qx+3.5,y2:qy,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
+      qG.style.cursor='pointer'; qG.style.opacity='0'; qG.style.pointerEvents='none'; qG.style.transition='opacity .12s';
+      const qw=86, qh=14, qx=10, qy=rowY+laneH-QADD_H+2;
+      qG.appendChild(el('rect',{x:qx,y:qy,width:qw,height:qh,rx:7,fill:'#fff',stroke:lc,'stroke-width':1.2}));
+      qG.appendChild(el('text',{x:qx+qw/2,y:qy+10.5,'text-anchor':'middle','font-size':10,'font-weight':'bold',fill:lc,'font-family':'inherit'},'＋ Ajouter'));
       const qT=document.createElementNS('http://www.w3.org/2000/svg','title'); qT.textContent='Ajouter une tâche ou un jalon dans « '+String(lane.name||'').replace(/\n/g,' ')+' »'; qG.appendChild(qT);
-      qG.addEventListener('mouseenter',()=>qG.style.opacity='1'); qG.addEventListener('mouseleave',()=>qG.style.opacity='0.55');
       qG.addEventListener('click',ev=>{ ev.stopPropagation(); const r=qG.getBoundingClientRect(); showAddMenu(lane.id, r.left, r.bottom+4); });
-      _quickAdd.push(qG);
+      _quickAdd.push(qG); _laneBands.push({y0:rowY,y1:rowY+laneH,g:qG});
     }
     let _lAddT;
     const showLAdd = () => { clearTimeout(_lAddT); laneDupG.style.display='block'; laneAddG.style.display='block'; };
@@ -2110,6 +2108,11 @@ function renderTimeline(){
   if(todayLabel) svg.appendChild(todayLabel);
   if(typeof _delGroups!=='undefined') _delGroups.forEach(g=>svg.appendChild(g));
   _quickAdd.forEach(g=>svg.appendChild(g));
+  svg.onmousemove=svg.onmouseleave=ev=>{
+    if(!_laneBands.length) return;
+    const r=svg.getBoundingClientRect(); const y=ev.type==='mouseleave'?-1:(ev.clientY-r.top)*(VH/r.height);
+    _laneBands.forEach(b=>{ const on=y>=b.y0&&y<b.y1; b.g.style.opacity=on?'1':'0'; b.g.style.pointerEvents=on?'auto':'none'; });
+  };
   if(todayMarker) svg.appendChild(todayMarker);
   if(todayArrow) svg.appendChild(todayArrow);
 }
