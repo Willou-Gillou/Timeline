@@ -1668,15 +1668,15 @@ function renderTimeline(){
     const showMFn=ev=>{ ev.stopPropagation(); const sr=document.getElementById('tl-svg').getBoundingClientRect(); showAddMenu(lane.id, sr.left + ((lacx-4) * (sr.width/VW)), sr.top + ((lacy+12) * (sr.height/VH))); };
     laneAddG.addEventListener('click',showMFn);
     phaseHeaderG.appendChild(laneAddG); _delGroups.push(laneAddG);
-    if(LL===0){
-      // Colonne des phases masquée : au survol de la phase, une pastille « + Ajouter » apparaît sous sa dernière ligne
+    {
+      // Au survol de la phase, une pastille « + Ajouter » apparaît sous sa dernière ligne
       const qG=document.createElementNS('http://www.w3.org/2000/svg','g');
       qG.style.cursor='pointer'; qG.style.opacity='0'; qG.style.pointerEvents='none'; qG.style.transition='opacity .12s';
-      const qw=86, qh=14, qx=10, qy=rowY+laneH-qh/2; // à cheval sur le bas de la phase : aucune ligne ajoutée
+      const qw=86, qh=14, qx=LL+10, qy=rowY+laneH-qh/2; // à cheval sur le bas de la phase : aucune ligne ajoutée
       qG.appendChild(el('rect',{x:qx,y:qy,width:qw,height:qh,rx:7,fill:'#fff',stroke:lc,'stroke-width':1.2}));
       qG.appendChild(el('text',{x:qx+qw/2,y:qy+10.5,'text-anchor':'middle','font-size':10,'font-weight':'bold',fill:lc,'font-family':'inherit'},'＋ Ajouter'));
-      const qT=document.createElementNS('http://www.w3.org/2000/svg','title'); qT.textContent='Ajouter une tâche ou un jalon dans « '+String(lane.name||'').replace(/\n/g,' ')+' »'; qG.appendChild(qT);
-      qG.addEventListener('click',ev=>{ ev.stopPropagation(); const r=qG.getBoundingClientRect(); showAddMenu(lane.id, r.left, r.bottom+4); });
+      const qT=document.createElementNS('http://www.w3.org/2000/svg','title'); qT.textContent='Ajouter une tâche dans « '+String(lane.name||'').replace(/\n/g,' ')+' »'; qG.appendChild(qT);
+      qG.addEventListener('click',ev=>{ ev.stopPropagation(); addTask(lane.id,'T'); });
       _quickAdd.push(qG); _laneBands.push({y0:rowY,y1:rowY+laneH,g:qG,px0:qx,px1:qx+qw,ph:qh/2});
     }
     let _lAddT;
