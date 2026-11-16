@@ -136,7 +136,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   #print-root { display:block !important; }
   html, body { height:auto !important; overflow:visible !important; background:#fff !important; }
 }
-/* ═══ Thème v4.8 : finition visuelle ═══ */
+/* ═══ Thème : finition visuelle ═══ */
 body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif; background:#f4f5f7; color:#1f2937; -webkit-font-smoothing:antialiased; }
 .app-shell { background:#f4f5f7; }
 .header-shell { border-bottom-color:#e5e7eb; box-shadow:0 1px 2px rgba(16,24,40,.04); }
@@ -172,6 +172,10 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 ::-webkit-scrollbar { width:10px; height:10px; }
 ::-webkit-scrollbar-thumb { background:#cfd4dc; border-radius:8px; border:2px solid transparent; background-clip:content-box; }
 ::-webkit-scrollbar-thumb:hover { background:#aeb5c0; background-clip:content-box; border:2px solid transparent; }
+#export-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
+#export-menu .btn { border-color:transparent; justify-content:center; font-size:10.5px; font-weight:700; letter-spacing:.04em; width:44px; height:28px; padding:0; }
+#export-menu .btn:hover { background:#f3f4f6; }
+#btn-export[aria-expanded="true"] { background:#f3f4f6; border-color:#e5e7eb; color:#111827; }
 </style>
 </head>
 <body>
@@ -210,7 +214,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.8 &mdash; Accès sécurisé
+      v4.3 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -218,29 +222,27 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="header-shell">
 <div class="topbar">
   <button class="btn burger-btn" id="burger-btn" type="button" onclick="toggleSidebar()" title="Ouvrir / fermer le menu" aria-label="Ouvrir / fermer le menu"><span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
-  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.8</span></div>
+  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.3</span></div>
   <div class="topbar-sep"></div>
   <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Phase</button>
+  <button class="btn" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" style="font-weight:600;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg> Gel</button>
 
   <div class="topbar-sep"></div>
   <div class="topbar-group">
     <span class="topbar-group-label">Planning</span>
     <button class="btn btn-icon" id="btn-undo" onclick="undoPlanning()" title="Retour : revenir incrémentalement aux dernières modifications" aria-label="Retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
     <button class="btn btn-icon" id="btn-redo" onclick="redoPlanning()" title="Annuler retour : rétablir le ou les retours effectués" aria-label="Annuler retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
-    <button class="btn btn-icon" onclick="promptSaveJSON()" title="Sauvegarder le planning en JSON" aria-label="Sauvegarder le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></button>
+    <button class="btn btn-icon" onclick="promptSaveJSON()" title="Sauvegarder le planning en JSON" aria-label="Sauvegarder le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg></button>
     <label class="btn btn-icon" style="cursor:pointer;" title="Charger un planning JSON" aria-label="Charger un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
     <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></button>
-    <button class="btn btn-icon" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" aria-label="Ajouter une période de gel"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg></button>
-    <button class="btn btn-icon" onclick="copyMacroPlanningImage()" title="Exporter le planning en PNG" aria-label="Exporter le planning en PNG"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.1-3.1a2 2 0 0 0-2.8 0L6 21"/></svg></button>
-    <button class="btn btn-icon" onclick="exportSVG()" title="Exporter en SVG vectoriel" aria-label="Exporter en SVG vectoriel" style="font-size:10px;font-weight:700;">SVG</button>
-    <button class="btn btn-icon" onclick="exportPDF()" title="Exporter en PDF vectoriel (via l'impression)" aria-label="Exporter en PDF" style="font-size:10px;font-weight:700;">PDF</button>
+    <button class="btn btn-icon" id="btn-export" onclick="toggleExportMenu(event)" title="Exporter le planning (PNG, SVG, PDF)" aria-label="Exporter le planning" aria-haspopup="true" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></button>
   </div>
 
   <div class="topbar-sep"></div>
   <div class="topbar-group">
     <span class="topbar-group-label">Réglages</span>
-    <button class="btn btn-icon" onclick="promptSaveSettingsJSON()" title="Sauvegarder les réglages" aria-label="Sauvegarder les réglages"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h8"/><path d="M16 6h4"/><path d="M4 12h2"/><path d="M10 12h10"/><path d="M4 18h10"/><path d="M18 18h2"/><circle cx="14" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="16" cy="18" r="2"/></svg></button>
-    <label class="btn btn-icon" style="cursor:pointer;" title="Importer les réglages" aria-label="Importer les réglages"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg><input type="file" accept=".json" style="display:none" onchange="importSettingsJSON(event)"></label>
+    <button class="btn btn-icon" onclick="promptSaveSettingsJSON()" title="Exporter les réglages" aria-label="Exporter les réglages"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></button>
+    <label class="btn btn-icon" style="cursor:pointer;" title="Importer les réglages" aria-label="Importer les réglages"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg><input type="file" accept=".json" style="display:none" onchange="importSettingsJSON(event)"></label>
     <button class="btn btn-icon" onclick="openVersionHistory()" title="Historique des versions" aria-label="Historique des versions"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
     <button class="btn btn-icon" onclick="openMemoryDiagnostic()" title="Diagnostic mémoire locale" aria-label="Diagnostic mémoire locale"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg></button>
   </div>
@@ -249,6 +251,11 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <button class="tab active" id="tab-t" onclick="showTab('timeline')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9"/><path d="M9 12h11"/><path d="M6 18h8"/></svg> Gantt</button>
   </div>
 </div>
+</div>
+<div id="export-menu" role="menu" style="display:none;">
+  <button class="btn" role="menuitem" onclick="closeExportMenu();copyMacroPlanningImage()" title="Image PNG">PNG</button>
+  <button class="btn" role="menuitem" onclick="closeExportMenu();exportSVG()" title="SVG vectoriel">SVG</button>
+  <button class="btn" role="menuitem" onclick="closeExportMenu();exportPDF()" title="PDF vectoriel (via l'impression)">PDF</button>
 </div>
 <div class="app-shell">
 <div class="app-body">
@@ -625,36 +632,15 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
-      <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
-      <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Finition visuelle : icônes vectorielles homogènes dans la barre d'outils, nom de l'application et version dans l'en-tête, onglets Données / Gantt en sélecteur, typographie et couleurs harmonisées, libellés corrigés, titre d'onglet et icône du site.</li>
-        <li>Périodes de gel : gris clair par défaut, dates de début et de fin modifiables depuis le Gantt. Colonne des phases de largeur réglable.</li>
-      </ul>
-      <div style="font-weight:700;margin:8px 0 6px;">V4.7:</div>
-      <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Affichages : « Tâches (barres) » ne masque plus que les barres de tâches (les losanges de jalons restent) ; « Phases (colonne) » devient une case indépendante, visible aussi en mode simplifié  ; largeur de la colonne des phases réglable.</li>
-      </ul>
-      <div style="font-weight:700;margin:8px 0 6px;">V4.6:</div>
-      <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : export SVG vectoriel (boutons SVG) et PDF vectoriel (bouton PDF, via la fenêtre d'impression), avec titre, périodes de gel incluses et sans éléments interactifs.</li>
-        <li>Périodes de gel : édition directe dans le Gantt (glisser pour déplacer, tirer les bords pour ajuster, clic pour modifier le nom, la couleur, l'opacité ou supprimer) et bouton ❄️ pour en ajouter. Les gels ne sont jamais décalés par le déplacement du planning ni d'une phase.</li>
-        <li>Barre latérale : mode « Simplifié » (par défaut) qui masque les tailles, la palette et les options détaillées, et mode « Avancé » pour tout retrouver. Le choix est mémorisé.</li>
-      </ul>
-      <div style="font-weight:700;margin:8px 0 6px;">V4.5:</div>
-      <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Retrait de l'import d'une timeline depuis une photo (API Claude) : bouton, fenêtre et code supprimés. La politique de sécurité (CSP) retrouve sa version stricte, sans accès réseau externe, et toute clé API mémorisée est effacée du navigateur.</li>
-        <li>Les périodes de gel sont affichées dans le bas de la barre de temps (petits rectangles, police réduite) et gérées dans l'onglet Données avec le même visuel que les phases.</li>
-      </ul>
-      <div style="font-weight:700;margin:8px 0 6px;">V4.4:</div>
-      <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : périodes de gel. Gérées dans l'onglet Données (nom, dates, couleur, opacité), elles s'affichent sur une ligne dans le bas de la barre de temps, avec option « Sur toute la hauteur » pour les prolonger sur tout le Gantt (la barre de temps reste toujours visible).</li>
-        <li>Les périodes de gel sont sauvegardées, exportées/importées avec le planning, prises en compte par l'annulation.</li>
-      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.3:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : import d'une timeline depuis une photo (bouton 📷). L'IA de Claude extrait phases, tâches et jalons, avec aperçu avant import (ajout ou remplacement du planning). Nécessite une clé API Anthropic.</li>
-        <li>Phase : boutons de décalage renommés « ± 30 jours » pour correspondre au comportement réel. Suppression de code mort.</li>
-        <li>CSP : ajout de img-src (blob/data) et connect-src limité à api.anthropic.com.</li>
+        <li>Nouveau : périodes de gel. Affichées dans le bas de la barre de temps (gris clair par défaut, couleur et opacité réglables), avec option « Sur toute la hauteur ». Ajout par le bouton « Gel », édition directe dans le Gantt (glisser, tirer les bords, clic pour modifier nom, dates, couleur, opacité) ou dans l'onglet Données. Elles sont sauvegardées avec le planning et ne sont jamais décalées par le déplacement du planning ou d'une phase.</li>
+        <li>Nouveau : export SVG et PDF vectoriels, en plus du PNG, regroupés sous un seul bouton d'export.</li>
+        <li>Barre latérale : mode « Simplifié » (par défaut) et mode « Avancé », choix mémorisé.</li>
+        <li>Affichages : « Phases (colonne) » et « Tâches (barres) » deviennent deux cases indépendantes ; masquer les tâches conserve les losanges des jalons et les phases ; largeur de la colonne des phases réglable.</li>
+        <li>Barre d'outils revue : icônes vectorielles homogènes, disquette pour la sauvegarde, export et import des réglages par flèches, nom de l'application et version dans l'en-tête, onglets Données / Gantt en sélecteur.</li>
+        <li>Finition visuelle : typographie et couleurs harmonisées, libellés corrigés, titre d'onglet et icône du site.</li>
+        <li>Phase : boutons de décalage renommés « ± 30 jours ». Suppression de code mort.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.2:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
@@ -3717,6 +3703,25 @@ function addFreezeFromGantt(){
   showToast('Période de gel ajoutée : cliquez dessus dans la barre de temps pour la modifier.');
 }
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeFreezePop(); });
+
+// ═══ MENU EXPORT ═════════════════════════════════════════════
+function closeExportMenu(){
+  const m=document.getElementById('export-menu'), b=document.getElementById('btn-export');
+  if(m) m.style.display='none'; if(b) b.setAttribute('aria-expanded','false');
+}
+function toggleExportMenu(ev){
+  if(ev) ev.stopPropagation();
+  const m=document.getElementById('export-menu'), b=document.getElementById('btn-export'); if(!m||!b) return;
+  if(m.style.display!=='none'){ closeExportMenu(); return; }
+  const r=b.getBoundingClientRect();
+  m.style.display='flex';
+  m.style.top=(r.bottom+6)+'px';
+  m.style.left=Math.max(4,Math.round(r.left+r.width/2-m.offsetWidth/2))+'px';
+  b.setAttribute('aria-expanded','true');
+}
+document.addEventListener('pointerdown',e=>{ if(!e.target.closest('#export-menu') && !e.target.closest('#btn-export')) closeExportMenu(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeExportMenu(); });
+window.addEventListener('resize',closeExportMenu);
 
 // ═══ MODE D'INTERFACE : SIMPLIFIÉ / AVANCÉ ═══════════════════
 const UIMODE_KEY='test_mp_uimode_v1';
