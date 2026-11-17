@@ -683,7 +683,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Nouveau : la largeur de la colonne des phases se règle directement dans le Gantt, en faisant glisser son bord droit ; le curseur « Largeur » des réglages est supprimé.</li>
         <li>Correction : le redimensionnement de la colonne des phases n'ajoute plus de mois dans le futur et ne bloque plus les options « Échelle de temps / Fin de la barre » (l'extension automatique n'est plus mémorisée).</li>
         <li>Nouveau : Affichage / Jalons / « Type de drapeau » : « Grand drapeau » (actuel) ou « Petit drapeau » (fanion avec le nom et la date JJ/MM/AAAA à droite, sans cadre) ; le choix est mémorisé.</li>
-        <li>Nouveau : Global / Jalons : réglage de la distance entre le mât et le petit drapeau (3 px par défaut).</li>
+        <li>Nouveau : Global / Jalons : réglage de la distance entre le mât et le petit drapeau (3 px par défaut). Les réglages largeur / hauteur / épaisseur des drapeaux s'appliquent aussi au petit drapeau.</li>
+        <li>Correction : les réglages « Espace / longueur des tirets » et « Distance mât / petit drapeau » s'appliquent immédiatement au Gantt (ils activent « Trait pointillé jalon » ou le petit drapeau si besoin).</li>
         <li>Nouveau : le bouton de conversion JSON ouvre un menu avec deux choix : « Convertir une image en JSON » et « Convertir un costmodel en JSON » (nouvel onglet).</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.5:</div>
@@ -1053,11 +1054,16 @@ window.shuffleMilestoneColors = function(){
   renderTimeline();
   saveState();
 }
-function changeFlagMastGap(d){ flagMastGap=Math.max(0,Math.min(20,flagMastGap+d)); document.getElementById('flag-mast-gap-val').textContent=flagMastGap; saveState(); renderTimeline(); }
+function changeFlagMastGap(d){ flagMastGap=Math.max(0,Math.min(20,flagMastGap+d)); document.getElementById('flag-mast-gap-val').textContent=flagMastGap;
+  // Réglage propre au petit drapeau : on bascule dessus pour que l'effet soit visible tout de suite
+  { const r=document.querySelector('input[name="flag-type"][value="small"]'); if(r&&!r.checked){ r.checked=true; showToast('Type de drapeau : petit drapeau'); } }
+  saveState(); renderTimeline(); }
 function changeFlagPad(type,d){ if(type==='h'){ flagPadH=Math.max(1,Math.min(20,flagPadH+d)); document.getElementById('flag-padh-val').textContent=flagPadH; } else { flagPadV=Math.max(1,Math.min(20,flagPadV+d)); document.getElementById('flag-padv-val').textContent=flagPadV; } saveState(); renderTimeline(); }
 function changeDash(type,d){
   if(type==='dash'){ dashLen=Math.max(1,Math.min(20,dashLen+d)); document.getElementById('dash-dash-val').textContent=dashLen; }
   else { dashGap=Math.max(1,Math.min(20,dashGap+d)); document.getElementById('dash-gap-val').textContent=dashGap; }
+  // Les tirets n'existent que si « Trait pointillé jalon » est coché : on l'active pour que le réglage soit visible tout de suite
+  { const c=document.getElementById('chk-dash-dot'); if(c&&!c.checked){ c.checked=true; showToast('« Trait pointillé jalon » activé'); } }
   saveState();
   renderTimeline();
 }
@@ -1557,7 +1563,7 @@ function renderTimeline(){
 
   // Milestone labels
   const LABEL_LINE_H=jalonFontSize+2,LABEL_PAD=3;
-  const smallFlag=document.querySelector('input[name="flag-type"]:checked')?.value==='small', SF_PW=13, SF_G=flagMastGap;
+  const smallFlag=document.querySelector('input[name="flag-type"]:checked')?.value==='small', SF_PW=flagPadH*2+1, SF_G=flagMastGap, SF_PH=flagPadV*2+1;
   let allMilestones=[];
   lanes.forEach(lane=>lane.tasks.forEach(task=>{
     if(task.type==='J'){
@@ -1567,7 +1573,7 @@ function renderTimeline(){
       let lw=Math.max(50, Math.max(...lines.map(l=>l.length))*(jalonFontSize*0.65)+flagPadH*2);
       const dFull=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
       if(smallFlag){
-        lh=lines.length*LABEL_LINE_H+jalonDateFontSize+3;
+        lh=Math.max(lines.length*LABEL_LINE_H+jalonDateFontSize+3, SF_PH);
         lw=SF_G+SF_PW+5+Math.max(Math.max(...lines.map(l=>l.length))*(jalonFontSize*0.62), dFull.length*(jalonDateFontSize*0.6))+2;
       }
       allMilestones.push({laneId:lane.id,taskId:task.id,x:dX(task.end||task.start),label:task.title||'Jalon',date:smallFlag?dFull:fmtLabel(d),color:task.color||'#888',lines,lh,lw});
@@ -1702,11 +1708,11 @@ function renderTimeline(){
     let flagEl;
     if(smallFlag){
       // Petit drapeau : fanion plein en haut du mât, nom et date à droite, sans cadre
-      const ph=Math.min(lh,13);
+      const ph=SF_PH, fi=flagW/2;
       flagEl=el('rect',{x:m.x,y:labelY,width:lw,height:lh,fill:'#ffffff','fill-opacity':0.001,cursor:'grab'});
       flagEl.addEventListener('pointerdown',dragFlag);
       flagGroup.appendChild(flagEl);
-      flagGroup.appendChild(el('path',{d:`M ${m.x+SF_G},${labelY} L ${m.x+SF_G+SF_PW},${labelY+ph/2} L ${m.x+SF_G},${labelY+ph} Z`,fill:m.color,'pointer-events':'none'}));
+      flagGroup.appendChild(el('path',{d:`M ${m.x+SF_G+fi},${labelY+fi} L ${m.x+SF_G+SF_PW-fi},${labelY+ph/2} L ${m.x+SF_G+fi},${labelY+ph-fi} Z`,fill:m.color,stroke:m.color,'stroke-width':flagW,'stroke-linejoin':'round','pointer-events':'none'}));
     } else {
       const r=5;
       const flagPath=`M ${m.x},${labelY+lh+tipH} L ${m.x},${labelY} H ${m.x+lw-r} Q ${m.x+lw},${labelY} ${m.x+lw},${labelY+r} V ${labelY+lh-r} Q ${m.x+lw},${labelY+lh} ${m.x+lw-r},${labelY+lh} H ${m.x} Z`;
