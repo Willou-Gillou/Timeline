@@ -180,6 +180,9 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 #export-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
 #export-menu .btn { border-color:transparent; justify-content:center; font-size:10.5px; font-weight:700; letter-spacing:.04em; width:44px; height:28px; padding:0; }
 #export-menu .btn:hover { background:#f3f4f6; }
+#conv-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
+#conv-menu .btn { border-color:transparent; justify-content:flex-start; font-size:12px; font-weight:600; height:30px; padding:0 12px; white-space:nowrap; text-decoration:none; }
+#conv-menu .btn:hover { background:#f3f4f6; }
 #btn-export[aria-expanded="true"] { background:#f3f4f6; border-color:#e5e7eb; color:#111827; }
 </style>
 </head>
@@ -219,7 +222,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.5 &mdash; Accès sécurisé
+      v4.6 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -227,7 +230,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="header-shell">
 <div class="topbar">
   <button class="btn burger-btn" id="burger-btn" type="button" onclick="toggleSidebar()" title="Ouvrir / fermer le menu" aria-label="Ouvrir / fermer le menu"><span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
-  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.5</span></div>
+  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.6</span></div>
   <div class="topbar-sep"></div>
   <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Phase</button>
   <button class="btn" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" style="font-weight:600;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg> Gel</button>
@@ -241,7 +244,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <label class="btn btn-icon" style="cursor:pointer;" title="Charger un planning JSON" aria-label="Charger un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
     <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></button>
     <button class="btn btn-icon" id="btn-export" onclick="toggleExportMenu(event)" title="Exporter le planning (PNG, SVG, PDF)" aria-label="Exporter le planning" aria-haspopup="true" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></button>
-    <a class="btn btn-icon" id="btn-png2json" href="https://m365.cloud.microsoft/chat/?titleId=T_26a2fcc3-c3fd-6d09-eff7-a65b904a0b40&amp;source=embedded-builder" target="_blank" rel="noopener noreferrer" title="Conversion Gantt PNG vers JSON (s'ouvre dans un nouvel onglet)" aria-label="Conversion Gantt PNG vers JSON" style="text-decoration:none;"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/></svg></a>
+    <button class="btn btn-icon" id="btn-png2json" type="button" onclick="toggleConvMenu(event)" title="Conversion vers JSON" aria-label="Conversion vers JSON" aria-haspopup="menu" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/></svg></button>
   </div>
 
   <div class="topbar-sep"></div>
@@ -280,6 +283,10 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     </div>
   </div>
   <div style="font-size:10.5px;color:#888;margin-top:10px;line-height:1.35;">Astuce : Maj + clic sur une activité pour l'ajouter ou la retirer ; faites glisser une barre sélectionnée pour déplacer tout le groupe.</div>
+</div>
+<div id="conv-menu" role="menu" style="display:none;">
+  <a class="btn" role="menuitem" href="https://m365.cloud.microsoft/chat/?titleId=T_26a2fcc3-c3fd-6d09-eff7-a65b904a0b40&amp;source=embedded-builder" target="_blank" rel="noopener noreferrer" onclick="closeConvMenu()">Convertir une image en JSON</a>
+  <a class="btn" role="menuitem" href="https://m365.cloud.microsoft/chat/?titleId=T_fed89d2e-b025-173e-d6e7-132a328f9e82&amp;source=embedded-builder" target="_blank" rel="noopener noreferrer" onclick="closeConvMenu()">Convertir un costmodel en JSON</a>
 </div>
 <div id="export-menu" role="menu" style="display:none;">
   <button class="btn" role="menuitem" onclick="closeExportMenu();copyMacroPlanningImage()" title="Image PNG">PNG</button>
@@ -367,7 +374,6 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         </div>
 
         <label><input type="checkbox" id="chk-lane-col" checked onchange="renderTimeline(); saveState()"/> Phases (colonne)</label>
-        <label style="display:flex;align-items:center;gap:6px;padding-left:22px;font-size:11px;color:#555;">Largeur <input type="range" id="lane-col-w" min="80" max="400" step="10" value="130" oninput="laneColW=+this.value;document.getElementById('lane-col-w-val').textContent=this.value;renderTimeline();saveState()" style="flex:1;min-width:0;"/><span id="lane-col-w-val" style="min-width:26px;text-align:right;">130</span></label>
         <label><input type="checkbox" id="chk-taches-master" checked onchange="toggleTachesOptions(); renderTimeline(); saveState()"/> Tâches (barres)</label>
         <div class="sub-options" id="taches-sub">
           <label><input type="checkbox" id="chk-task-label" checked onchange="toggleTaskLabelOptions()"/> Titre des tâches</label>
@@ -661,6 +667,12 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.6:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Nouveau : la largeur de la colonne des phases se règle directement dans le Gantt, en faisant glisser son bord droit ; le curseur « Largeur » des réglages est supprimé.</li>
+        <li>Correction : le redimensionnement de la colonne des phases n'ajoute plus de mois dans le futur et ne bloque plus les options « Échelle de temps / Fin de la barre » (l'extension automatique n'est plus mémorisée).</li>
+        <li>Nouveau : le bouton de conversion JSON ouvre un menu avec deux choix : « Convertir une image en JSON » et « Convertir un costmodel en JSON » (nouvel onglet).</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.5:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : bouton « Conversion Gantt PNG vers JSON » (après l'export), qui ouvre l'assistant de conversion dans un nouvel onglet.</li>
@@ -1469,6 +1481,7 @@ function computeLaneRows(lane){
 }
 
 // ═══ RENDER TIMELINE ═════════════════════════════════════════
+let _tlAutoEnd=false;
 function renderTimeline(){
   window._colorPickerActive = false;
 
@@ -1502,7 +1515,8 @@ function renderTimeline(){
   freezes.forEach(f=>{ if(validISO(f.start)&&validISO(f.end)){ allD.push(parseD(f.start)); allD.push(parseD(f.end)); } });
   const rawMin=new Date(Math.min(...allD)), rawMax=new Date(Math.max(...allD));
   const startOpt=+document.querySelector('input[name="tl-start"]:checked').value;
-  const endOpt=+document.querySelector('input[name="tl-end"]:checked').value;
+  const endOpt=_tlAutoEnd?1:+document.querySelector('input[name="tl-end"]:checked').value;
+  const endChosen=+document.querySelector('input[name="tl-end"]:checked').value;
   let minD=startOpt===0?new Date(rawMin.getFullYear(),rawMin.getMonth(),1):new Date(rawMin.getFullYear(),rawMin.getMonth()-1,1);
   let maxD=endOpt===2?new Date(rawMax):endOpt===0?new Date(rawMax.getFullYear(),rawMax.getMonth()+1,0):new Date(rawMax.getFullYear(),rawMax.getMonth()+2,0);
 
@@ -1561,9 +1575,9 @@ function renderTimeline(){
   // +3px top margin so top flag border is never clipped
   allMilestones.forEach(m=>{ m.labelTopY+=3; });
   const milestoneOverflow = allMilestones.some(m=>m.x + m.lw > VW);
-  if(milestoneOverflow && endOpt !== 1){
-    const endPlusOne = document.querySelector('input[name="tl-end"][value="1"]'); if(endPlusOne) endPlusOne.checked = true;
-    return renderTimeline();
+  // Extension automatique TEMPORAIRE (le choix de l'utilisateur n'est jamais modifié) et seulement pour « Fin dernier mois »
+  if(milestoneOverflow && !_tlAutoEnd && endChosen===0){
+    _tlAutoEnd=true; try{ return renderTimeline(); } finally{ _tlAutoEnd=false; }
   }
   const MA=rows.length===0?0:rows.reduce((a,r)=>Math.max(a,r.topY+r.h),0)+8+3;
   const TOTAL_TOP=MA+TH+timelineGap;
@@ -2199,6 +2213,14 @@ function renderTimeline(){
   if(typeof _delGroups!=='undefined') _delGroups.forEach(g=>svg.appendChild(g));
   _quickAdd.forEach(g=>svg.appendChild(g));
   tlBands=_laneBands; tlBoxes=_taskBoxes; tlLLv=LL; tlVBw=VW; tlVBh=VH;
+  if(showLaneCol){
+    const hg=document.createElementNS(NS,'g'); hg.style.cursor='col-resize'; hg.style.touchAction='none';
+    hg.appendChild(el('rect',{x:LL-4,y:MA,width:8,height:Math.max(0,VH-MA),fill:'#ffffff','fill-opacity':0.001}));
+    const grip=el('rect',{x:LL-1.5,y:MA+TH+timelineGap,width:3,height:Math.max(0,VH-(MA+TH+timelineGap)),rx:1.5,fill:'#c0392b',opacity:'0'}); grip.style.pointerEvents='none'; hg.appendChild(grip);
+    hg.addEventListener('mouseenter',()=>grip.setAttribute('opacity','0.55')); hg.addEventListener('mouseleave',()=>{ if(!laneColDrag) grip.setAttribute('opacity','0'); });
+    hg.addEventListener('pointerdown',ev=>{ if(ev.button!==0) return; ev.preventDefault(); ev.stopPropagation(); startLaneColResize(ev); });
+    svg.appendChild(hg);
+  }
   renderSelectionUI();
   svg.onmousemove=svg.onmouseleave=ev=>{
     if(!_laneBands.length) return;
@@ -3885,6 +3907,16 @@ function shiftSel(sign,unit,count){
   saveState(); renderData(); renderTimeline();
   showToast((sign>0?'+':'−')+n+' '+(unit==='m'?'mois':unit==='w'?'sem.':'j')+(biz&&unit!=='m'?' ouvrés':'')+' appliqué à '+tlSel.ids.size+' activité'+(tlSel.ids.size>1?'s':''));
 }
+let laneColDrag=null;
+function startLaneColResize(ev){
+  const svg=document.getElementById('tl-svg'); if(!svg) return;
+  const r=svg.getBoundingClientRect();
+  laneColDrag={x0:ev.clientX,w0:laneColW,k:tlVBw/r.width,raf:0};
+  document.body.style.cursor='col-resize';
+  const mv=e=>{ if(!laneColDrag) return; laneColW=Math.min(400,Math.max(80,Math.round(laneColDrag.w0+(e.clientX-laneColDrag.x0)*laneColDrag.k))); if(!laneColDrag.raf) laneColDrag.raf=requestAnimationFrame(()=>{ if(laneColDrag){ laneColDrag.raf=0; renderTimeline(); } }); };
+  const up=()=>{ document.removeEventListener('pointermove',mv); document.removeEventListener('pointerup',up); document.removeEventListener('pointercancel',up); document.body.style.cursor=''; if(laneColDrag&&laneColDrag.raf) cancelAnimationFrame(laneColDrag.raf); laneColDrag=null; renderTimeline(); saveState(); };
+  document.addEventListener('pointermove',mv); document.addEventListener('pointerup',up); document.addEventListener('pointercancel',up);
+}
 (function initLasso(){
   const svg=document.getElementById('tl-svg'); if(!svg) return;
   const pt=e=>{ const r=svg.getBoundingClientRect(); return { x:(e.clientX-r.left)*(tlVBw/r.width), y:(e.clientY-r.top)*(tlVBh/r.height) }; };
@@ -3943,6 +3975,7 @@ function toggleExportMenu(ev){
   if(ev) ev.stopPropagation();
   const m=document.getElementById('export-menu'), b=document.getElementById('btn-export'); if(!m||!b) return;
   if(m.style.display!=='none'){ closeExportMenu(); return; }
+  closeConvMenu();
   const r=b.getBoundingClientRect();
   m.style.display='flex';
   m.style.top=(r.bottom+6)+'px';
@@ -3952,6 +3985,21 @@ function toggleExportMenu(ev){
 document.addEventListener('pointerdown',e=>{ if(!e.target.closest('#export-menu') && !e.target.closest('#btn-export')) closeExportMenu(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeExportMenu(); });
 window.addEventListener('resize',closeExportMenu);
+function closeConvMenu(){ const m=document.getElementById('conv-menu'), b=document.getElementById('btn-png2json'); if(m) m.style.display='none'; if(b) b.setAttribute('aria-expanded','false'); }
+function toggleConvMenu(ev){
+  if(ev) ev.stopPropagation();
+  const m=document.getElementById('conv-menu'), b=document.getElementById('btn-png2json'); if(!m||!b) return;
+  if(m.style.display!=='none'){ closeConvMenu(); return; }
+  closeExportMenu();
+  const r=b.getBoundingClientRect();
+  m.style.display='flex';
+  m.style.top=(r.bottom+6)+'px';
+  m.style.left=Math.max(4,Math.min(window.innerWidth-m.offsetWidth-4,Math.round(r.left+r.width/2-m.offsetWidth/2)))+'px';
+  b.setAttribute('aria-expanded','true');
+}
+document.addEventListener('pointerdown',e=>{ if(!e.target.closest('#conv-menu') && !e.target.closest('#btn-png2json')) closeConvMenu(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeConvMenu(); });
+window.addEventListener('resize',closeConvMenu);
 
 // ═══ MODE D'INTERFACE : SIMPLIFIÉ / AVANCÉ ═══════════════════
 // Le mode n'est pas mémorisé : l'application s'ouvre toujours en « Simplifié »
