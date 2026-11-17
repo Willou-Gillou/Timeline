@@ -365,6 +365,9 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <label><input type="checkbox" id="chk-jalons-master" checked onchange="toggleJalonsOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Jalons</label>
         <div class="sub-options" id="jalons-sub">
           <label class="adv"><input type="checkbox" id="chk-jalons-flags" checked onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Drapeaux jalons</label>
+          <div style="font-size:11px;color:#555;margin:4px 0 2px;">Type de drapeau</div>
+          <label><input type="radio" name="flag-type" value="big" checked onchange="renderTimeline(); saveState()"/> Grand drapeau</label>
+          <label><input type="radio" name="flag-type" value="small" onchange="renderTimeline(); saveState()"/> Petit drapeau</label>
           <label class="adv"><input type="checkbox" id="chk-dash-dot" onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
           <label><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
           <div class="sub-options" id="jalon-lines-sub">
@@ -671,6 +674,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : la largeur de la colonne des phases se règle directement dans le Gantt, en faisant glisser son bord droit ; le curseur « Largeur » des réglages est supprimé.</li>
         <li>Correction : le redimensionnement de la colonne des phases n'ajoute plus de mois dans le futur et ne bloque plus les options « Échelle de temps / Fin de la barre » (l'extension automatique n'est plus mémorisée).</li>
+        <li>Nouveau : Affichage / Jalons / « Type de drapeau » : « Grand drapeau » (actuel) ou « Petit drapeau » (fanion avec le nom et la date JJ/MM/AAAA à droite, sans cadre) ; le choix est mémorisé.</li>
         <li>Nouveau : le bouton de conversion JSON ouvre un menu avec deux choix : « Convertir une image en JSON » et « Convertir un costmodel en JSON » (nouvel onglet).</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.5:</div>
@@ -1542,14 +1546,20 @@ function renderTimeline(){
 
   // Milestone labels
   const LABEL_LINE_H=jalonFontSize+2,LABEL_PAD=3;
+  const smallFlag=document.querySelector('input[name="flag-type"]:checked')?.value==='small', SF_PW=13;
   let allMilestones=[];
   lanes.forEach(lane=>lane.tasks.forEach(task=>{
     if(task.type==='J'){
       const d=parseD(task.end||task.start);
       const lines=(task.title||'Jalon').split('\n');
-      const lh=lines.length*LABEL_LINE_H+flagPadV*2+4;
-      const lw=Math.max(50, Math.max(...lines.map(l=>l.length))*(jalonFontSize*0.65)+flagPadH*2);
-      allMilestones.push({laneId:lane.id,taskId:task.id,x:dX(task.end||task.start),label:task.title||'Jalon',date:fmtLabel(d),color:task.color||'#888',lines,lh,lw});
+      let lh=lines.length*LABEL_LINE_H+flagPadV*2+4;
+      let lw=Math.max(50, Math.max(...lines.map(l=>l.length))*(jalonFontSize*0.65)+flagPadH*2);
+      const dFull=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
+      if(smallFlag){
+        lh=lines.length*LABEL_LINE_H+jalonDateFontSize+3;
+        lw=SF_PW+5+Math.max(Math.max(...lines.map(l=>l.length))*(jalonFontSize*0.62), dFull.length*(jalonDateFontSize*0.6))+2;
+      }
+      allMilestones.push({laneId:lane.id,taskId:task.id,x:dX(task.end||task.start),label:task.title||'Jalon',date:smallFlag?dFull:fmtLabel(d),color:task.color||'#888',lines,lh,lw});
     }
   }));
   allMilestones.sort((a,b)=>a.x-b.x);
@@ -1677,11 +1687,22 @@ function renderTimeline(){
     const totalH=lh+tipH;
 
     // Forme drapeau : angles droits à gauche, arrondis à droite, pointe bas-gauche
-    const r=5;
-    const flagPath=`M ${m.x},${labelY+lh+tipH} L ${m.x},${labelY} H ${m.x+lw-r} Q ${m.x+lw},${labelY} ${m.x+lw},${labelY+r} V ${labelY+lh-r} Q ${m.x+lw},${labelY+lh} ${m.x+lw-r},${labelY+lh} H ${m.x} Z`;
-    const flagEl=el('path',{d:flagPath,fill:'white',stroke:m.color,'stroke-width':flagW,cursor:'grab'});
-    flagEl.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); const d=getTask(m.laneId,m.taskId);if(!d)return; tlDrag={mode:'move-milestone',laneId:m.laneId,taskId:m.taskId,startX:e.clientX,origStart:d.end||d.start,origEnd:d.end||d.start}; document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
-    flagGroup.appendChild(flagEl);
+    const dragFlag=e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); const d=getTask(m.laneId,m.taskId);if(!d)return; tlDrag={mode:'move-milestone',laneId:m.laneId,taskId:m.taskId,startX:e.clientX,origStart:d.end||d.start,origEnd:d.end||d.start}; document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); };
+    let flagEl;
+    if(smallFlag){
+      // Petit drapeau : fanion plein en haut du mât, nom et date à droite, sans cadre
+      const ph=Math.min(lh,13);
+      flagEl=el('rect',{x:m.x,y:labelY,width:lw,height:lh,fill:'#ffffff','fill-opacity':0.001,cursor:'grab'});
+      flagEl.addEventListener('pointerdown',dragFlag);
+      flagGroup.appendChild(flagEl);
+      flagGroup.appendChild(el('path',{d:`M ${m.x},${labelY} L ${m.x+SF_PW},${labelY+ph/2} L ${m.x},${labelY+ph} Z`,fill:m.color,'pointer-events':'none'}));
+    } else {
+      const r=5;
+      const flagPath=`M ${m.x},${labelY+lh+tipH} L ${m.x},${labelY} H ${m.x+lw-r} Q ${m.x+lw},${labelY} ${m.x+lw},${labelY+r} V ${labelY+lh-r} Q ${m.x+lw},${labelY+lh} ${m.x+lw-r},${labelY+lh} H ${m.x} Z`;
+      flagEl=el('path',{d:flagPath,fill:'white',stroke:m.color,'stroke-width':flagW,cursor:'grab'});
+      flagEl.addEventListener('pointerdown',dragFlag);
+      flagGroup.appendChild(flagEl);
+    }
 
     // Croix suppression drapeau (hover)
     const fDelG=document.createElementNS('http://www.w3.org/2000/svg','g');
@@ -1701,8 +1722,9 @@ function renderTimeline(){
 
     // Texte lignes (blanc, bold)
     m.lines.forEach((line,i)=>{
-      const ty2=labelY+flagPadV+(i+1)*LABEL_LINE_H-1;
-      const tEl=el('text',{x:m.x+lw/2,y:ty2,'text-anchor':'middle','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line);
+      const ty2=smallFlag?labelY+(i+1)*LABEL_LINE_H-2:labelY+flagPadV+(i+1)*LABEL_LINE_H-1;
+      const tEl=smallFlag?el('text',{x:m.x+SF_PW+5,y:ty2,'text-anchor':'start','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line):el('text',{x:m.x+lw/2,y:ty2,'text-anchor':'middle','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line);
+      if(smallFlag){ tEl.addEventListener('mouseenter',()=>fDelG.style.display='block'); tEl.addEventListener('mouseleave',()=>fDelG.style.display='none'); }
       tEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:m.laneId,taskId:m.taskId},m.label,tEl.getBoundingClientRect());});
       flagGroup.appendChild(tEl);
     });
@@ -1713,7 +1735,7 @@ function renderTimeline(){
       else if(sc===3){const isoSW=new Date(rawMin);isoSW.setHours(0,0,0,0);const dw=isoSW.getDay();isoSW.setDate(isoSW.getDate()-(dw===0?6:dw-1));const md=parseD(getTask(m.laneId,m.taskId).end||getTask(m.laneId,m.taskId).start);const mdw=new Date(md);const dw2=mdw.getDay();mdw.setDate(mdw.getDate()-(dw2===0?6:dw2-1));mDateLbl='S'+String(Math.round((mdw-isoSW)/86400000/7)+1).padStart(2,'0');}
       else if(sc===5){const isoSM=new Date(rawMin.getFullYear(),rawMin.getMonth(),1);const md=parseD(getTask(m.laneId,m.taskId).end||getTask(m.laneId,m.taskId).start);mDateLbl='M'+String(Math.round((md.getFullYear()-isoSM.getFullYear())*12+(md.getMonth()-isoSM.getMonth()))+1).padStart(2,'0');}
       else mDateLbl=m.date;
-      flagGroup.appendChild(el('text',{x:m.x+lw/2,y:labelY+lh-3,'text-anchor':'middle','font-size':jalonDateFontSize,fill:'#999'},mDateLbl));
+      flagGroup.appendChild(smallFlag?el('text',{x:m.x+SF_PW+5,y:labelY+lh-2,'text-anchor':'start','font-size':jalonDateFontSize,fill:'#666','pointer-events':'none'},mDateLbl):el('text',{x:m.x+lw/2,y:labelY+lh-3,'text-anchor':'middle','font-size':jalonDateFontSize,fill:'#999'},mDateLbl));
     }
   });
 
@@ -2297,6 +2319,7 @@ function resetDefaults() {
    applyHeaderHeight();
   const cJalMaster=document.getElementById('chk-jalons-master'); if(cJalMaster) cJalMaster.checked = true;
   const cJalFlags=document.getElementById('chk-jalons-flags'); if(cJalFlags) cJalFlags.checked = true;
+  { const ft=document.querySelector('input[name="flag-type"][value="big"]'); if(ft) ft.checked=true; }
   const cDashDot=document.getElementById('chk-dash-dot'); if(cDashDot) cDashDot.checked = false;
   const cJalLines=document.getElementById('chk-jalon-lines'); if(cJalLines) cJalLines.checked = true;
   document.getElementById('chk-title').checked = true;
@@ -2586,6 +2609,7 @@ function saveState() {
     todayArrowSize,
     showJalonsMaster: document.getElementById('chk-jalons-master')?.checked,
     showJalonsFlags: document.getElementById('chk-jalons-flags')?.checked,
+    flagType: document.querySelector('input[name="flag-type"]:checked')?.value || 'big',
     showJalonLines: document.getElementById('chk-jalon-lines')?.checked,
     showDashDot: document.getElementById('chk-dash-dot')?.checked,
     timebarColor,
@@ -2655,6 +2679,7 @@ saveState._orig = function(){
       todayArrowSize,
       showJalonsMaster: document.getElementById('chk-jalons-master')?.checked,
       showJalonsFlags: document.getElementById('chk-jalons-flags')?.checked,
+      flagType: document.querySelector('input[name="flag-type"]:checked')?.value || 'big',
       showJalonLines: document.getElementById('chk-jalon-lines')?.checked,
       showDashDot: document.getElementById('chk-dash-dot')?.checked,
       timebarColor,
@@ -2752,6 +2777,7 @@ function restoreSidebar(s) {
   setChk('chk-todayline-arrow', s.showTodayLineArrow ?? true);
   setChk('chk-jalons-master', s.showJalonsMaster ?? true);
   setChk('chk-jalons-flags', s.showJalonsFlags ?? true);
+  { const ft=document.querySelector('input[name="flag-type"][value="'+(s.flagType==='small'?'small':'big')+'"]'); if(ft) ft.checked=true; }
   setChk('chk-jalon-lines', s.showJalonLines ?? true);
   setChk('chk-dash-dot', s.showDashDot ?? false);
   setChk('chk-taches-master', s.showTachesMaster ?? true);
