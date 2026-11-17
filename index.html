@@ -1546,7 +1546,7 @@ function renderTimeline(){
 
   // Milestone labels
   const LABEL_LINE_H=jalonFontSize+2,LABEL_PAD=3;
-  const smallFlag=document.querySelector('input[name="flag-type"]:checked')?.value==='small', SF_PW=13;
+  const smallFlag=document.querySelector('input[name="flag-type"]:checked')?.value==='small', SF_PW=13, SF_G=3;
   let allMilestones=[];
   lanes.forEach(lane=>lane.tasks.forEach(task=>{
     if(task.type==='J'){
@@ -1557,7 +1557,7 @@ function renderTimeline(){
       const dFull=String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear();
       if(smallFlag){
         lh=lines.length*LABEL_LINE_H+jalonDateFontSize+3;
-        lw=SF_PW+5+Math.max(Math.max(...lines.map(l=>l.length))*(jalonFontSize*0.62), dFull.length*(jalonDateFontSize*0.6))+2;
+        lw=SF_G+SF_PW+5+Math.max(Math.max(...lines.map(l=>l.length))*(jalonFontSize*0.62), dFull.length*(jalonDateFontSize*0.6))+2;
       }
       allMilestones.push({laneId:lane.id,taskId:task.id,x:dX(task.end||task.start),label:task.title||'Jalon',date:smallFlag?dFull:fmtLabel(d),color:task.color||'#888',lines,lh,lw});
     }
@@ -1695,7 +1695,7 @@ function renderTimeline(){
       flagEl=el('rect',{x:m.x,y:labelY,width:lw,height:lh,fill:'#ffffff','fill-opacity':0.001,cursor:'grab'});
       flagEl.addEventListener('pointerdown',dragFlag);
       flagGroup.appendChild(flagEl);
-      flagGroup.appendChild(el('path',{d:`M ${m.x},${labelY} L ${m.x+SF_PW},${labelY+ph/2} L ${m.x},${labelY+ph} Z`,fill:m.color,'pointer-events':'none'}));
+      flagGroup.appendChild(el('path',{d:`M ${m.x+SF_G},${labelY} L ${m.x+SF_G+SF_PW},${labelY+ph/2} L ${m.x+SF_G},${labelY+ph} Z`,fill:m.color,'pointer-events':'none'}));
     } else {
       const r=5;
       const flagPath=`M ${m.x},${labelY+lh+tipH} L ${m.x},${labelY} H ${m.x+lw-r} Q ${m.x+lw},${labelY} ${m.x+lw},${labelY+r} V ${labelY+lh-r} Q ${m.x+lw},${labelY+lh} ${m.x+lw-r},${labelY+lh} H ${m.x} Z`;
@@ -1723,7 +1723,7 @@ function renderTimeline(){
     // Texte lignes (blanc, bold)
     m.lines.forEach((line,i)=>{
       const ty2=smallFlag?labelY+(i+1)*LABEL_LINE_H-2:labelY+flagPadV+(i+1)*LABEL_LINE_H-1;
-      const tEl=smallFlag?el('text',{x:m.x+SF_PW+5,y:ty2,'text-anchor':'start','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line):el('text',{x:m.x+lw/2,y:ty2,'text-anchor':'middle','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line);
+      const tEl=smallFlag?el('text',{x:m.x+SF_G+SF_PW+5,y:ty2,'text-anchor':'start','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line):el('text',{x:m.x+lw/2,y:ty2,'text-anchor':'middle','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line);
       if(smallFlag){ tEl.addEventListener('mouseenter',()=>fDelG.style.display='block'); tEl.addEventListener('mouseleave',()=>fDelG.style.display='none'); }
       tEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:m.laneId,taskId:m.taskId},m.label,tEl.getBoundingClientRect());});
       flagGroup.appendChild(tEl);
@@ -1735,7 +1735,7 @@ function renderTimeline(){
       else if(sc===3){const isoSW=new Date(rawMin);isoSW.setHours(0,0,0,0);const dw=isoSW.getDay();isoSW.setDate(isoSW.getDate()-(dw===0?6:dw-1));const md=parseD(getTask(m.laneId,m.taskId).end||getTask(m.laneId,m.taskId).start);const mdw=new Date(md);const dw2=mdw.getDay();mdw.setDate(mdw.getDate()-(dw2===0?6:dw2-1));mDateLbl='S'+String(Math.round((mdw-isoSW)/86400000/7)+1).padStart(2,'0');}
       else if(sc===5){const isoSM=new Date(rawMin.getFullYear(),rawMin.getMonth(),1);const md=parseD(getTask(m.laneId,m.taskId).end||getTask(m.laneId,m.taskId).start);mDateLbl='M'+String(Math.round((md.getFullYear()-isoSM.getFullYear())*12+(md.getMonth()-isoSM.getMonth()))+1).padStart(2,'0');}
       else mDateLbl=m.date;
-      flagGroup.appendChild(smallFlag?el('text',{x:m.x+SF_PW+5,y:labelY+lh-2,'text-anchor':'start','font-size':jalonDateFontSize,fill:'#666','pointer-events':'none'},mDateLbl):el('text',{x:m.x+lw/2,y:labelY+lh-3,'text-anchor':'middle','font-size':jalonDateFontSize,fill:'#999'},mDateLbl));
+      flagGroup.appendChild(smallFlag?el('text',{x:m.x+SF_G+SF_PW+5,y:labelY+lh-2,'text-anchor':'start','font-size':jalonDateFontSize,fill:'#666','pointer-events':'none'},mDateLbl):el('text',{x:m.x+lw/2,y:labelY+lh-3,'text-anchor':'middle','font-size':jalonDateFontSize,fill:'#999'},mDateLbl));
     }
   });
 
