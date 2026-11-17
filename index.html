@@ -551,7 +551,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           <span style="font-size:12px;">Distance mât / petit drapeau</span>
           <div style="display:flex;align-items:center;gap:4px;">
             <button onclick="changeFlagMastGap(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="flag-mast-gap-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">3</span>
+            <span id="flag-mast-gap-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">2</span>
             <button onclick="changeFlagMastGap(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
           </div>
         </div>
@@ -683,7 +683,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Nouveau : la largeur de la colonne des phases se règle directement dans le Gantt, en faisant glisser son bord droit ; le curseur « Largeur » des réglages est supprimé.</li>
         <li>Correction : le redimensionnement de la colonne des phases n'ajoute plus de mois dans le futur et ne bloque plus les options « Échelle de temps / Fin de la barre » (l'extension automatique n'est plus mémorisée).</li>
         <li>Nouveau : Affichage / Jalons / « Type de drapeau » : « Grand drapeau » (actuel) ou « Petit drapeau » (fanion avec le nom et la date JJ/MM/AAAA à droite, sans cadre) ; le choix est mémorisé.</li>
-        <li>Nouveau : Global / Jalons : réglage de la distance entre le mât et le petit drapeau (3 px par défaut). Les réglages largeur / hauteur / épaisseur des drapeaux s'appliquent aussi au petit drapeau.</li>
+        <li>Nouveau : Global / Jalons : réglage de la distance entre le mât et le petit drapeau (2 px par défaut). Les réglages largeur / hauteur / épaisseur des drapeaux s'appliquent aussi au petit drapeau.</li>
         <li>Correction : les réglages « Espace / longueur des tirets » et « Distance mât / petit drapeau » s'appliquent immédiatement au Gantt (ils activent « Trait pointillé jalon » ou le petit drapeau si besoin).</li>
         <li>Nouveau : le bouton de conversion JSON ouvre un menu avec deux choix : « Convertir une image en JSON » et « Convertir un costmodel en JSON » (nouvel onglet).</li>
       </ul>
@@ -984,7 +984,7 @@ function restoreUIPrefs() {
 function changeTaskSize(d){ taskRH=Math.max(8,Math.min(80,taskRH+d)); document.getElementById('task-size-val').textContent=taskRH; saveState(); renderTimeline(); }
 function changeJalonSize(d){ jalonRH=Math.max(4,Math.min(80,jalonRH+d)); document.getElementById('jalon-size-val').textContent=jalonRH; saveState(); renderTimeline(); }
 function changeJalonS(d){ jalonS=Math.max(5,Math.min(20,jalonS+d)); document.getElementById('jalon-s-val').textContent=jalonS; saveState(); renderTimeline(); }
-let flagMastGap=3;
+let flagMastGap=2;
 let dashLen=4, dashGap=3, flagPadH=6, flagPadV=6, lineW=2, flagW=1.5, flagRowGap=7;
 let laneColW=130, laneFontSize=13, taskFontSize=11, taskDateFontSize=8, jalonFontSize=11, jalonDateFontSize=8, todayFontSize=8, tMajorFontSize=10, tMinorUpFontSize=8.5, tMinorLblFontSize=9, headerH=36, sepMargin=0, phaseGap=1, timelineGap=8, todayArrowSize=4;
 function applyHeaderHeight(){ document.body.style.setProperty('--header-h', headerH+'px'); }
@@ -2293,10 +2293,10 @@ function resetAfficherDefaults(){
   toggleTitle(); toggleDatesOptions(); toggleTaskLabelOptions(); toggleTodayLineOptions(); toggleJalonsOptions(); toggleJalonsLinesOptions(); toggleTachesOptions(); saveState(); renderTimeline();
 }
 function resetSizesDefaults(){
-  taskRH = 24; jalonRH = 16; jalonS = 10; flagPadH = 6; flagPadV = 6; flagMastGap = 3; flagRowGap = 7; flagW = 1.5; lineW = 2; dashLen = 4; dashGap = 3; laneFontSize = 13; taskFontSize = 11; taskDateFontSize = 8; jalonFontSize = 11; jalonDateFontSize = 8; todayFontSize = 8; tMajorFontSize = 10; tMinorUpFontSize = 8.5; tMinorLblFontSize = 9; headerH = 36; sepMargin = 0; todayArrowSize = 4;
+  taskRH = 24; jalonRH = 16; jalonS = 10; flagPadH = 6; flagPadV = 6; flagMastGap = 2; flagRowGap = 7; flagW = 1.5; lineW = 2; dashLen = 4; dashGap = 3; laneFontSize = 13; taskFontSize = 11; taskDateFontSize = 8; jalonFontSize = 11; jalonDateFontSize = 8; todayFontSize = 8; tMajorFontSize = 10; tMinorUpFontSize = 8.5; tMinorLblFontSize = 9; headerH = 36; sepMargin = 0; todayArrowSize = 4;
   phaseGap = 1; timelineGap = 8;
   document.getElementById('sep-margin-val').textContent=0; document.documentElement.style.setProperty('--sep-margin','0px'); document.getElementById('header-h-val').textContent=36; applyHeaderHeight(); const tas=document.getElementById('today-arrow-size-val'); if(tas) tas.textContent=4;
-  const pairs=[['task-size-val',24],['jalon-size-val',16],['jalon-s-val',10],['flag-padh-val',6],['flag-padv-val',6],['flag-mast-gap-val',3],['lbl-flag-row-gap',7],['lbl-flag-w',1.5],['lbl-line-w',2],['dash-dash-val',4],['dash-gap-val',3],['lane-font-size-val',13],['task-font-size-val',11],['task-date-font-size-val',8],['jalon-font-size-val',11],['jalon-date-font-size-val',8],['today-font-size-val',8],['tmajor-font-size-val',10],['tminor-up-font-size-val',8.5],['tminor-lbl-font-size-val',9],['header-h-val',36],['sep-margin-val',0],['today-arrow-size-val',4],['phase-gap-val',6],['timeline-gap-val',8]];
+  const pairs=[['task-size-val',24],['jalon-size-val',16],['jalon-s-val',10],['flag-padh-val',6],['flag-padv-val',6],['flag-mast-gap-val',2],['lbl-flag-row-gap',7],['lbl-flag-w',1.5],['lbl-line-w',2],['dash-dash-val',4],['dash-gap-val',3],['lane-font-size-val',13],['task-font-size-val',11],['task-date-font-size-val',8],['jalon-font-size-val',11],['jalon-date-font-size-val',8],['today-font-size-val',8],['tmajor-font-size-val',10],['tminor-up-font-size-val',8.5],['tminor-lbl-font-size-val',9],['header-h-val',36],['sep-margin-val',0],['today-arrow-size-val',4],['phase-gap-val',6],['timeline-gap-val',8]];
   pairs.forEach(([id,v])=>{ const el=document.getElementById(id); if(el) el.textContent=v; });
   saveState();
   renderTimeline();
@@ -2752,7 +2752,9 @@ function restoreSidebar(s) {
   jalonS = s.jalonS ?? 10;
   document.getElementById('jalon-s-val').textContent = jalonS;
   flagPadH = s.flagPadH ?? 6; document.getElementById('flag-padh-val').textContent = flagPadH;
-  flagMastGap = Math.max(0,Math.min(20,+(s.flagMastGap ?? 3))); document.getElementById('flag-mast-gap-val').textContent=flagMastGap;
+  flagMastGap = Math.max(0,Math.min(20,+(s.flagMastGap ?? 2)));
+  // Passage unique à 2 px (ancienne valeur par défaut : 3 px), puis le choix de l'utilisateur est conservé
+  if(mastGapMigrationDue()) flagMastGap=2; document.getElementById('flag-mast-gap-val').textContent=flagMastGap;
   flagPadV = s.flagPadV ?? 6; document.getElementById('flag-padv-val').textContent = flagPadV;
   lineW = s.lineW ?? 1.5; document.getElementById('lbl-line-w').textContent = lineW;
   flagW = s.flagW ?? 2; document.getElementById('lbl-flag-w').textContent = flagW;
@@ -2861,7 +2863,10 @@ document.addEventListener('keydown', (e) => {
   }
 });
 
+let _mgDue=null;
+function mastGapMigrationDue(){ if(_mgDue===null){ try{ _mgDue=!localStorage.getItem('test_mp_mastgap_v46'); localStorage.setItem('test_mp_mastgap_v46','1'); }catch(e){ _mgDue=false; } } return _mgDue; }
 function loadState() {
+  mastGapMigrationDue();
   try {
     let raw = localStorage.getItem(MP_PLANNING_KEY);
     if (!raw) {
