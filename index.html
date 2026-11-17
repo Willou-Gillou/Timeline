@@ -1546,7 +1546,7 @@ function renderTimeline(){
 
   // Milestone labels
   const LABEL_LINE_H=jalonFontSize+2,LABEL_PAD=3;
-  const smallFlag=document.querySelector('input[name="flag-type"]:checked')?.value==='small', SF_PW=13, SF_G=3;
+  const smallFlag=document.querySelector('input[name="flag-type"]:checked')?.value==='small', SF_PW=13, SF_G=1;
   let allMilestones=[];
   lanes.forEach(lane=>lane.tasks.forEach(task=>{
     if(task.type==='J'){
