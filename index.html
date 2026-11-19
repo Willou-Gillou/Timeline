@@ -49,6 +49,14 @@ body.menu-closed #burger-btn .burger-icon { transform:rotate(90deg); }
 .radio-group { display:flex; flex-direction:column; gap:5px; }
 .radio-group label { display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; }
 .radio-group input[type=radio], .radio-group input[type=checkbox] { accent-color:#c0392b; }
+/* Interrupteurs on/off à la place des cases à cocher */
+input[type=checkbox] { -webkit-appearance:none; appearance:none; flex:none; width:30px; height:17px; margin:0; padding:0; border-radius:999px; background:#c5c9cf; position:relative; cursor:pointer; vertical-align:middle; transition:background .15s; }
+input[type=checkbox]::before { content:''; position:absolute; top:2px; left:2px; width:13px; height:13px; border-radius:50%; background:#fff; box-shadow:0 1px 2px rgba(0,0,0,.3); transition:transform .15s; }
+input[type=checkbox]:checked { background:#c0392b; }
+input[type=checkbox]:checked::before { transform:translateX(13px); }
+input[type=checkbox]:focus-visible { outline:2px solid #c0392b; outline-offset:2px; }
+input[type=checkbox]:disabled { opacity:.45; cursor:not-allowed; }
+@media (prefers-reduced-motion:reduce) { input[type=checkbox], input[type=checkbox]::before { transition:none; } }
 .sidebar-sep { border:none; border-top:1px solid #eee; margin-top:var(--sep-margin,0px) !important; margin-bottom:var(--sep-margin,0px) !important; }
 .scale-cur { font-size:11px; color:#c0392b; font-weight:700; margin-bottom:6px; }
 .sub-options { margin-left:18px; margin-top:3px; display:flex; flex-direction:column; gap:4px; }
@@ -690,6 +698,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Menus : les cases à cocher deviennent des interrupteurs on/off.</li>
         <li>Vue Données : une phase vide affiche une zone « glissez une tâche ici » pour y déposer une tâche.</li>
         <li>Nouveau : saisie rapide façon mindmap dans la vue Données. Phase : Entrée crée la première tâche, Tab range la phase comme tâche de la phase précédente. Tâche : Entrée crée la tâche suivante, Maj+Tab la transforme en phase.</li>
       </ul>
