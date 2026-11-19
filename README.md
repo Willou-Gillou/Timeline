@@ -17,3 +17,7 @@ Déployé automatiquement sur GitHub Pages via `.github/workflows/pages.yml` à 
 
 Pour activer GitHub Pages (une seule fois) :
 **Settings → Pages → Build and deployment → Source : GitHub Actions**
+
+## Guide utilisateur
+
+`guide-utilisateur.pdf` est ouvert par l'icône « ? » (Réglages). Source : document « Guide utilisateur — Macro Planning (Timeline) ». À chaque évolution du code, revoir le guide et régénérer ce PDF.
