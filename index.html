@@ -723,7 +723,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Menus : refonte du design du panneau Affichages (interrupteurs alignés à droite, sous-options regroupées dans des cadres, boutons segmentés à la place des boutons radio). L'info-bulle de déplacement s'affiche plus bas, sous le curseur.</li>
-        <li>Déplacement d'une tâche ou d'un jalon : l'info-bulle affiche le nombre de jours, la date de début et la date de fin avec le jour de la semaine. Idem pour un déplacement multiple.</li>
+        <li>Déplacement d'une tâche, d'un jalon ou d'une période de gel : l'info-bulle affiche le nombre de jours, la date de début et la date de fin avec le jour de la semaine. Idem pour un déplacement multiple.</li>
         <li>Menus : les cases à cocher deviennent des interrupteurs on/off.</li>
         <li>Vue Données : une phase vide affiche une zone « glissez une tâche ici » pour y déposer une tâche.</li>
         <li>Nouveau : saisie rapide façon mindmap dans la vue Données. Phase : Entrée crée la première tâche, Tab range la phase comme tâche de la phase précédente. Tâche : Entrée crée la tâche suivante, Maj+Tab la transforme en phase.</li>
@@ -4070,11 +4070,12 @@ function fzPointerMove(e){
   if(fzDrag.mode==='move'){ f.start=fmt(addDays(parseD(fzDrag.origStart),dd)); f.end=fmt(addDays(parseD(fzDrag.origEnd),dd)); }
   else if(fzDrag.mode==='resize-r'){ const ne=fmt(addDays(parseD(fzDrag.origEnd),dd)); if(ne>=f.start) f.end=ne; }
   else if(fzDrag.mode==='resize-l'){ const ns=fmt(addDays(parseD(fzDrag.origStart),dd)); if(ns<=f.end) f.start=ns; }
+  if(fzDrag.mode==='move') tlShowDragTip(e,dd,parseD(f.start),parseD(f.end));
   renderTimeline();
 }
 function fzPointerUp(e){
   document.removeEventListener('pointermove',fzPointerMove); document.removeEventListener('pointerup',fzPointerUp);
-  const d=fzDrag; fzDrag=null; if(!d) return;
+  const d=fzDrag; fzDrag=null; const _tip=document.getElementById('drag-tip'); if(_tip) _tip.style.display='none'; if(!d) return;
   if(d.moved){ renderFreezePanel(); afterFreezeChange(); } else openFreezePop(d.id,e.clientX,e.clientY);
 }
 function closeFreezePop(){ document.getElementById('freeze-pop')?.remove(); document.removeEventListener('mousedown',fzPopOutside,true); }
