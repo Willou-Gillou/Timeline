@@ -688,7 +688,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
       <div style="font-weight:700;margin:8px 0 6px;">V4.7:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : Affichages / « Périodes de gel » pour afficher ou masquer les gels, avec en sous-option « Jours fériés (France) » (calculés dans l'outil, sans connexion).</li>
+        <li>Nouveau : Affichages / « Périodes de gel » pour afficher ou masquer les gels, avec en sous-option « Jours fériés (France) » (calculés dans l'outil, sans connexion), affichés sur toute la hauteur du Gantt.</li>
         <li>Nouveau : Affichages / Ligne de temps / « Date au-dessus du rond » (décochée par défaut).</li>
         <li>Nouveau : Exporter / « Presse-papier » copie l'image du planning pour la coller dans un PDF, un mail ou un document.</li>
         <li>Nouveau : guide utilisateur illustré (PDF), accessible par l'icône « ? » placée tout à droite du groupe Réglages de la barre d'outils.</li>
@@ -2298,6 +2298,7 @@ function renderTimeline(){
       const band=el('rect',{x:x1,y:fzY+2,width:x2-x1,height:FZ-4,rx:2,fill:'#78909c','fill-opacity':0.85,stroke:'#546e7a','stroke-width':1});
       const tip=document.createElementNS(NS,'title'); tip.textContent=h.name+' : '+fmtDMY(h.d); band.appendChild(tip);
       fzG.appendChild(band);
+      fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:'#78909c','fill-opacity':0.2})); // sur toute la hauteur
       if(h.name.length*fzFont*0.58 < (x2-x1)-4) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:'#fff','pointer-events':'none'},h.name));
     });
     svg.appendChild(fzG);
