@@ -57,6 +57,30 @@ input[type=checkbox]:checked::before { transform:translateX(13px); }
 input[type=checkbox]:focus-visible { outline:2px solid #c0392b; outline-offset:2px; }
 input[type=checkbox]:disabled { opacity:.45; cursor:not-allowed; }
 @media (prefers-reduced-motion:reduce) { input[type=checkbox], input[type=checkbox]::before { transition:none; } }
+/* ── Panneau Affichages : lignes à interrupteur, groupes en retrait, boutons segmentés ── */
+#afficher-body { gap:2px; }
+#afficher-body label { display:flex; flex-direction:row-reverse; justify-content:space-between; align-items:center; gap:10px; min-height:28px; padding:2px 0; font-size:12px; font-weight:500; color:#1f2937; cursor:pointer; }
+#afficher-body .sub-options { margin:2px 0 6px 0; padding:3px 10px; gap:0; background:#f4f5f7; border-radius:8px; border-left:3px solid #d9dde3; }
+#afficher-body .sub-options label { font-size:11.5px; font-weight:400; color:#4b5563; min-height:26px; }
+#afficher-body .sub-options .sub-options { background:#eaecf0; border-left-color:#c9ced6; margin:2px 0 6px 0; }
+#afficher-body .opt-sub-title { font-size:10.5px; font-weight:600; letter-spacing:.02em; color:#6b7280; margin:6px 0 4px; }
+.seg { display:flex; gap:2px; padding:2px; margin:3px 0 6px; background:#dfe3e8; border-radius:8px; }
+.sub-options .sub-options .seg { background:#d5d9df; }
+#afficher-body .seg label, .seg label { flex:1; flex-direction:row; justify-content:center; min-height:0; padding:4px 6px; border-radius:6px; font-size:11px; font-weight:500; text-align:center; color:#4b5563; cursor:pointer; transition:background .15s,color .15s; }
+.seg label input[type=radio] { position:absolute; opacity:0; width:0; height:0; margin:0; -webkit-appearance:none; appearance:none; pointer-events:none; }
+.seg label:has(input:checked) { background:#fff; color:#c0392b; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.18); }
+.seg label:has(input:focus-visible) { outline:2px solid #c0392b; outline-offset:1px; }
+@media (prefers-reduced-motion:reduce) { .seg label { transition:none; } }
+#afficher-body .seg.seg-v label { justify-content:flex-start; text-align:left; padding:5px 10px; }
+#afficher-body .seg label { font-size:10.5px; }
+
+.radio-group.seg { flex-direction:row; gap:2px; }
+.seg.seg-v, .radio-group.seg.seg-v { flex-direction:column; }
+.seg.seg-v label { justify-content:flex-start; text-align:left; padding:5px 10px; }
+.seg label { white-space:normal; min-width:0; line-height:1.2; padding:4px 4px; }
+#afficher-body .sub-options { padding:3px 8px 3px 10px; border-left-width:2px; }
+#afficher-body .sub-options .sub-options { padding:2px 6px 2px 8px; }
+#afficher-body .sub-options label { gap:6px; }
 .sidebar-sep { border:none; border-top:1px solid #eee; margin-top:var(--sep-margin,0px) !important; margin-bottom:var(--sep-margin,0px) !important; }
 .scale-cur { font-size:11px; color:#c0392b; font-weight:700; margin-bottom:6px; }
 .sub-options { margin-left:18px; margin-top:3px; display:flex; flex-direction:column; gap:4px; }
@@ -342,14 +366,14 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         </div>
         <div class="adv" style="margin-top:12px;">
           <div style="font-size:12px;font-weight:700;color:#333;">Début de la barre</div>
-          <div class="radio-group">
+          <div class="radio-group seg">
             <label><input type="radio" name="tl-start" value="0" onchange="renderTimeline(); saveState()"/> Début 1er mois</label>
             <label><input type="radio" name="tl-start" value="1" checked onchange="renderTimeline(); saveState()"/> Début 1er mois − 1</label>
           </div>
         </div>
         <div class="adv" style="margin-top:12px;">
           <div style="font-size:12px;font-weight:700;color:#333;">Fin de la barre</div>
-          <div class="radio-group">
+          <div class="radio-group seg seg-v">
             <label><input type="radio" name="tl-end" value="2" onchange="renderTimeline(); saveState()"/> Dernier jour</label>
             <label><input type="radio" name="tl-end" value="0" checked onchange="renderTimeline(); saveState()"/> Fin dernier mois</label>
             <label><input type="radio" name="tl-end" value="1" onchange="renderTimeline(); saveState()"/> Fin dernier mois + 1</label>
@@ -364,9 +388,9 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <div class="radio-group collapsible-body collapsed" id="afficher-body" style="margin-top:10px;">
         <label><input type="checkbox" id="chk-title" checked onchange="toggleTitle()"/> Titre planning</label>
         <label><input type="checkbox" id="chk-timebar" checked onchange="toggleTimebarOptions(); renderTimeline(); saveState()"/> Barre de temps</label>
-        <div class="sub-options" id="timebar-sub" style="margin-left:14px;">
+        <div class="sub-options" id="timebar-sub">
           <label><input type="checkbox" id="chk-todayline" checked onchange="toggleTodayLineOptions(); renderTimeline(); saveState()"/> Ligne de temps</label>
-          <div class="sub-options" id="todayline-sub" style="margin-left:14px;">
+          <div class="sub-options" id="todayline-sub">
             <label><input type="checkbox" id="chk-todayline-vline" checked onchange="renderTimeline(); saveState()"/> Barre verticale (pointillés)</label>
             <label><input type="checkbox" id="chk-todayline-hline" checked onchange="renderTimeline(); saveState()"/> Barre horizontale</label>
             <label><input type="checkbox" id="chk-todayline-circle" checked onchange="renderTimeline(); saveState()"/> Rond central</label>
@@ -376,21 +400,21 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         </div>
 
         <label><input type="checkbox" id="chk-freezes" checked onchange="toggleFreezesOptions(); renderTimeline(); saveState()"/> Périodes de gel</label>
-        <div class="sub-options" id="freezes-sub" style="margin-left:14px;">
+        <div class="sub-options" id="freezes-sub">
           <label><input type="checkbox" id="chk-holidays" onchange="renderTimeline(); saveState()"/> Jours fériés (France)</label>
         </div>
 
         <label><input type="checkbox" id="chk-jalons-master" checked onchange="toggleJalonsOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Jalons</label>
         <div class="sub-options" id="jalons-sub">
           <label class="adv"><input type="checkbox" id="chk-jalons-flags" checked onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Drapeaux jalons</label>
-          <div style="font-size:11px;color:#555;margin:4px 0 2px;">Type de drapeau</div>
-          <label><input type="radio" name="flag-type" value="big" checked onchange="renderTimeline(); saveState()"/> Grand drapeau</label>
-          <label><input type="radio" name="flag-type" value="small" onchange="renderTimeline(); saveState()"/> Petit drapeau</label>
+          <div class="opt-sub-title">Type de drapeau</div>
+          <div class="seg"><label><input type="radio" name="flag-type" value="big" checked onchange="renderTimeline(); saveState()"/> Grand drapeau</label>
+          <label><input type="radio" name="flag-type" value="small" onchange="renderTimeline(); saveState()"/> Petit drapeau</label></div>
           <label class="adv"><input type="checkbox" id="chk-dash-dot" onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
           <label><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
           <div class="sub-options" id="jalon-lines-sub">
-            <label><input type="radio" name="jalon-line-pos" value="first" onchange="renderTimeline(); saveState()"/> Première ligne</label>
-            <label><input type="radio" name="jalon-line-pos" value="last" checked onchange="renderTimeline(); saveState()"/> Dernière ligne</label>
+            <div class="seg seg-v"><label><input type="radio" name="jalon-line-pos" value="first" onchange="renderTimeline(); saveState()"/> Première ligne</label>
+            <label><input type="radio" name="jalon-line-pos" value="last" checked onchange="renderTimeline(); saveState()"/> Dernière ligne</label></div>
           </div>
         </div>
 
@@ -399,16 +423,16 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <div class="sub-options" id="taches-sub">
           <label><input type="checkbox" id="chk-task-label" checked onchange="toggleTaskLabelOptions()"/> Titre des tâches</label>
           <div class="sub-options" id="task-label-sub">
-            <label><input type="radio" name="task-label-pos" value="inside" onchange="renderTimeline(); saveState()"/> Dans la barre</label>
+            <div class="seg seg-v"><label><input type="radio" name="task-label-pos" value="inside" onchange="renderTimeline(); saveState()"/> Dans la barre</label>
             <label><input type="radio" name="task-label-pos" value="left" checked onchange="renderTimeline(); saveState()"/> À gauche</label>
-            <label><input type="radio" name="task-label-pos" value="bottom" onchange="renderTimeline(); saveState()"/> En dessous</label>
+            <label><input type="radio" name="task-label-pos" value="bottom" onchange="renderTimeline(); saveState()"/> En dessous</label></div>
             <label><input type="checkbox" id="chk-task-dash-dot" checked onchange="renderTimeline(); saveState()"/> Trait pointillé tâches</label>
           </div>
 
           <label><input type="checkbox" id="chk-dates" checked onchange="toggleDatesOptions()"/> Dates tâches</label>
           <div class="sub-options" id="dates-sub">
-            <label><input type="radio" name="dates-pos" value="right" checked onchange="renderTimeline(); saveState()"/> À droite</label>
-            <label><input type="radio" name="dates-pos" value="bottom" onchange="renderTimeline(); saveState()"/> En bas</label>
+            <div class="seg"><label><input type="radio" name="dates-pos" value="right" checked onchange="renderTimeline(); saveState()"/> À droite</label>
+            <label><input type="radio" name="dates-pos" value="bottom" onchange="renderTimeline(); saveState()"/> En bas</label></div>
           </div>
         </div>
 
@@ -623,7 +647,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">Couleur barre de temps <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="timebar-color" value="#0b0f14" onchange="setTimebarColor(this.value)"/></label>
         <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">Couleur ligne de temps <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="todayline-color" value="#e74c3c" onchange="setTodaylineColor(this.value)"/></label>
         <div style="font-size:12px;font-weight:700;color:#333;margin-top:4px;">Couleurs des jalons par défaut</div>
-        <div class="radio-group" style="margin-top:2px;">
+        <div class="radio-group seg" style="margin-top:2px;">
           <label><input type="radio" name="default-jalon-colors-mode" value="different" onchange="setDefaultJalonColorsMode(this.value)"/> Couleurs différentes</label>
           <label><input type="radio" name="default-jalon-colors-mode" value="lane" checked onchange="setDefaultJalonColorsMode(this.value)"/> Couleurs de la phase</label>
         </div>
@@ -698,6 +722,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Menus : refonte du design du panneau Affichages (interrupteurs alignés à droite, sous-options regroupées dans des cadres, boutons segmentés à la place des boutons radio). L'info-bulle de déplacement s'affiche plus bas, sous le curseur.</li>
         <li>Déplacement d'une tâche ou d'un jalon : l'info-bulle affiche le nombre de jours, la date de début et la date de fin avec le jour de la semaine. Idem pour un déplacement multiple.</li>
         <li>Menus : les cases à cocher deviennent des interrupteurs on/off.</li>
         <li>Vue Données : une phase vide affiche une zone « glissez une tâche ici » pour y déposer une tâche.</li>
@@ -1528,7 +1553,7 @@ function tlShowDragTip(e,dd,ds,de){
   const tip=document.getElementById('drag-tip'); if(!tip) return;
   let txt=(dd>0?'+':dd<0?'−':'')+Math.abs(dd)+' j · '+(de?'début ':'')+tlFmtDayShort(ds);
   if(de) txt+=' → fin '+tlFmtDayShort(de);
-  tip.textContent=txt; tip.style.left=(e.clientX+16)+'px'; tip.style.top=(e.clientY-30)+'px'; tip.style.display='block';
+  tip.textContent=txt; tip.style.display='block'; tip.style.left=(e.clientX+16)+'px'; const th=tip.offsetHeight||24; tip.style.top=((e.clientY+34+th>window.innerHeight)?(e.clientY-34-th):(e.clientY+34))+'px';
 }
 function tlPointerMove(e){
   if(!tlDrag)return; e.preventDefault();
