@@ -688,7 +688,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
       <div style="font-weight:700;margin:8px 0 6px;">V4.7:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : Affichages / « Périodes de gel » pour afficher ou masquer les gels, avec en sous-option « Jours fériés (France) » (calculés dans l'outil, sans connexion), affichés sur toute la hauteur du Gantt.</li>
+        <li>Nouveau : Affichages / « Périodes de gel » pour afficher ou masquer les gels, avec en sous-option « Jours fériés (France) » (calculés dans l'outil, sans connexion), affichés sur toute la hauteur du Gantt ; le nom du jour férié apparaît dès que le curseur passe dessus.</li>
         <li>Nouveau : Affichages / Ligne de temps / « Date au-dessus du rond » (décochée par défaut).</li>
         <li>Nouveau : Exporter / « Presse-papier » copie l'image du planning pour la coller dans un PDF, un mail ou un document.</li>
         <li>Nouveau : guide utilisateur illustré (PDF), accessible par l'icône « ? » placée tout à droite du groupe Réglages de la barre d'outils.</li>
@@ -937,6 +937,21 @@ function frHolidaysBetween(d1,d2){
   return out;
 }
 function fmtDMY(d){ return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
+function showHolidayTip(ev){
+  let tip=document.getElementById('holiday-tip');
+  const svg=document.getElementById('tl-svg'), hits=window._tlHol||[];
+  if(!svg||!hits.length||ev.buttons){ if(tip) tip.style.display='none'; return; }
+  const r=svg.getBoundingClientRect(); if(!r.width){ return; }
+  const x=(ev.clientX-r.left)*((tlVBw||r.width)/r.width), tol=3;
+  const h=hits.find(k=>x>=k.x1-tol&&x<=k.x2+tol);
+  if(!h){ if(tip) tip.style.display='none'; return; }
+  if(!tip){ tip=document.createElement('div'); tip.id='holiday-tip'; tip.style.cssText='position:fixed;z-index:10050;pointer-events:none;background:#263238;color:#fff;font:600 12px/1.3 system-ui,sans-serif;padding:6px 9px;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.28);white-space:nowrap;'; document.body.appendChild(tip); }
+  const dt=h.date.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+  tip.innerHTML=''; const b=document.createElement('div'); b.textContent=h.name; const d=document.createElement('div'); d.textContent=dt; d.style.cssText='font-weight:400;opacity:.85;font-size:11px;'; tip.appendChild(b); tip.appendChild(d);
+  tip.style.display='block';
+  tip.style.left=Math.min(window.innerWidth-tip.offsetWidth-8,ev.clientX+14)+'px';
+  tip.style.top=(ev.clientY+16)+'px';
+}
 function toggleFreezesOptions() {
   const chk = document.getElementById('chk-freezes');
   const sub = document.getElementById('freezes-sub');
@@ -1590,6 +1605,7 @@ function renderTimeline(){
   const LL=showLaneCol?laneColW:0, TH0=showTimeBar?52:0, RH=taskRH;
   const _fzList=showFreezes?freezes.filter(f=>validISO(f.start)&&validISO(f.end)):[];
   const _holList=showHolidays?frHolidaysBetween(minD,maxD):[];
+  const _holHit=[]; window._tlHol=_holHit; // zones survolables des jours fériés (infobulle immédiate)
   const fzFont=Math.max(7,Math.round(taskFontSize*0.72)); // police réduite pour les périodes de gel
   const FZ=(_fzList.length||_holList.length)?fzFont+8:0; // bandeau des gels, en bas de la barre de temps
   const TH=TH0+FZ;
@@ -2296,7 +2312,7 @@ function renderTimeline(){
       const x1=Math.max(LL,dX(h.d)), x2=Math.min(VW,dX(h.d)+PPD);
       if(x2<=x1) return;
       const band=el('rect',{x:x1,y:fzY+2,width:x2-x1,height:FZ-4,rx:2,fill:'#78909c','fill-opacity':0.85,stroke:'#546e7a','stroke-width':1});
-      const tip=document.createElementNS(NS,'title'); tip.textContent=h.name+' : '+fmtDMY(h.d); band.appendChild(tip);
+      _holHit.push({x1,x2,name:h.name,date:h.d});
       fzG.appendChild(band);
       fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:'#78909c','fill-opacity':0.2})); // sur toute la hauteur
       if(h.name.length*fzFont*0.58 < (x2-x1)-4) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:'#fff','pointer-events':'none'},h.name));
@@ -2317,6 +2333,7 @@ function renderTimeline(){
     svg.appendChild(hg);
   }
   renderSelectionUI();
+  if(!svg._holTipBound){ svg._holTipBound=true; svg.addEventListener('mousemove',showHolidayTip); svg.addEventListener('mouseleave',()=>{ const t=document.getElementById('holiday-tip'); if(t) t.style.display='none'; }); }
   svg.onmousemove=svg.onmouseleave=ev=>{
     if(!_laneBands.length) return;
     const r=svg.getBoundingClientRect(); const k=VH/r.height;
