@@ -222,7 +222,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.7 &mdash; Accès sécurisé
+      v4.8 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -230,7 +230,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="header-shell">
 <div class="topbar">
   <button class="btn burger-btn" id="burger-btn" type="button" onclick="toggleSidebar()" title="Ouvrir / fermer le menu" aria-label="Ouvrir / fermer le menu"><span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
-  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.7</span></div>
+  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.8</span></div>
   <div class="topbar-sep"></div>
   <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Phase</button>
   <button class="btn" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" style="font-weight:600;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg> Gel</button>
@@ -686,6 +686,10 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Nouveau : saisie rapide façon mindmap dans la vue Données. Phase : Entrée crée la première tâche, Tab range la phase comme tâche de la phase précédente. Tâche : Entrée crée la tâche suivante, Maj+Tab la transforme en phase.</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.7:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : Affichages / « Périodes de gel » pour afficher ou masquer les gels, avec en sous-option « Jours fériés (France) » (calculés dans l'outil, sans connexion), affichés sur toute la hauteur du Gantt ; le nom du jour férié apparaît dès que le curseur passe dessus.</li>
@@ -3270,6 +3274,79 @@ function importJSON(event) {
   reader.readAsText(file);
   event.target.value = '';
 }
+
+
+// ═══ SAISIE RAPIDE (façon mindmap) dans la vue Données ═══════
+function focusDataField(id, selectAll){
+  requestAnimationFrame(()=>{ const el=document.getElementById(id); if(!el) return;
+    el.focus({preventScroll:true});
+    if(selectAll) el.select(); else el.setSelectionRange(el.value.length, el.value.length);
+    try{ el.scrollIntoView({block:'nearest'}); }catch(_){}
+  });
+}
+function quickLaneEnter(laneId){
+  const lane=getLane(laneId); if(!lane) return;
+  if(lane.tasks.length){ focusDataField('ta-'+lane.tasks[0].id, true); return; }
+  addTask(laneId,'T');
+  const t=lane.tasks[lane.tasks.length-1];
+  renderTimeline(); saveState();
+  focusDataField('ta-'+t.id, true);
+}
+function quickLaneToTask(laneId){
+  const idx=lanes.findIndex(l=>l.id===laneId);
+  if(idx<=0) return false;
+  const lane=lanes[idx], prev=lanes[idx-1];
+  addTask(prev.id,'T');
+  const t=prev.tasks[prev.tasks.length-1];
+  t.title=lane.name||'nouvelle tâche';
+  (lane.tasks||[]).forEach(x=>prev.tasks.push(x));
+  lanes.splice(idx,1);
+  renderData(); renderTimeline(); saveState();
+  focusDataField('ta-'+t.id, false);
+  return true;
+}
+function quickTaskEnter(laneId,taskId){
+  const lane=getLane(laneId); if(!lane) return;
+  const i=lane.tasks.findIndex(t=>t.id===taskId); if(i<0) return;
+  addTask(laneId,'T');
+  const nt=lane.tasks.pop();
+  lane.tasks.splice(i+1,0,nt);
+  renderData(); renderTimeline(); saveState();
+  focusDataField('ta-'+nt.id, true);
+}
+function quickTaskToLane(laneId,taskId){
+  const idx=lanes.findIndex(l=>l.id===laneId); if(idx<0) return;
+  const lane=lanes[idx];
+  const i=lane.tasks.findIndex(t=>t.id===taskId); if(i<0) return;
+  const palette=(typeof defaultTaskJalonPalette!=='undefined'&&defaultTaskJalonPalette?.length)?defaultTaskJalonPalette:LANE_COLORS;
+  const t=lane.tasks[i];
+  const following=lane.tasks.splice(i);
+  following.shift();
+  const nl={id:lid++,name:t.title||'Phase',color:palette[lanes.length%palette.length],tasks:following};
+  lanes.splice(idx+1,0,nl);
+  renderData(); renderTimeline(); saveState();
+  focusDataField('ln-'+nl.id, false);
+}
+(function(){
+  const box=document.getElementById('lanes'); if(!box) return;
+  box.addEventListener('keydown',function(e){
+    if(e.isComposing||e.altKey||e.ctrlKey||e.metaKey) return;
+    const el=e.target; if(!el||el.tagName!=='TEXTAREA') return;
+    let m=/^ln-(\d+)$/.exec(el.id);
+    if(m){
+      const id=+m[1];
+      if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); quickLaneEnter(id); }
+      else if(e.key==='Tab'&&!e.shiftKey){ if(quickLaneToTask(id)) e.preventDefault(); }
+      return;
+    }
+    m=/^ta-(\d+)$/.exec(el.id);
+    if(m){
+      const tid2=+m[1]; const lane=lanes.find(l=>l.tasks.some(t=>t.id===tid2)); if(!lane) return;
+      if(e.key==='Enter'&&!e.shiftKey){ e.preventDefault(); quickTaskEnter(lane.id,tid2); }
+      else if(e.key==='Tab'&&e.shiftKey){ e.preventDefault(); quickTaskToLane(lane.id,tid2); }
+    }
+  });
+})();
 
 // ═══ PATCH saveState dans renderData ══════════════════════════
 const _origRenderData = renderData;
