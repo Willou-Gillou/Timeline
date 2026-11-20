@@ -1350,7 +1350,7 @@ function addTask(lid2,type){
     renderTimeline(); saveState();
     requestAnimationFrame(()=>{
       const te=document.querySelector('#tl-svg [data-tt="'+lid2+'-'+newId+'"]'); const nt=getTask(lid2,newId);
-      if(te&&nt) openEdit({type:'task',laneId:lid2,taskId:newId},nt.title||'',te.getBoundingClientRect());
+      if(te&&nt) openEdit({type:'task',laneId:lid2,taskId:newId,isNew:true,ttype:t},nt.title||'',te.getBoundingClientRect());
     });
   }
 }
@@ -1557,10 +1557,18 @@ let editorCtx=null;
 const editorWrap=document.getElementById('tl-editor-wrap');
 const editorEl=document.getElementById('tl-editor');
 editorEl.addEventListener('input',()=>autoResize(editorEl));
-editorEl.addEventListener('keydown',e=>{if(e.key==='Escape') cancelEdit();});
+editorEl.addEventListener('keydown',e=>{
+  const c=editorCtx;
+  if(c&&c.isNew){ // activité tout juste créée dans le Gantt : Échap l'annule, Entrée valide puis en crée une nouvelle
+    if(e.key==='Escape'){ e.preventDefault(); cancelNewTask(c); return; }
+    if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); commitEdit(); addTask(c.laneId,c.ttype||'T'); return; }
+  }
+  if(e.key==='Escape') cancelEdit();
+});
 editorEl.addEventListener('blur',()=>commitEdit());
 function openEdit(ctx,val,rect){ editorCtx=ctx; editorEl.value=val; editorWrap.style.display='block'; editorWrap.style.left=rect.left+'px'; editorWrap.style.top=rect.top+'px'; editorEl.style.width=Math.max(80,rect.width+16)+'px'; editorEl.style.whiteSpace='pre-wrap'; autoResize(editorEl); editorEl.focus(); editorEl.select(); }
 function cancelEdit(){ editorCtx=null; editorWrap.style.display='none'; }
+function cancelNewTask(c){ editorCtx=null; editorWrap.style.display='none'; const l=getLane(c.laneId); if(!l) return; l.tasks=l.tasks.filter(t=>t.id!==c.taskId); renderData(); renderTimeline(); saveState(); }
 function commitEdit(){ if(!editorCtx){editorWrap.style.display='none';return;} const{type,laneId,taskId}=editorCtx; editorCtx=null; editorWrap.style.display='none'; const val=editorEl.value; if(type==='lane') syncLaneName(laneId,val); else syncTitle(laneId,taskId,val); renderTimeline(); }
 
 // ═══ TIMELINE POINTER DRAG ═══════════════════════════════════
