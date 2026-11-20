@@ -591,20 +591,27 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
-      <div style="font-weight:700;margin:8px 0 6px;">V4.9:</div>
-      <ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Barre latérale : le mode « Simplifié » disparaît ; toutes les options d'affichage, les tailles et la palette sont toujours visibles.</li>
-        <li>Affichages : les phases se présentent soit en colonne (comme avant), soit en liste, avec un bandeau coloré portant le nom de la phase au-dessus de ses tâches.</li>
-        <li>Affichages : le trait pointillé des jalons peut s'arrêter au jalon (comme avant) ou aller jusqu'en bas du Gantt.</li>
-        <li>Affichage : « Barre de temps » est toujours active et « Ligne de temps » passe au premier niveau.</li>
-        <li>Gantt : « + ajouter » crée l'élément et place le curseur dans son nom ; Échap annule, OK valide et en crée un nouveau.</li>
-        <li>Barre latérale : Affichages et Tailles sont réunis dans un seul menu « Affichage » à deux onglets, et les choix exclusifs deviennent des listes déroulantes.</li>
-        <li>Barre latérale : nouveau design (une seule échelle de tailles, sous-options à filet, onglets et boutons segmentés sur une ligne à la place des listes déroulantes, menu plus large) ; la palette de couleurs devient l'onglet « Couleurs » du menu Affichage.</li>
-        <li>Barre latérale : « Déplacement du planning » et « Mes modèles » sont retirés ; « Échelle de temps » et « Affichage » restent toujours ouverts.</li>
-        <li>Gantt : la sélection par encerclement peut maintenant démarrer en dehors du Gantt, dans la marge au-dessus ou la zone vide en dessous.</li>
-        <li>Menu de conversion JSON : ajout de « Convertir un fichier MS Project en JSON (tbd) », sans lien pour l'instant.</li>
-        <li>Barre latérale : titres de section sur des bandeaux rouges de deux nuances qui restent empilés en haut au défilement, onglets Éléments / Tailles / Couleurs collants, libellés de la période plus clairs.</li>
-        <li>Échelle de temps : choix de l'unité (jour, semaine, mois, trimestre, année), repères au calendrier ou comptés depuis le début, exemple en direct, et bloc « Période affichée » regroupé.</li>
+            <div style="font-weight:700;margin:8px 0 6px;">V4.9:</div>
+      <div style="font-weight:600;margin:6px 0 3px;color:#4b5563;">Nouveau</div>
+      <ul style="margin:0 0 8px 18px;padding:0;">
+        <li>Échelle de temps : unité (jour à année), repères « Calendrier » ou « Numéroté », exemple en direct, période affichée regroupée.</li>
+        <li>Phases en liste (bandeau au-dessus de leurs tâches) en plus de la colonne ; trait pointillé des jalons jusqu'en bas du Gantt (option).</li>
+        <li>Gantt : « + ajouter » place le curseur dans le nom (Échap annule, OK valide et en crée un nouveau) ; l'encerclement peut démarrer hors du Gantt.</li>
+        <li>Couleur des jalons par défaut « Aligné Phase / Palette Coul. », appliquée aussitôt ; onglet « Couleurs » ; entrée « MS Project en JSON (tbd) ».</li>
+      </ul>
+      <div style="font-weight:600;margin:6px 0 3px;color:#4b5563;">Retiré</div>
+      <ul style="margin:0 0 8px 18px;padding:0;">
+        <li>Mode « Simplifié » ; interrupteur « Barre de temps » (toujours active).</li>
+        <li>Sections « Déplacement du planning » et « Mes modèles » du menu ; sections repliables (Échelle et Affichage restent ouvertes).</li>
+      </ul>
+      <div style="font-weight:600;margin:6px 0 3px;color:#4b5563;">Modifié</div>
+      <ul style="margin:0 0 8px 18px;padding:0;">
+        <li>Menu de gauche redessiné : Affichage en onglets Éléments / Tailles / Couleurs (palette fusionnée), titres sur bandeaux rouges empilés, choix sur une ligne en boutons segmentés, libellés courts, menu plus large.</li>
+        <li>« Ligne de temps » remonte au premier niveau d'Affichage.</li>
+      </ul>
+      <div style="font-weight:600;margin:6px 0 3px;color:#4b5563;">Corrigé</div>
+      <ul style="margin:0 0 8px 18px;padding:0;">
+        <li>« Valeurs par défaut » (Couleurs et global) recolore les jalons ; « Tout réinitialiser » rétablit bien « Tous les 5 jours » et « Mois précédent ».</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
