@@ -402,7 +402,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           <div class="seg"><label><input type="radio" name="flag-type" value="big" checked onchange="renderTimeline(); saveState()"/> Grand drapeau</label>
           <label><input type="radio" name="flag-type" value="small" onchange="renderTimeline(); saveState()"/> Petit drapeau</label></div>
           <label><input type="checkbox" id="chk-dash-dot" onchange="toggleDashDotOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
-          <div class="sub-options" id="dash-dot-sub">
+          <div class="sub-options" id="dash-dot-sub" style="display:none;">
             <div class="seg seg-v"><label><input type="radio" name="dash-dot-end" value="jalon" checked onchange="renderTimeline(); saveState()"/> S'arrête au jalon</label>
             <label><input type="radio" name="dash-dot-end" value="bottom" onchange="renderTimeline(); saveState()"/> Jusqu'en bas du Gantt</label></div>
           </div>
