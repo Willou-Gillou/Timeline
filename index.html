@@ -110,6 +110,8 @@ td input[type=color] { width:28px; height:22px; padding:1px; border:1px solid #d
 #tl-svg text, #tl-svg tspan { font-size-adjust:none; }
 #tl-editor-wrap { position:fixed; display:none; z-index:9999; }
 #tl-editor { border:2px solid #c0392b; border-radius:5px; padding:3px 7px; font-family:'Segoe UI',sans-serif; font-size:12px; font-weight:700; outline:none; min-width:70px; box-shadow:0 3px 12px rgba(0,0,0,.15); resize:none; overflow:hidden; background:#fff; }
+.tl-outer{perspective:1000px;perspective-origin:50% 0;}
+#view-timeline.tilt3d #tl-svg{transform:rotateX(-10deg);transform-origin:50% 0;pointer-events:none;filter:drop-shadow(0 18px 16px rgba(0,0,0,.28));}
 .modal-overlay { position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); z-index:10000; display:flex; align-items:center; justify-content:center; }
 .modal-box { background:#fff; border-radius:10px; padding:24px 28px; box-shadow:0 8px 32px rgba(0,0,0,0.2); min-width:300px; text-align:center; }
 .modal-box h3 { margin-bottom:12px; font-size:15px; color:#333; }
@@ -436,7 +438,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <button type="button" role="tab" id="dtab-colors" aria-selected="false" aria-controls="palette-body" onclick="showDisplayTab('colors')">Couleurs</button>
       </div></div>
       <div class="radio-group" id="afficher-body" role="tabpanel" aria-labelledby="dtab-elements" style="margin-top:10px;">
-        <label><input type="checkbox" id="chk-3d" onchange="renderTimeline(); saveState()"/> Gantt en 3D</label>
+        <label><input type="checkbox" id="chk-3d" onchange="apply3D(); saveState()"/> Gantt en 3D</label>
         <label><input type="checkbox" id="chk-title" checked onchange="toggleTitle()"/> Titre planning</label>
         <label><input type="checkbox" id="chk-todayline" checked onchange="toggleTodayLineOptions(); renderTimeline(); saveState()"/> Ligne de temps</label>
           <div class="sub-options" id="todayline-sub">
@@ -593,7 +595,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
             <div style="font-weight:700;margin:8px 0 6px;">V4.9:</div><ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : option « Gantt en 3D » (barres et phases en relief), en tête d'Affichage.</li>
+        <li>Nouveau : option « Gantt en 3D » (planning incliné en perspective, affichage seul), en tête d'Affichage.</li>
         <li>Nouveau : échelle de temps par unité (jour à année), repères Calendrier ou Numéroté, exemple en direct.</li>
         <li>Nouveau : phases en liste ou en colonne ; trait pointillé des jalons jusqu'en bas (option).</li>
         <li>Nouveau : « + ajouter » place le curseur dans le nom ; l'encerclement peut démarrer hors du Gantt.</li>
@@ -774,6 +776,7 @@ function dur(s,e){ if(!s||!e)return '-'; const d=Math.round((parseD(e)-parseD(s)
 // injecté via innerHTML DOIT être wrappé dans esc(). Ne jamais injecter de champ
 // texte libre directement dans un template littéral sans esc().
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function apply3D(){ const v=document.getElementById('view-timeline'); if(v) v.classList.toggle('tilt3d', document.getElementById('chk-3d')?.checked===true); }
 function darken(hex){ try{ const n=parseInt(hex.slice(1),16); const f=v=>Math.max(0,v-40).toString(16).padStart(2,'0'); return '#'+f(n>>16)+f((n>>8)&0xff)+f(n&0xff); }catch(e){return hex;} }
 function getLane(id){ return lanes.find(l=>l.id===id); }
 
@@ -1684,12 +1687,6 @@ function renderTimeline(){
   // _vLines sera collecté en fin de rendu
 
   svg.appendChild(el('rect',{x:0,y:0,width:VW,height:VH,fill:'#f9f9f9'}));
-  const is3D=document.getElementById('chk-3d')?.checked===true;
-  if(is3D){
-    const defs3=el('defs',{}); const gr=el('linearGradient',{id:'g3d',x1:0,y1:0,x2:0,y2:1});
-    [[0,'#fff',0.6],[0.5,'#fff',0],[1,'#000',0.22]].forEach(([o,c,a])=>gr.appendChild(el('stop',{offset:o,'stop-color':c,'stop-opacity':a})));
-    defs3.appendChild(gr); svg.appendChild(defs3);
-  }
   if(MA>0) svg.appendChild(el('rect',{x:0,y:0,width:VW,height:MA,fill:'#f0f0f0'}));
 
 
@@ -1808,7 +1805,6 @@ function renderTimeline(){
         const phaseHeaderG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     svg.appendChild(phaseHeaderG);
     phaseHeaderG.appendChild(laneColorRect);
-    if(is3D){ const lg=el('rect',{x:0,y:rowY,width:listMode?VW:LL,height:listMode?PHH:laneH,fill:'url(#g3d)'}); lg.style.pointerEvents='none'; phaseHeaderG.appendChild(lg); }
     if(li === 0) {
       phaseHeaderG.appendChild(el('line',{x1:0,y1:rowY,x2:VW,y2:rowY,stroke:'#ccc','stroke-width':1.5}));
     }
@@ -2029,8 +2025,7 @@ function renderTimeline(){
           if(!task.start||!task.end)return;
           const x1=dX(task.start), x2=dX(task.end);
           const rowHh=getRowH(row); const bw=Math.max(8,x2-x1), bh=rowHh*0.55, by=ty+(rowHh-bh)/2;
-          if(is3D){ svg.appendChild(el('rect',{x:x1+3,y:by+6,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.16)'})); svg.appendChild(el('rect',{x:x1,y:by+4,width:bw,height:bh,rx:4,fill:darken(darken(tc))})); }
-          else svg.appendChild(el('rect',{x:x1+2,y:by+2,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.07)'}));
+          svg.appendChild(el('rect',{x:x1+2,y:by+2,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.07)'}));
           _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:x1,x1:x1+bw,y0:by,y1:by+bh});
           const barEl=el('rect',{x:x1,y:by,width:bw,height:bh,rx:4,fill:tc,cursor:'grab'});
           barEl.style.touchAction='none';
@@ -2039,7 +2034,6 @@ function renderTimeline(){
           svg.appendChild(taskHeaderG);
           taskHeaderG.appendChild(barEl);
           const pctEl=task.pct>0?el('rect',{x:x1,y:by,width:bw*task.pct/100,height:bh,rx:4,fill:darken(tc)}):null; if(pctEl) taskHeaderG.appendChild(pctEl);
-          if(is3D){ const gl=el('rect',{x:x1,y:by,width:bw,height:bh,rx:4,fill:'url(#g3d)'}); gl.style.pointerEvents='none'; taskHeaderG.appendChild(gl); }
           const hw=Math.min(8,bw/4);
           [['resize-l',x1],['resize-r',x1+bw-hw]].forEach(([mode,hx])=>{ const h=el('rect',{x:hx,y:by,width:hw,height:bh,rx:4,fill:'rgba(0,0,0,0.13)',cursor:'ew-resize'}); h.style.touchAction='none'; h.addEventListener('pointerdown',e=>{e.stopPropagation();tlPointerDown(e,mode,lane.id,task.id);}); taskHeaderG.appendChild(h); });
 
@@ -2340,7 +2334,7 @@ function resetTimeScaleDefaults(){
 }
 function resetAfficherDefaults(){
   const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.checked=v; };
-  set('chk-3d', false); set('chk-title', true); set('chk-todayline', true); set('chk-todayline-vline', true); set('chk-todayline-hline', true); set('chk-todayline-circle', true); set('chk-todayline-date', false); set('chk-freezes', true); set('chk-holidays', false); set('chk-todayline-arrow', true); set('chk-taches-master', true); set('chk-lane-col', true); set('chk-dates', true); set('chk-task-label', true); set('chk-task-dash-dot', true); set('chk-jalons-master', true); set('chk-jalons-flags', true); set('chk-jalon-lines', true); set('chk-dash-dot', false);
+  set('chk-3d', false); apply3D(); set('chk-title', true); set('chk-todayline', true); set('chk-todayline-vline', true); set('chk-todayline-hline', true); set('chk-todayline-circle', true); set('chk-todayline-date', false); set('chk-freezes', true); set('chk-holidays', false); set('chk-todayline-arrow', true); set('chk-taches-master', true); set('chk-lane-col', true); set('chk-dates', true); set('chk-task-label', true); set('chk-task-dash-dot', true); set('chk-jalons-master', true); set('chk-jalons-flags', true); set('chk-jalon-lines', true); set('chk-dash-dot', false);
   const d=document.querySelector('input[name="dates-pos"][value="right"]'); if(d) d.checked=true;
   const t=document.querySelector('input[name="task-label-pos"][value="left"]'); if(t) t.checked=true;
   const fl=document.querySelector('input[name="flag-type"][value="big"]'); if(fl) fl.checked=true;
@@ -2852,7 +2846,7 @@ function restoreSidebar(s) {
   setChk('chk-title', s.showTitle);
   setChk('chk-lane-col', s.showLaneCol);
   laneColW=Math.min(400,Math.max(80,+s.laneColW||130)); { const e=document.getElementById('lane-col-w'); if(e) e.value=laneColW; const v=document.getElementById('lane-col-w-val'); if(v) v.textContent=laneColW; }
-  setChk('chk-3d', s.show3D ?? false);
+  setChk('chk-3d', s.show3D ?? false); apply3D();
   setChk('chk-todayline', s.showTodayLine);
   setChk('chk-todayline-vline', s.showTodayLineVline ?? true);
   setChk('chk-todayline-hline', s.showTodayLineHline ?? true);
