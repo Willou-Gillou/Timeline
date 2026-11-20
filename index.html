@@ -160,6 +160,18 @@ td input[type=color] { width:28px; height:22px; padding:1px; border:1px solid #d
 .task-size-val { font-size:12px; color:#555; min-width:28px; text-align:center; }
 svg text, svg tspan { text-rendering: geometricPrecision; }
 
+/* ── Section « Affichage » : onglets Éléments / Tailles, menus déroulants ── */
+.dtabs { display:flex; gap:2px; padding:2px; background:#e6e9ee; border-radius:9px; }
+.dtabs button { flex:1; padding:6px 8px; border:0; border-radius:7px; background:transparent; color:#4b5563; font-size:11.5px; font-weight:600; line-height:1.2; font-family:inherit; cursor:pointer; transition:background .15s,color .15s; }
+.dtabs button:hover { color:#1c2430; }
+.dtabs button[aria-selected="true"] { background:#fff; color:#c0392b; box-shadow:0 1px 2px rgba(0,0,0,.18); }
+.dtabs button:focus-visible { outline:2px solid #c0392b; outline-offset:1px; }
+.pane-hidden { display:none !important; }
+.dd-src { display:none !important; }
+select.dd { display:block; width:100%; box-sizing:border-box; height:30px; margin:3px 0 6px; padding:0 28px 0 10px; border:1px solid #cfd5dd; border-radius:8px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%236b7685' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center; -webkit-appearance:none; appearance:none; color:#1c2430; font-size:11.5px; font-weight:500; line-height:1; font-family:inherit; cursor:pointer; text-overflow:ellipsis; transition:border-color .15s, box-shadow .15s; }
+select.dd:hover { border-color:#aab3be; }
+select.dd:focus-visible { outline:none; border-color:#c0392b; box-shadow:0 0 0 3px rgba(192,57,43,.18); }
+@media (prefers-reduced-motion:reduce) { .dtabs button, select.dd { transition:none; } }
 #print-root { display:none; }
 @media print {
   body > *:not(#print-root) { display:none !important; }
@@ -375,8 +387,13 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('afficher-body','afficher-chev')"><h3 style="margin:0;">AFFICHAGES</h3><span class="chev" id="afficher-chev">▸</span></div>
-      <div class="radio-group collapsible-body collapsed" id="afficher-body" style="margin-top:10px;">
+      <div class="collapsible-head" onclick="toggleSection('display-body','display-chev')"><h3 style="margin:0;">AFFICHAGE</h3><span class="chev" id="display-chev">▸</span></div>
+      <div class="collapsible-body collapsed" id="display-body" style="margin-top:10px;">
+      <div class="dtabs" role="tablist" aria-label="Affichage">
+        <button type="button" role="tab" id="dtab-elements" aria-selected="true" aria-controls="afficher-body" onclick="showDisplayTab('elements')">Éléments</button>
+        <button type="button" role="tab" id="dtab-sizes" aria-selected="false" aria-controls="sizes-body" onclick="showDisplayTab('sizes')">Tailles</button>
+      </div>
+      <div class="radio-group" id="afficher-body" role="tabpanel" aria-labelledby="dtab-elements" style="margin-top:10px;">
         <label><input type="checkbox" id="chk-title" checked onchange="toggleTitle()"/> Titre planning</label>
         <label><input type="checkbox" id="chk-todayline" checked onchange="toggleTodayLineOptions(); renderTimeline(); saveState()"/> Ligne de temps</label>
           <div class="sub-options" id="todayline-sub">
@@ -434,11 +451,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 
         <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetAfficherDefaults()">Valeurs par défaut</button>
       </div>
-    </div>
-    <hr class="sidebar-sep adv" style="margin:12px 0;">
-    <div class="adv">
-      <div class="collapsible-head" onclick="toggleSection('sizes-body','sizes-chev')"><h3 style="margin:0;">TAILLES</h3><span class="chev" id="sizes-chev">▸</span></div>
-      <div class="collapsible-body collapsed" id="sizes-body" style="display:flex;flex-direction:column;gap:7px;margin-top:10px;">
+      <div class="pane-hidden" id="sizes-body" role="tabpanel" aria-labelledby="dtab-sizes" style="display:flex;flex-direction:column;gap:7px;margin-top:10px;">
         <div style="font-weight:700; color:#555; font-size:11px; margin-top:8px; border-bottom:1px solid #ddd; padding-bottom:2px; text-transform:uppercase;">Global</div>
 <div style="display:flex;align-items:center;justify-content:space-between;">
           <span style="font-size:12px;">Hauteur du header</span>
@@ -634,6 +647,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           </div>
         </div>
         <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetSizesDefaults()">Valeurs par défaut</button>
+      </div>
       </div>
     </div>
     <hr class="sidebar-sep adv" style="margin:12px 0;">
@@ -1059,8 +1073,7 @@ function toggleSection(bodyId, chevId){
 function _saveUIPrefs() {
   const prefs = {
     depPlanning: document.getElementById('deplacement-planning-body')?.classList.contains('collapsed'),
-    afficher: document.getElementById('afficher-body')?.classList.contains('collapsed'),
-    sizes: document.getElementById('sizes-body')?.classList.contains('collapsed'),
+    display: document.getElementById('display-body')?.classList.contains('collapsed'),
     timeScale: document.getElementById('time-scale-body')?.classList.contains('collapsed'),
     palette: document.getElementById('palette-body')?.classList.contains('collapsed'),
     models: document.getElementById('models-body')?.classList.contains('collapsed')
@@ -1081,8 +1094,7 @@ function restoreUIPrefs() {
       }
     };
     setSec('deplacement-planning-body', 'deplacement-planning-chev', prefs.depPlanning);
-    setSec('afficher-body', 'afficher-chev', prefs.afficher);
-    setSec('sizes-body', 'sizes-chev', prefs.sizes);
+    setSec('display-body', 'display-chev', prefs.display);
     setSec('time-scale-body', 'time-scale-chev', prefs.timeScale);
     setSec('palette-body', 'palette-chev', prefs.palette);
     setSec('models-body', 'models-chev', prefs.models);
@@ -1643,6 +1655,7 @@ function computeLaneRows(lane){
 // ═══ RENDER TIMELINE ═════════════════════════════════════════
 let _tlAutoEnd=false;
 function renderTimeline(){
+  if(typeof syncDropdowns==='function') syncDropdowns();
   window._colorPickerActive = false;
 
   const svg=document.getElementById('tl-svg'); svg.innerHTML='';
@@ -2525,8 +2538,8 @@ function resetDefaults() {
   const dpl=document.getElementById('day-step-cur-lbl'); if(dpl) dpl.textContent='Tous les jours';
   const r4=document.querySelector('input[name="tl-start"][value="0"]'); if(r4) r4.checked=true;
   const r5=document.querySelector('input[name="tl-end"][value="0"]'); if(r5) r5.checked=true;
-  const ab=document.getElementById('afficher-body'), ac=document.getElementById('afficher-chev'); if(ab && ac){ ab.classList.add('collapsed'); ac.textContent='▸'; }
-  const sb=document.getElementById('sizes-body'), sc=document.getElementById('sizes-chev'); if(sb && sc){ sb.classList.add('collapsed'); sc.textContent='▸'; }
+  const ab=document.getElementById('display-body'), ac=document.getElementById('display-chev'); if(ab && ac){ ab.classList.add('collapsed'); ac.textContent='▸'; }
+  if(typeof showDisplayTab==='function') showDisplayTab('elements');
   const tb=document.getElementById('time-scale-body'), tc=document.getElementById('time-scale-chev'); if(tb && tc){ tb.classList.add('collapsed'); tc.textContent='▸'; }
   const pb=document.getElementById('palette-body'), pc=document.getElementById('palette-chev'); if(pb && pc){ pb.classList.add('collapsed'); pc.textContent='▸'; }
   timebarColor='#0b0f14'; todaylineColor='#e74c3c'; defaultTaskJalonPalette=[...DEFAULT_TASK_JALON_PALETTE]; syncPaletteInputs();
@@ -3442,6 +3455,61 @@ function quickTaskToLane(laneId,taskId){
     }
   });
 })();
+
+// ═══ AFFICHAGE : ONGLETS ET MENUS DÉROULANTS ══════════════════
+function showDisplayTab(tab){
+  const el=tab!=='sizes';
+  document.getElementById('afficher-body')?.classList.toggle('pane-hidden',!el);
+  document.getElementById('sizes-body')?.classList.toggle('pane-hidden',el);
+  document.getElementById('dtab-elements')?.setAttribute('aria-selected',String(el));
+  document.getElementById('dtab-sizes')?.setAttribute('aria-selected',String(!el));
+}
+// Les choix exclusifs s'affichent en menu déroulant ; les boutons radio d'origine restent en place (masqués) : ils portent la valeur et les réglages enregistrés
+const DD_RADIOS={
+  'flag-type':'Type de drapeau','dash-dot-end':'Fin du trait pointillé des jalons','jalon-line-pos':'Position des lignes de jalons',
+  'lane-view':'Affichage des phases','task-label-pos':'Position du titre des tâches','dates-pos':'Position des dates des tâches',
+  'tl-start':'Début de la barre de temps','tl-end':'Fin de la barre de temps','default-jalon-colors-mode':'Couleurs des jalons par défaut'
+};
+const SCALE_LABELS=['Jours','Jours numérotés (J-i)','Semaines','Semaines numérotées (S-i)','Mois','Mois numérotés (M-i)','Trimestres','Années'];
+function _mkSelect(label,opts,onChange){
+  const sel=document.createElement('select'); sel.className='dd'; sel.setAttribute('aria-label',label);
+  opts.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; sel.appendChild(o); });
+  sel.addEventListener('change',()=>onChange(sel.value));
+  return sel;
+}
+function buildDropdowns(){
+  Object.keys(DD_RADIOS).forEach(name=>{
+    const radios=[...document.querySelectorAll('input[type=radio][name="'+name+'"]')]; if(!radios.length) return;
+    const first=radios[0], host=first.closest('.seg')||first.closest('label');
+    const opts=radios.map(r=>[r.value,(r.closest('label')?.textContent||r.value).trim()]);
+    const sel=_mkSelect(DD_RADIOS[name],opts,v=>{ const r=radios.find(x=>x.value===v); if(r){ r.checked=true; r.dispatchEvent(new Event('change',{bubbles:true})); } });
+    sel.dataset.radio=name;
+    host.parentNode.insertBefore(sel,host);
+    radios.forEach(r=>(r.closest('.seg')||r.closest('label')).classList.add('dd-src'));
+  });
+  // Échelle de temps : graduations principales et graduation des jours
+  const sl=document.getElementById('scale-slider');
+  if(sl){
+    const s1=_mkSelect('Graduations principales',SCALE_LABELS.map((t,i)=>[String(i),t]),v=>onScaleChange(+v)); s1.id='scale-select';
+    sl.parentNode.insertBefore(s1,sl);
+    ['scale-cur-lbl'].forEach(id=>document.getElementById(id)?.classList.add('dd-src')); sl.classList.add('dd-src'); sl.nextElementSibling?.classList.add('dd-src');
+  }
+  const ds=document.getElementById('day-step-slider');
+  if(ds){
+    const s2=_mkSelect('Graduation jours',DAY_STEP_NAMES.map((t,i)=>[String(i),t]),v=>onDayStepChange(+v)); s2.id='day-step-select';
+    ds.parentNode.insertBefore(s2,ds);
+    document.getElementById('day-step-cur-lbl')?.classList.add('dd-src'); ds.classList.add('dd-src'); ds.nextElementSibling?.classList.add('dd-src');
+  }
+  syncDropdowns();
+}
+function syncDropdowns(){
+  document.querySelectorAll('select.dd[data-radio]').forEach(sel=>{
+    const c=document.querySelector('input[type=radio][name="'+sel.dataset.radio+'"]:checked'); if(c&&sel.value!==c.value) sel.value=c.value;
+  });
+  const s1=document.getElementById('scale-select'); if(s1&&typeof scaleIdx!=='undefined') s1.value=String(scaleIdx);
+  const s2=document.getElementById('day-step-select'); if(s2){ const r=[...document.querySelectorAll('input[name="day-step"]')].findIndex(x=>x.checked); if(r>=0) s2.value=String(r); }
+}
+buildDropdowns();
 
 // ═══ PATCH saveState dans renderData ══════════════════════════
 const _origRenderData = renderData;
