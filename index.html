@@ -175,6 +175,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 #conv-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
 #conv-menu .btn { border-color:transparent; justify-content:flex-start; font-size:12px; font-weight:600; height:30px; padding:0 12px; white-space:nowrap; text-decoration:none; }
 #conv-menu .btn:hover { background:#f3f4f6; }
+#conv-menu .btn[aria-disabled="true"] { opacity:.55; cursor:default; pointer-events:none; }
 #btn-export[aria-expanded="true"] { background:#f3f4f6; border-color:#e5e7eb; color:#111827; }
 /* ═══ Barre latérale : règles de design ═══
    Une seule échelle : texte 12 px (lignes), 11 px (aides), 13 px (titres de section) ; rayons 8 px ; lignes 32 px.
@@ -366,6 +367,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div id="conv-menu" role="menu" style="display:none;">
   <a class="btn" role="menuitem" href="https://m365.cloud.microsoft/chat/?titleId=T_26a2fcc3-c3fd-6d09-eff7-a65b904a0b40&amp;source=embedded-builder" target="_blank" rel="noopener noreferrer" onclick="closeConvMenu()">Convertir une image en JSON</a>
   <a class="btn" role="menuitem" href="https://m365.cloud.microsoft/chat/?titleId=T_fed89d2e-b025-173e-d6e7-132a328f9e82&amp;source=embedded-builder" target="_blank" rel="noopener noreferrer" onclick="closeConvMenu()">Convertir un costmodel en JSON</a>
+  <span class="btn" role="menuitem" aria-disabled="true" tabindex="-1">Convertir un fichier MS Project en JSON (tbd)</span>
 </div>
 <div id="export-menu" role="menu" style="display:none;">
   <button class="btn" role="menuitem" onclick="closeExportMenu();copyMacroPlanningImage()" title="Image PNG">PNG</button>
@@ -599,6 +601,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Barre latérale : Affichages et Tailles sont réunis dans un seul menu « Affichage » à deux onglets, et les choix exclusifs deviennent des listes déroulantes.</li>
         <li>Barre latérale : nouveau design (une seule échelle de tailles, sous-options à filet, onglets et boutons segmentés sur une ligne à la place des listes déroulantes, menu plus large) ; la palette de couleurs devient l'onglet « Couleurs » du menu Affichage.</li>
         <li>Barre latérale : « Déplacement du planning » et « Mes modèles » sont retirés ; « Échelle de temps » et « Affichage » restent toujours ouverts.</li>
+        <li>Menu de conversion JSON : ajout de « Convertir un fichier MS Project en JSON (tbd) », sans lien pour l'instant.</li>
         <li>Barre latérale : titres de section sur des bandeaux rouges de deux nuances qui restent empilés en haut au défilement, onglets Éléments / Tailles / Couleurs collants, libellés de la période plus clairs.</li>
         <li>Échelle de temps : choix de l'unité (jour, semaine, mois, trimestre, année), repères au calendrier ou comptés depuis le début, exemple en direct, et bloc « Période affichée » regroupé.</li>
       </ul>
