@@ -2023,7 +2023,6 @@ function renderTimeline(){
           if (showJalonsMaster) {
             if(showDashDot) svg.appendChild(el('line',{x1:mx,y1:MA+TH,x2:mx,y2:my-s,stroke:tc,'stroke-width':1.5,'stroke-dasharray':`${dashLen},${dashGap}`}));
             if(showDashDot&&dashToBottom) _dashExt.push(el('line',{x1:mx,y1:my+s,x2:mx,y2:VH,stroke:tc,'stroke-width':1.5,'stroke-dasharray':`${dashLen},${dashGap}`,'pointer-events':'none'}));
-            if(is3D){ const dp=(dy,f)=>el('polygon',{points:`${mx},${my-s+dy} ${mx+s},${my+dy} ${mx},${my+s+dy} ${mx-s},${my+dy}`,fill:f}); svg.appendChild(dp(4,'rgba(0,0,0,0.12)')); svg.appendChild(dp(2.5,darken(darken(tc)))); }
             const poly=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s} ${mx-s},${my}`,fill:tc,stroke:'white','stroke-width':2,cursor:'grab'});
             poly.style.touchAction='none';
             poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); if(e.shiftKey||e.ctrlKey||e.metaKey){ toggleSelected(lane.id,task.id); return; } const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; if(selHas(lane.id,task.id)&&tlSel.keys.size>1){ tlDrag.mode='move-group'; tlDrag.origs=selItems().map(i=>({laneId:i.lane.id,id:i.task.id,start:i.task.start,end:i.task.end})); } document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
@@ -2039,7 +2038,7 @@ function renderTimeline(){
           if(!task.start||!task.end)return;
           const x1=dX(task.start), x2=dX(task.end);
           const rowHh=getRowH(row); const bw=Math.max(8,x2-x1), bh=rowHh*0.55, by=ty+(rowHh-bh)/2;
-          if(is3D){ svg.appendChild(el('rect',{x:x1+3,y:by+3,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.12)'})); svg.appendChild(el('rect',{x:x1,y:by+2,width:bw,height:bh,rx:4,fill:darken(darken(tc))})); }
+          if(is3D){ svg.appendChild(el('rect',{x:x1+3,y:by+5,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.16)'})); svg.appendChild(el('rect',{x:x1,y:by+3,width:bw,height:bh,rx:4,fill:darken(darken(tc))})); }
           else svg.appendChild(el('rect',{x:x1+2,y:by+2,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.07)'}));
           _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:x1,x1:x1+bw,y0:by,y1:by+bh});
           const barEl=el('rect',{x:x1,y:by,width:bw,height:bh,rx:4,fill:tc,cursor:'grab'});
