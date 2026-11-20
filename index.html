@@ -10,7 +10,6 @@
 html, body { width:100%; height:100%; margin:0; overflow:hidden !important; overscroll-behavior:none; }
 body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; font-size: 13px; position:relative; --header-h:48px; }
 .header-shell { position:absolute; top:0; left:0; right:0; height:var(--header-h); background:#fff; border-bottom:1px solid #ddd; z-index:2000; overflow:hidden; }
-.collapsible-body.collapsed { display:none !important; }
 .topbar { background:#fff; padding:7px 14px; display:flex; align-items:center; gap:10px; width:100%; height:var(--header-h); box-sizing:border-box; position:relative; overflow:hidden; }
 .btn { padding:5px 12px; border-radius:5px; border:1px solid #ccc; cursor:pointer; font-size:12px; background:#fff; display:inline-flex; align-items:center; gap:5px; }
 .btn-icon { width:32px; min-width:32px; height:32px; padding:0; justify-content:center; font-size:15px; }
@@ -185,15 +184,9 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   transition:width .18s ease, padding .18s ease, border-color .18s ease; }
 .sidebar > div { min-width:0; }
 .sidebar-sep { border:none; border-top:1px solid var(--line); margin:var(--sep-margin,0px) 0 !important; }
-.collapsible-head { display:flex; align-items:center; justify-content:space-between; gap:8px; cursor:pointer; user-select:none; padding:13px 2px 13px 0; border-radius:6px; }
-.collapsible-head h3 { margin:0 !important; font-size:13px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); }
-.collapsible-head .chev { flex:none; width:16px; height:16px; font-size:0; color:transparent; opacity:.55; transition:transform .18s ease, opacity .12s;
-  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M6 3.5 10.5 8 6 12.5' fill='none' stroke='%23111827' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat; }
-.collapsible-head:hover .chev { opacity:1; }
-.collapsible-head:has(+ .collapsible-body:not(.collapsed)) .chev { transform:rotate(90deg); opacity:.9; }
-.collapsible-head:focus-visible { outline:2px solid #c0392b66; outline-offset:2px; }
-.sidebar .collapsible-body { margin-top:0 !important; padding:0 0 16px; }
-.sidebar .collapsible-body > * + .ts-title, .sidebar .collapsible-body > .ts-title:not(.first) { margin-top:14px; }
+.sec-head { padding:14px 0 8px; }
+.sec-head h3 { margin:0; font-size:13px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); }
+.sec-body { padding:0 0 16px; }
 .ts-title { font-size:12px; font-weight:600; color:var(--ink); margin:14px 0 4px; }
 .ts-title.first { margin-top:0; }
 .ts-sub, .opt-sub-title { font-size:11px; font-weight:500; color:var(--faint); margin:10px 0 2px; }
@@ -258,7 +251,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 .step button:active { background:var(--fill-2); }
 .step button:focus-visible { outline:2px solid #c0392b88; outline-offset:1px; }
 .step span { min-width:32px; text-align:center; font-size:12px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
-@media (prefers-reduced-motion:reduce) { .seg label, .dtabs button, .collapsible-head .chev, .sbtn, .sidebar .btn, .step button { transition:none; } }
+@media (prefers-reduced-motion:reduce) { .seg label, .dtabs button, .sbtn, .sidebar .btn, .step button { transition:none; } }
 </style>
 </head>
 <body>
@@ -374,22 +367,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="app-body">
   <div class="sidebar">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">Déplacement du planning</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
-      <div class="collapsible-body collapsed" id="deplacement-planning-body">
-        <div class="ts-title first">Décaler tout le planning</div>
-        <div class="pairs">
-          <button type="button" class="sbtn" onclick="shiftPlanningDays(-1)">− 1 jour</button><button type="button" class="sbtn" onclick="shiftPlanningDays(1)">+ 1 jour</button>
-          <button type="button" class="sbtn" onclick="shiftPlanningWeeks(-1)">− 1 semaine</button><button type="button" class="sbtn" onclick="shiftPlanningWeeks(1)">+ 1 semaine</button>
-          <button type="button" class="sbtn" onclick="shiftPlanningMonths(-1)">− 1 mois</button><button type="button" class="sbtn" onclick="shiftPlanningMonths(1)">+ 1 mois</button>
-        </div>
-        <div class="ts-title">Changer le T0</div>
-        <input type="date" id="t0-new-date" class="fld-in">
-      </div>
-    </div>
-    <hr class="sidebar-sep" style="margin:12px 0;">
-    <div>
-      <div class="collapsible-head" onclick="toggleSection('time-scale-body','time-scale-chev')"><h3 style="margin:0;">Échelle de temps</h3><span class="chev" id="time-scale-chev">▸</span></div>
-      <div class="collapsible-body collapsed" id="time-scale-body" style="margin-top:10px;">
+      <div class="sec-head"><h3>Échelle de temps</h3></div>
+      <div class="sec-body" id="time-scale-body">
         <div class="ts-block">
           <div class="ts-title first" id="ts-unit-lbl">Unité de la graduation</div>
           <div class="seg ts-unit" role="radiogroup" aria-labelledby="ts-unit-lbl">
@@ -438,8 +417,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('display-body','display-chev')"><h3 style="margin:0;">Affichage</h3><span class="chev" id="display-chev">▸</span></div>
-      <div class="collapsible-body collapsed" id="display-body" style="margin-top:10px;">
+      <div class="sec-head"><h3>Affichage</h3></div>
+      <div class="sec-body" id="display-body">
       <div class="dtabs" role="tablist" aria-label="Affichage">
         <button type="button" role="tab" id="dtab-elements" aria-selected="true" aria-controls="afficher-body" onclick="showDisplayTab('elements')">Éléments</button>
         <button type="button" role="tab" id="dtab-sizes" aria-selected="false" aria-controls="sizes-body" onclick="showDisplayTab('sizes')">Tailles</button>
@@ -562,14 +541,6 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       </div>
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
-    <div>
-      <div class="collapsible-head" onclick="toggleSection('models-body','models-chev')"><h3 style="margin:0;">Mes modèles</h3><span class="chev" id="models-chev">▸</span></div>
-      <div class="collapsible-body collapsed" id="models-body" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
-        <label class="btn" style="justify-content:center;width:100%;font-size:11px;cursor:pointer;margin:0;">➕ Ajout répertoire local<input type="file" webkitdirectory directory multiple style="display:none;" onchange="handleLocalDirSelect(event)"></label>
-        <div id="local-dirs-container" style="display:flex;flex-direction:column;gap:4px;"></div>
-      </div>
-    </div>
-    <hr class="sidebar-sep" style="margin:12px 0;">
     <div style="display:flex;flex-direction:column;gap:6px;padding:10px 0 4px 0;">
     <button class="btn btn-danger" style="justify-content:center;width:100%;" onclick="clearMacroPlanning()"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="m19 6-1 14H6L5 6"/></svg> Supprimer le planning</button>
     <button class="btn btn-warn" style="justify-content:center;width:100%;" onclick="resetAll()" title="Efface le planning et remet tous les réglages par défaut"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Tout réinitialiser</button>
@@ -618,6 +589,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Gantt : « + ajouter » crée l'élément et place le curseur dans son nom ; Échap annule, OK valide et en crée un nouveau.</li>
         <li>Barre latérale : Affichages et Tailles sont réunis dans un seul menu « Affichage » à deux onglets, et les choix exclusifs deviennent des listes déroulantes.</li>
         <li>Barre latérale : nouveau design (une seule échelle de tailles, sous-options à filet, onglets et boutons segmentés sur une ligne à la place des listes déroulantes, menu plus large) ; la palette de couleurs devient l'onglet « Couleurs » du menu Affichage.</li>
+        <li>Barre latérale : « Déplacement du planning » et « Mes modèles » sont retirés ; « Échelle de temps » et « Affichage » restent toujours ouverts.</li>
         <li>Échelle de temps : choix de l'unité (jour, semaine, mois, trimestre, année), repères au calendrier ou comptés depuis le début, exemple en direct, et bloc « Période affichée » regroupé.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
@@ -987,42 +959,10 @@ function toggleSidebar(forceOpen){
   saveState();
   requestAnimationFrame(()=>{ renderTimeline(); requestAnimationFrame(()=>renderTimeline()); });
 }
-function toggleSection(bodyId, chevId){
-  const body=document.getElementById(bodyId), chev=document.getElementById(chevId);
-  if(!body || !chev) return;
-  body.classList.toggle('collapsed');
-  chev.textContent = body.classList.contains('collapsed') ? '▸' : '▾';
-  _saveUIPrefs();
-}
 
-function _saveUIPrefs() {
-  const prefs = {
-    depPlanning: document.getElementById('deplacement-planning-body')?.classList.contains('collapsed'),
-    display: document.getElementById('display-body')?.classList.contains('collapsed'),
-    timeScale: document.getElementById('time-scale-body')?.classList.contains('collapsed'),
-    models: document.getElementById('models-body')?.classList.contains('collapsed')
-  };
-  localStorage.setItem('TEST_MP_UI_PREFS', JSON.stringify(prefs));
-}
+function _saveUIPrefs() { /* sections toujours ouvertes : rien à mémoriser */ }
 
-function restoreUIPrefs() {
-  const data = localStorage.getItem('TEST_MP_UI_PREFS');
-  if (!data) return; // au premier lancement, c'est null, les classes HTML "collapsed" restent actives
-  try {
-    const prefs = JSON.parse(data);
-    const setSec = (bId, cId, collapsed) => {
-      const b = document.getElementById(bId), c = document.getElementById(cId);
-      if (b && c && collapsed !== undefined) {
-        b.classList.toggle('collapsed', collapsed);
-        c.textContent = collapsed ? '▸' : '▾';
-      }
-    };
-    setSec('deplacement-planning-body', 'deplacement-planning-chev', prefs.depPlanning);
-    setSec('display-body', 'display-chev', prefs.display);
-    setSec('time-scale-body', 'time-scale-chev', prefs.timeScale);
-    setSec('models-body', 'models-chev', prefs.models);
-  } catch(e){}
-}
+function restoreUIPrefs() { /* sections toujours ouvertes */ }
 
 function changeTaskSize(d){ taskRH=Math.max(8,Math.min(80,taskRH+d)); document.getElementById('task-size-val').textContent=taskRH; saveState(); renderTimeline(); }
 function changeJalonSize(d){ jalonRH=Math.max(4,Math.min(80,jalonRH+d)); document.getElementById('jalon-size-val').textContent=jalonRH; saveState(); renderTimeline(); }
@@ -2449,9 +2389,7 @@ function resetDefaults() {
   document.getElementById('chk-task-label').checked = true;
   const r1=document.querySelector('input[name="dates-pos"][value="right"]'); if(r1) r1.checked=true;
   const r2=document.querySelector('input[name="task-label-pos"][value="left"]'); if(r2) r2.checked=true;
-  const ab=document.getElementById('display-body'), ac=document.getElementById('display-chev'); if(ab && ac){ ab.classList.add('collapsed'); ac.textContent='▸'; }
   if(typeof showDisplayTab==='function') showDisplayTab('elements');
-  const tb=document.getElementById('time-scale-body'), tc=document.getElementById('time-scale-chev'); if(tb && tc){ tb.classList.add('collapsed'); tc.textContent='▸'; }
   timebarColor='#0b0f14'; todaylineColor='#e74c3c'; defaultTaskJalonPalette=[...DEFAULT_TASK_JALON_PALETTE]; syncPaletteInputs();
   defaultJalonColorsMode='lane'; const rLane=document.querySelector('input[name="default-jalon-colors-mode"][value="lane"]'); if(rLane) rLane.checked=true;
   toggleTitle();
