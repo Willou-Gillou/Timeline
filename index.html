@@ -378,16 +378,13 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <div class="collapsible-head" onclick="toggleSection('afficher-body','afficher-chev')"><h3 style="margin:0;">AFFICHAGES</h3><span class="chev" id="afficher-chev">▸</span></div>
       <div class="radio-group collapsible-body collapsed" id="afficher-body" style="margin-top:10px;">
         <label><input type="checkbox" id="chk-title" checked onchange="toggleTitle()"/> Titre planning</label>
-        <label><input type="checkbox" id="chk-timebar" checked onchange="toggleTimebarOptions(); renderTimeline(); saveState()"/> Barre de temps</label>
-        <div class="sub-options" id="timebar-sub">
-          <label><input type="checkbox" id="chk-todayline" checked onchange="toggleTodayLineOptions(); renderTimeline(); saveState()"/> Ligne de temps</label>
+        <label><input type="checkbox" id="chk-todayline" checked onchange="toggleTodayLineOptions(); renderTimeline(); saveState()"/> Ligne de temps</label>
           <div class="sub-options" id="todayline-sub">
             <label><input type="checkbox" id="chk-todayline-vline" checked onchange="renderTimeline(); saveState()"/> Barre verticale (pointillés)</label>
             <label><input type="checkbox" id="chk-todayline-hline" checked onchange="renderTimeline(); saveState()"/> Barre horizontale</label>
             <label><input type="checkbox" id="chk-todayline-circle" checked onchange="renderTimeline(); saveState()"/> Rond central</label>
             <label><input type="checkbox" id="chk-todayline-date" onchange="renderTimeline(); saveState()"/> Date au-dessus du rond</label>
             <label><input type="checkbox" id="chk-todayline-arrow" checked onchange="renderTimeline(); saveState()"/> Aujourd'hui + flèche</label>
-        </div>
         </div>
 
         <label><input type="checkbox" id="chk-freezes" checked onchange="toggleFreezesOptions(); renderTimeline(); saveState()"/> Périodes de gel</label>
@@ -960,11 +957,6 @@ function setDefaultPaletteColor(i,v){ defaultTaskJalonPalette[i]=v; saveState();
 
 // ═══ OPTIONS ═════════════════════════════════════════════════
 function toggleTitle(){ document.getElementById('planning-title-wrap').style.display=document.getElementById('chk-title').checked?'block':'none'; }
-function toggleTimebarOptions() {
-  const chk = document.getElementById('chk-timebar');
-  const sub = document.getElementById('timebar-sub');
-  if (chk && sub) sub.style.display = chk.checked ? '' : 'none';
-}
 // ═══ JOURS FÉRIÉS FRANÇAIS (métropole) : calcul, sans donnée externe ═══
 function easterDate(y){ // algorithme de Meeus/Jones/Butcher (calendrier grégorien)
   const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
@@ -1639,7 +1631,7 @@ function renderTimeline(){
   const svg=document.getElementById('tl-svg'); svg.innerHTML='';
   const _delGroups=[]; const _quickAdd=[]; const _laneBands=[]; const _taskBoxes=[];
   const NS='http://www.w3.org/2000/svg';
-  const showTimeBar=document.getElementById('chk-timebar').checked;
+  const showTimeBar=true; // la barre de temps est toujours affichée
   const showTodayLine=document.getElementById('chk-todayline').checked;
   const showDates=document.getElementById('chk-dates').checked;
   const datesPos=document.querySelector('input[name="dates-pos"]:checked')?.value||'right';
@@ -2441,7 +2433,7 @@ function resetTimeScaleDefaults(){
 }
 function resetAfficherDefaults(){
   const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.checked=v; };
-  set('chk-title', true); set('chk-timebar', true); set('chk-todayline', true); set('chk-todayline-vline', true); set('chk-todayline-hline', true); set('chk-todayline-circle', true); set('chk-todayline-date', false); set('chk-freezes', true); set('chk-holidays', false); set('chk-todayline-arrow', true); set('chk-taches-master', true); set('chk-lane-col', true); set('chk-dates', true); set('chk-task-label', true); set('chk-task-dash-dot', true); set('chk-jalons-master', true); set('chk-jalons-flags', true); set('chk-jalon-lines', true); set('chk-dash-dot', false);
+  set('chk-title', true); set('chk-todayline', true); set('chk-todayline-vline', true); set('chk-todayline-hline', true); set('chk-todayline-circle', true); set('chk-todayline-date', false); set('chk-freezes', true); set('chk-holidays', false); set('chk-todayline-arrow', true); set('chk-taches-master', true); set('chk-lane-col', true); set('chk-dates', true); set('chk-task-label', true); set('chk-task-dash-dot', true); set('chk-jalons-master', true); set('chk-jalons-flags', true); set('chk-jalon-lines', true); set('chk-dash-dot', false);
   const d=document.querySelector('input[name="dates-pos"][value="right"]'); if(d) d.checked=true;
   const t=document.querySelector('input[name="task-label-pos"][value="left"]'); if(t) t.checked=true;
   const fl=document.querySelector('input[name="flag-type"][value="big"]'); if(fl) fl.checked=true;
@@ -2501,7 +2493,6 @@ function resetDefaults() {
   const cDashDot=document.getElementById('chk-dash-dot'); if(cDashDot) cDashDot.checked = false;
   const cJalLines=document.getElementById('chk-jalon-lines'); if(cJalLines) cJalLines.checked = true;
   document.getElementById('chk-title').checked = true;
-  document.getElementById('chk-timebar').checked = true;
   document.getElementById('chk-todayline').checked = true;
   const cTachesMaster=document.getElementById('chk-taches-master'); if(cTachesMaster) cTachesMaster.checked = true;
   const cLaneCol=document.getElementById('chk-lane-col'); if(cLaneCol) cLaneCol.checked = true;
@@ -2527,7 +2518,6 @@ function resetDefaults() {
   toggleDatesOptions();
   toggleTaskLabelOptions();
   updateDayStepVisibility();
-  if(typeof toggleTimebarOptions==='function') toggleTimebarOptions();
   if(typeof toggleTodayLineOptions==='function') toggleTodayLineOptions();
   if(typeof toggleFreezesOptions==='function') toggleFreezesOptions();
   if(typeof toggleJalonsOptions==='function') toggleJalonsOptions();
@@ -2801,7 +2791,6 @@ function saveState() {
     showTitle: document.getElementById('chk-title')?.checked,
     showLaneCol: document.getElementById('chk-lane-col')?.checked,
     laneColW,
-    showTimeBar: document.getElementById('chk-timebar')?.checked,
     showTodayLine: document.getElementById('chk-todayline')?.checked,
     showTodayLineVline: document.getElementById('chk-todayline-vline')?.checked,
     showTodayLineHline: document.getElementById('chk-todayline-hline')?.checked,
@@ -2877,7 +2866,6 @@ saveState._orig = function(){
       showTitle: document.getElementById('chk-title')?.checked,
       showLaneCol: document.getElementById('chk-lane-col')?.checked,
       laneColW,
-      showTimeBar: document.getElementById('chk-timebar')?.checked,
       showTodayLine: document.getElementById('chk-todayline')?.checked,
       showTodayLineVline: document.getElementById('chk-todayline-vline')?.checked,
       showTodayLineHline: document.getElementById('chk-todayline-hline')?.checked,
@@ -2965,7 +2953,6 @@ function restoreSidebar(s) {
   setChk('chk-title', s.showTitle);
   setChk('chk-lane-col', s.showLaneCol);
   laneColW=Math.min(400,Math.max(80,+s.laneColW||130)); { const e=document.getElementById('lane-col-w'); if(e) e.value=laneColW; const v=document.getElementById('lane-col-w-val'); if(v) v.textContent=laneColW; }
-  setChk('chk-timebar', s.showTimeBar);
   setChk('chk-todayline', s.showTodayLine);
   setChk('chk-todayline-vline', s.showTodayLineVline ?? true);
   setChk('chk-todayline-hline', s.showTodayLineHline ?? true);
@@ -2984,7 +2971,6 @@ function restoreSidebar(s) {
   setChk('chk-task-label', s.showTaskLabel);
   setChk('chk-task-dash-dot', s.showTaskDashDot ?? true);
 
-  if(typeof toggleTimebarOptions==='function') toggleTimebarOptions();
   if(typeof toggleTodayLineOptions==='function') toggleTodayLineOptions();
   if(typeof toggleFreezesOptions==='function') toggleFreezesOptions();
   if(typeof toggleJalonsOptions==='function') toggleJalonsOptions();
