@@ -1342,8 +1342,17 @@ function addTask(lid2,type){
   // Fin = baseDate + 4 (5 jours ouvrés lun→ven)
   const end=new Date(baseDate); end.setDate(baseDate.getDate()+4);
   const tColor=t==='J'?getDefaultJalonColor(lane.color):lane.color;
-  lane.tasks.push({id:tid++,title:t==='J'?'nouveau jalon':'nouvelle tâche',type:t,color:tColor,start:fmt(baseDate),end:fmt(t==='J'?baseDate:end),pct:0,status:''});
+  const newId=tid++;
+  lane.tasks.push({id:newId,title:t==='J'?'nouveau jalon':'nouvelle tâche',type:t,color:tColor,start:fmt(baseDate),end:fmt(t==='J'?baseDate:end),pct:0,status:''});
   renderData();
+  // Dans le Gantt, on passe tout de suite en édition du nom de la nouvelle activité
+  if(document.getElementById('view-timeline')?.classList.contains('active')){
+    renderTimeline(); saveState();
+    requestAnimationFrame(()=>{
+      const te=document.querySelector('#tl-svg [data-tt="'+lid2+'-'+newId+'"]'); const nt=getTask(lid2,newId);
+      if(te&&nt) openEdit({type:'task',laneId:lid2,taskId:newId},nt.title||'',te.getBoundingClientRect());
+    });
+  }
 }
 
 function delTask(lid2,tid2){ const l=getLane(lid2); if(!l)return; l.tasks=l.tasks.filter(t=>t.id!==tid2); renderData(); renderTimeline(); saveState(); }
@@ -1871,7 +1880,7 @@ function renderTimeline(){
       const ty2=smallFlag?labelY+(i+1)*LABEL_LINE_H-2:labelY+flagPadV+(i+1)*LABEL_LINE_H-1;
       const tEl=smallFlag?el('text',{x:m.x+SF_G+SF_PW+5,y:ty2,'text-anchor':'start','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line):el('text',{x:m.x+lw/2,y:ty2,'text-anchor':'middle','font-size':jalonFontSize,'font-weight':'bold',fill:'#333',cursor:'text'},line);
       if(smallFlag){ tEl.addEventListener('mouseenter',()=>fDelG.style.display='block'); tEl.addEventListener('mouseleave',()=>fDelG.style.display='none'); }
-      tEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:m.laneId,taskId:m.taskId},m.label,tEl.getBoundingClientRect());});
+      tEl.setAttribute('data-tt',m.laneId+'-'+m.taskId); tEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:m.laneId,taskId:m.taskId},m.label,tEl.getBoundingClientRect());});
       flagGroup.appendChild(tEl);
     });
 
@@ -2137,7 +2146,7 @@ function renderTimeline(){
               if(bw>24){
                 const baseY=by+bh/2-((taskLines.length-1)*taskLineH)/2+4;
                 const lEl=multiText(x1+bw/2,baseY,task.title||'',{'text-anchor':'middle','font-size':taskFontSize,'font-weight':'600',fill:'white',cursor:'text'},taskLineH,'middle');
-                lEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',lEl.getBoundingClientRect());}); taskHeaderG.appendChild(lEl);
+                lEl.setAttribute('data-tt',lane.id+'-'+task.id); lEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',lEl.getBoundingClientRect());}); taskHeaderG.appendChild(lEl);
               }
             } else if(taskLabelPos==='bottom'){
               const baseY=by+bh+taskFontSize+2;
@@ -2147,7 +2156,7 @@ function renderTimeline(){
                 const lW=lTxt.length*taskFontSize*0.6;
                 const lCx=Math.min(Math.max(x1+bw/2, LL+lW/2), VW-lW/2);
                 const lEl=multiText(lCx,baseY,lTxt,{'text-anchor':'middle','font-size':taskFontSize,'font-weight':'600',fill:'#333',cursor:'text'},taskLineH,'middle');
-                lEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',lEl.getBoundingClientRect());}); taskHeaderG.appendChild(lEl);
+                lEl.setAttribute('data-tt',lane.id+'-'+task.id); lEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',lEl.getBoundingClientRect());}); taskHeaderG.appendChild(lEl);
               }
               // si bothBottom : géré dans le bloc datesPos==='bottom' ci-dessous
             } else {
@@ -2155,7 +2164,7 @@ function renderTimeline(){
               const titleW=Math.max(...taskLines.map(line=>line.length),0)*6.5+8;
               if(showTaskDashDot) svg.appendChild(el('line',{x1:labelX+titleW,y1:by+bh/2,x2:x1,y2:by+bh/2,stroke:'#555','stroke-width':1,'stroke-dasharray':'3,2',opacity:'0.5'}));
               const lEl=multiText(labelX,labelY,task.title||'',{'text-anchor':'start','font-size':taskFontSize,'font-weight':'600',fill:'#333',cursor:'text'},taskLineH,'start');
-              lEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',lEl.getBoundingClientRect());}); svg.appendChild(lEl);
+              lEl.setAttribute('data-tt',lane.id+'-'+task.id); lEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',lEl.getBoundingClientRect());}); svg.appendChild(lEl);
             }
           }
 
@@ -2191,7 +2200,7 @@ function renderTimeline(){
                 tspDate.textContent=tf;
                 cEl.appendChild(tspTitle);
                 cEl.appendChild(tspDate);
-                cEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',cEl.getBoundingClientRect());}); taskHeaderG.appendChild(cEl);
+                cEl.setAttribute('data-tt',lane.id+'-'+task.id); cEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',cEl.getBoundingClientRect());}); taskHeaderG.appendChild(cEl);
               } else {
                 // Dates seules centrées avec clamp
                 const dW=tf.length*taskDateFontSize*0.6;
