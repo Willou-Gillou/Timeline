@@ -476,7 +476,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <div class="sub-options" id="taches-sub">
           <label><input type="checkbox" id="chk-task-label" checked onchange="toggleTaskLabelOptions()"/> Titre des tâches</label>
           <div class="sub-options" id="task-label-sub">
-            <div class="seg seg3"><label><input type="radio" name="task-label-pos" value="inside" onchange="renderTimeline(); saveState()"/> Dans</label>
+            <div class="seg seg3"><label><input type="radio" name="task-label-pos" value="inside" onchange="renderTimeline(); saveState()"/> Dedans</label>
             <label><input type="radio" name="task-label-pos" value="left" checked onchange="renderTimeline(); saveState()"/> Gauche</label>
             <label><input type="radio" name="task-label-pos" value="bottom" onchange="renderTimeline(); saveState()"/> Dessous</label></div>
             <label><input type="checkbox" id="chk-task-dash-dot" checked onchange="renderTimeline(); saveState()"/> Trait pointillé tâches</label>
@@ -534,8 +534,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <div class="grp">Jalons</div>
         <div class="ts-sub" style="margin-top:6px;">Couleur par défaut</div>
         <div class="radio-group seg">
-          <label title="Une couleur différente par jalon"><input type="radio" name="default-jalon-colors-mode" value="different" onchange="setDefaultJalonColorsMode(this.value)"/> Variées</label>
-          <label title="Couleur de la phase"><input type="radio" name="default-jalon-colors-mode" value="lane" checked onchange="setDefaultJalonColorsMode(this.value)"/> Phase</label>
+          <label title="Chaque jalon prend la couleur de sa phase"><input type="radio" name="default-jalon-colors-mode" value="lane" checked onchange="setDefaultJalonColorsMode(this.value)"/> Aligné Phase</label>
+          <label title="Les jalons reprennent les couleurs de la séquence par défaut"><input type="radio" name="default-jalon-colors-mode" value="different" onchange="setDefaultJalonColorsMode(this.value)"/> Palette Coul.</label>
         </div>
         <div class="grp">Séquence par défaut</div>
         <div class="swatches"><label class="sw" title="Couleur n°1"><input type="color" id="palette-color-1" value="#297FB8" onchange="setDefaultPaletteColor(0,this.value)"/><span>1</span></label><label class="sw" title="Couleur n°2"><input type="color" id="palette-color-2" value="#27AE60" onchange="setDefaultPaletteColor(1,this.value)"/><span>2</span></label><label class="sw" title="Couleur n°3"><input type="color" id="palette-color-3" value="#E67E22" onchange="setDefaultPaletteColor(2,this.value)"/><span>3</span></label><label class="sw" title="Couleur n°4"><input type="color" id="palette-color-4" value="#F1C40F" onchange="setDefaultPaletteColor(3,this.value)"/><span>4</span></label><label class="sw" title="Couleur n°5"><input type="color" id="palette-color-5" value="#C0392B" onchange="setDefaultPaletteColor(4,this.value)"/><span>5</span></label><label class="sw" title="Couleur n°6"><input type="color" id="palette-color-6" value="#9B59B6" onchange="setDefaultPaletteColor(5,this.value)"/><span>6</span></label><label class="sw" title="Couleur n°7"><input type="color" id="palette-color-7" value="#D3D3D3" onchange="setDefaultPaletteColor(6,this.value)"/><span>7</span></label><label class="sw" title="Couleur n°8"><input type="color" id="palette-color-8" value="#EFCBA2" onchange="setDefaultPaletteColor(7,this.value)"/><span>8</span></label><label class="sw" title="Couleur n°9"><input type="color" id="palette-color-9" value="#2C3E50" onchange="setDefaultPaletteColor(8,this.value)"/><span>9</span></label><label class="sw" title="Couleur n°10"><input type="color" id="palette-color-10" value="#50C2E5" onchange="setDefaultPaletteColor(9,this.value)"/><span>10</span></label><label class="sw" title="Couleur n°11"><input type="color" id="palette-color-11" value="#1F618D" onchange="setDefaultPaletteColor(10,this.value)"/><span>11</span></label></div>
@@ -802,7 +802,7 @@ function getDefaultJalonColor(laneColor){
   jalonColorIdx=(jalonColorIdx+1)%len;
   return color;
 }
-function setDefaultJalonColorsMode(v){ defaultJalonColorsMode=(v==='lane'?'lane':'different'); saveState(); }
+function setDefaultJalonColorsMode(v){ defaultJalonColorsMode=(v==='lane'?'lane':'different'); shuffleMilestoneColors(); }
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
 function autoResize(el){ el.style.height='auto'; el.style.height=el.scrollHeight+'px'; }
 function isoWeek(d){ const t=new Date(d); t.setHours(0,0,0,0); t.setDate(t.getDate()+4-(t.getDay()||7)); const y=new Date(t.getFullYear(),0,1); return Math.ceil(((t-y)/86400000+1)/7); }
