@@ -180,7 +180,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 /* ═══ Barre latérale : règles de design ═══
    Une seule échelle : texte 12 px (lignes), 11 px (aides), 13 px (titres de section) ; rayons 8 px ; lignes 32 px.
    Couleur : encre (#111827) pour tout ce qui est actif ; le rouge de la marque ne sert qu'au focus. */
-.sidebar { --ink:#111827; --text:#1f2937; --muted:#4b5563; --faint:#6b7280; --line:#e8ebef; --fill:#f3f4f6; --fill-2:#e8ebef; --edge:#d3d8df; --on:#1f2937;
+.sidebar { --accent:#c0392b; --ink:#111827; --text:#1f2937; --muted:#4b5563; --faint:#6b7280; --line:#e8ebef; --fill:#f3f4f6; --fill-2:#e8ebef; --edge:#d3d8df; --on:#c0392b;
   width:272px; background:#fff; border-right:1px solid #e5e7eb; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; padding:4px 16px 20px; gap:0; font-size:12px; color:var(--text);
   transition:width .18s ease, padding .18s ease, border-color .18s ease; }
 .sidebar > div { min-width:0; }
@@ -217,22 +217,16 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 /* Boutons segmentés et onglets */
 .seg, .dtabs { display:flex; gap:2px; padding:2px; margin:4px 0 6px; background:var(--fill-2); border-radius:9px; }
 .radio-group.seg { flex-direction:row; gap:2px; }
-.seg label, .dtabs button { flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; min-height:28px; padding:0 8px; border:0; border-radius:7px; background:transparent; font-family:inherit; font-size:12px; font-weight:500; line-height:1.15; text-align:center; color:var(--muted); cursor:pointer; transition:background .15s, color .15s, box-shadow .15s; }
+.seg label, .dtabs button { flex:1 1 auto; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; justify-content:center; min-height:28px; padding:0 6px; border:0; border-radius:7px; background:transparent; font-family:inherit; font-size:12px; font-weight:500; line-height:1.15; text-align:center; color:var(--muted); cursor:pointer; transition:background .15s, color .15s, box-shadow .15s; }
 .dtabs button { min-height:30px; font-weight:600; }
-.seg label:hover, .dtabs button:hover { color:var(--ink); }
-.seg label:has(input:checked), .dtabs button[aria-selected="true"] { background:#fff; color:var(--ink); font-weight:600; box-shadow:0 1px 2px rgba(16,24,40,.16), 0 0 0 .5px rgba(16,24,40,.05); }
+.seg label:hover, .dtabs button:hover { color:var(--accent); }
+.seg label:has(input:checked), .dtabs button[aria-selected="true"] { background:#fff; color:var(--accent); font-weight:600; box-shadow:0 1px 2px rgba(16,24,40,.16), 0 0 0 .5px rgba(16,24,40,.05); }
 .seg label input[type=radio] { position:absolute; opacity:0; width:0; height:0; margin:0; -webkit-appearance:none; appearance:none; pointer-events:none; }
 .seg label:has(input:focus-visible), .dtabs button:focus-visible { outline:2px solid #c0392b88; outline-offset:1px; }
 .seg.seg-v { flex-direction:column; }
 .seg.seg-v label { justify-content:flex-start; padding:0 10px; min-height:30px; }
-.ts-unit label { flex:1 1 auto; padding:0 3px; font-size:11.5px; }
+.ts-unit label { padding:0 3px; font-size:11.5px; }
 .pane-hidden { display:none !important; }
-/* Listes déroulantes */
-.dd-src { display:none !important; }
-select.dd { display:block; width:100%; box-sizing:border-box; height:32px; margin:4px 0 6px; padding:0 30px 0 10px; border:1px solid var(--edge); border-radius:8px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%234b5563' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center; -webkit-appearance:none; appearance:none; color:var(--ink); font-size:12px; font-weight:500; line-height:1; font-family:inherit; cursor:pointer; text-overflow:ellipsis; transition:border-color .15s, box-shadow .15s; }
-select.dd:hover { border-color:#aeb6c1; }
-select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 0 3px rgba(17,24,39,.12); }
-.ts-block .fld select.dd, .ts-block #day-step-host select.dd { margin:4px 0 0; }
 /* Boutons et champs */
 .sbtn, .sidebar .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:0 10px; border:1px solid var(--edge); border-radius:8px; background:#fff; color:var(--text); font-family:inherit; font-size:12px; font-weight:500; cursor:pointer; box-shadow:none; transition:background .12s, border-color .12s, color .12s; }
 .sbtn:hover, .sidebar .btn:hover { background:var(--fill); border-color:#c3cad3; }
@@ -257,7 +251,7 @@ select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 
 .step button:active { background:var(--fill-2); }
 .step button:focus-visible { outline:2px solid #c0392b88; outline-offset:1px; }
 .step span { min-width:32px; text-align:center; font-size:12px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
-@media (prefers-reduced-motion:reduce) { .seg label, .dtabs button, select.dd, .collapsible-head .chev, .sbtn, .sidebar .btn, .step button { transition:none; } }
+@media (prefers-reduced-motion:reduce) { .seg label, .dtabs button, .collapsible-head .chev, .sbtn, .sidebar .btn, .step button { transition:none; } }
 </style>
 </head>
 <body>
@@ -402,17 +396,16 @@ select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 
             <div class="ts-title" id="ts-count-lbl">Repères</div>
             <div class="seg" role="radiogroup" aria-labelledby="ts-count-lbl">
               <label title="Dates réelles du calendrier"><input type="radio" name="scale-count" value="cal" checked onchange="onScaleCountChange(this.value)"/> Calendrier</label>
-              <label title="Compteur à partir du début du planning"><input type="radio" name="scale-count" value="num" onchange="onScaleCountChange(this.value)"/> Depuis le début</label>
+              <label title="Numéroté depuis le début du planning (S1, S2…)"><input type="radio" name="scale-count" value="num" onchange="onScaleCountChange(this.value)"/> Numéroté</label>
             </div>
           </div>
           <div id="day-step-wrap" style="display:none;">
-            <div class="ts-title">Jours affichés</div>
-            <div id="day-step-host"></div>
-            <div style="display:none;">
-              <input type="radio" name="day-step" value="1"/>
-              <input type="radio" name="day-step" value="2"/>
-              <input type="radio" name="day-step" value="5" checked/>
-              <input type="radio" name="day-step" value="10"/>
+            <div class="ts-title">Un jour sur</div>
+            <div class="seg" role="radiogroup" aria-label="Un jour sur">
+              <label title="Tous les jours"><input type="radio" name="day-step" value="1" onchange="onDayStepChange(0)"/> 1</label>
+              <label title="Un jour sur 2"><input type="radio" name="day-step" value="2" onchange="onDayStepChange(1)"/> 2</label>
+              <label title="Un jour sur 5"><input type="radio" name="day-step" value="5" checked onchange="onDayStepChange(2)"/> 5</label>
+              <label title="Un jour sur 10"><input type="radio" name="day-step" value="10" onchange="onDayStepChange(3)"/> 10</label>
             </div>
           </div>
           <div class="ts-sample" id="ts-sample" aria-live="polite"></div>
@@ -421,15 +414,15 @@ select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 
           <div class="ts-title first">Période affichée</div>
           <div class="fld"><div class="ts-sub">Début</div>
             <div class="radio-group seg">
-              <label><input type="radio" name="tl-start" value="0" onchange="renderTimeline(); saveState()"/> Début du premier mois</label>
-              <label><input type="radio" name="tl-start" value="1" checked onchange="renderTimeline(); saveState()"/> Début du mois précédent</label>
+              <label title="Début du premier mois"><input type="radio" name="tl-start" value="0" onchange="renderTimeline(); saveState()"/> Début de mois</label>
+              <label title="Début du mois précédent"><input type="radio" name="tl-start" value="1" checked onchange="renderTimeline(); saveState()"/> −1 mois</label>
             </div>
           </div>
           <div class="fld"><div class="ts-sub">Fin</div>
-            <div class="radio-group seg seg-v">
-              <label><input type="radio" name="tl-end" value="2" onchange="renderTimeline(); saveState()"/> Dernier jour du planning</label>
-              <label><input type="radio" name="tl-end" value="0" checked onchange="renderTimeline(); saveState()"/> Fin du dernier mois</label>
-              <label><input type="radio" name="tl-end" value="1" onchange="renderTimeline(); saveState()"/> Fin du mois suivant</label>
+            <div class="radio-group seg">
+              <label title="Dernier jour du planning"><input type="radio" name="tl-end" value="2" onchange="renderTimeline(); saveState()"/> Dernier jour</label>
+              <label title="Fin du dernier mois"><input type="radio" name="tl-end" value="0" checked onchange="renderTimeline(); saveState()"/> Fin de mois</label>
+              <label title="Fin du mois suivant"><input type="radio" name="tl-end" value="1" onchange="renderTimeline(); saveState()"/> +1 mois</label>
             </div>
           </div>
         </div>
@@ -464,12 +457,12 @@ select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 
         <div class="sub-options" id="jalons-sub">
           <label class="adv"><input type="checkbox" id="chk-jalons-flags" checked onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Drapeaux jalons</label>
           <div class="opt-sub-title">Type de drapeau</div>
-          <div class="seg"><label><input type="radio" name="flag-type" value="big" checked onchange="renderTimeline(); saveState()"/> Grand drapeau</label>
-          <label><input type="radio" name="flag-type" value="small" onchange="renderTimeline(); saveState()"/> Petit drapeau</label></div>
+          <div class="seg"><label><input type="radio" name="flag-type" value="big" checked onchange="renderTimeline(); saveState()"/> Grand</label>
+          <label><input type="radio" name="flag-type" value="small" onchange="renderTimeline(); saveState()"/> Petit</label></div>
           <label><input type="checkbox" id="chk-dash-dot" onchange="toggleDashDotOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
           <div class="sub-options" id="dash-dot-sub" style="display:none;">
-            <div class="seg seg-v"><label><input type="radio" name="dash-dot-end" value="jalon" checked onchange="renderTimeline(); saveState()"/> S'arrête au jalon</label>
-            <label><input type="radio" name="dash-dot-end" value="bottom" onchange="renderTimeline(); saveState()"/> Jusqu'en bas du Gantt</label></div>
+            <div class="seg"><label><input type="radio" name="dash-dot-end" value="jalon" checked onchange="renderTimeline(); saveState()"/> Au jalon</label>
+            <label><input type="radio" name="dash-dot-end" value="bottom" onchange="renderTimeline(); saveState()"/> Jusqu'en bas</label></div>
           </div>
           <label><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
           <div class="sub-options" id="jalon-lines-sub">
@@ -487,16 +480,16 @@ select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 
         <div class="sub-options" id="taches-sub">
           <label><input type="checkbox" id="chk-task-label" checked onchange="toggleTaskLabelOptions()"/> Titre des tâches</label>
           <div class="sub-options" id="task-label-sub">
-            <div class="seg seg-v"><label><input type="radio" name="task-label-pos" value="inside" onchange="renderTimeline(); saveState()"/> Dans la barre</label>
-            <label><input type="radio" name="task-label-pos" value="left" checked onchange="renderTimeline(); saveState()"/> À gauche</label>
-            <label><input type="radio" name="task-label-pos" value="bottom" onchange="renderTimeline(); saveState()"/> En dessous</label></div>
+            <div class="seg"><label><input type="radio" name="task-label-pos" value="inside" onchange="renderTimeline(); saveState()"/> Dans</label>
+            <label><input type="radio" name="task-label-pos" value="left" checked onchange="renderTimeline(); saveState()"/> Gauche</label>
+            <label><input type="radio" name="task-label-pos" value="bottom" onchange="renderTimeline(); saveState()"/> Dessous</label></div>
             <label><input type="checkbox" id="chk-task-dash-dot" checked onchange="renderTimeline(); saveState()"/> Trait pointillé tâches</label>
           </div>
 
           <label><input type="checkbox" id="chk-dates" checked onchange="toggleDatesOptions()"/> Dates tâches</label>
           <div class="sub-options" id="dates-sub">
-            <div class="seg"><label><input type="radio" name="dates-pos" value="right" checked onchange="renderTimeline(); saveState()"/> À droite</label>
-            <label><input type="radio" name="dates-pos" value="bottom" onchange="renderTimeline(); saveState()"/> En bas</label></div>
+            <div class="seg"><label><input type="radio" name="dates-pos" value="right" checked onchange="renderTimeline(); saveState()"/> Droite</label>
+            <label><input type="radio" name="dates-pos" value="bottom" onchange="renderTimeline(); saveState()"/> Bas</label></div>
           </div>
         </div>
 
@@ -548,8 +541,8 @@ select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 
         <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">Couleur ligne de temps <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="todayline-color" value="#e74c3c" onchange="setTodaylineColor(this.value)"/></label>
         <div class="ts-title">Couleurs des jalons par défaut</div>
         <div class="radio-group seg" style="margin-top:2px;">
-          <label><input type="radio" name="default-jalon-colors-mode" value="different" onchange="setDefaultJalonColorsMode(this.value)"/> Couleurs différentes</label>
-          <label><input type="radio" name="default-jalon-colors-mode" value="lane" checked onchange="setDefaultJalonColorsMode(this.value)"/> Couleurs de la phase</label>
+          <label><input type="radio" name="default-jalon-colors-mode" value="different" onchange="setDefaultJalonColorsMode(this.value)"/> Variées</label>
+          <label><input type="radio" name="default-jalon-colors-mode" value="lane" checked onchange="setDefaultJalonColorsMode(this.value)"/> Phase</label>
         </div>
         <div class="ts-title">Séquence de couleurs par défaut</div>
         <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px;">
@@ -628,7 +621,7 @@ select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 
         <li>Affichage : « Barre de temps » est toujours active et « Ligne de temps » passe au premier niveau.</li>
         <li>Gantt : « + ajouter » crée l'élément et place le curseur dans son nom ; Échap annule, OK valide et en crée un nouveau.</li>
         <li>Barre latérale : Affichages et Tailles sont réunis dans un seul menu « Affichage » à deux onglets, et les choix exclusifs deviennent des listes déroulantes.</li>
-        <li>Barre latérale : nouveau design (une seule échelle de tailles, interrupteurs sobres, sous-options à filet, onglets et boutons segmentés, menu plus large).</li>
+        <li>Barre latérale : nouveau design (une seule échelle de tailles, sous-options à filet, onglets et boutons segmentés sur une ligne à la place des listes déroulantes, menu plus large).</li>
         <li>Échelle de temps : choix de l'unité (jour, semaine, mois, trimestre, année), repères au calendrier ou comptés depuis le début, exemple en direct, et bloc « Période affichée » regroupé.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
@@ -847,7 +840,6 @@ function updateDayStepVisibility(){
 function onDayStepChange(idx){
   idx=Math.max(0,Math.min(3,idx));
   document.querySelectorAll('input[name="day-step"]').forEach((el,i)=>{ el.checked = i===idx; });
-  const sel=document.getElementById('day-step-select'); if(sel) sel.value=String(idx);
   updateScaleSample();
   saveState();
   renderTimeline();
@@ -3387,43 +3379,8 @@ function showDisplayTab(tab){
   document.getElementById('dtab-elements')?.setAttribute('aria-selected',String(el));
   document.getElementById('dtab-sizes')?.setAttribute('aria-selected',String(!el));
 }
-// Les choix exclusifs s'affichent en menu déroulant ; les boutons radio d'origine restent en place (masqués) : ils portent la valeur et les réglages enregistrés
-const DD_RADIOS={
-  'dash-dot-end':'Fin du trait pointillé des jalons','task-label-pos':'Position du titre des tâches',
-  'tl-start':'Début de la barre de temps','tl-end':'Fin de la barre de temps','default-jalon-colors-mode':'Couleurs des jalons par défaut'
-};
-function _mkSelect(label,opts,onChange){
-  const sel=document.createElement('select'); sel.className='dd'; sel.setAttribute('aria-label',label);
-  opts.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; sel.appendChild(o); });
-  sel.addEventListener('change',()=>onChange(sel.value));
-  return sel;
-}
-function buildDropdowns(){
-  Object.keys(DD_RADIOS).forEach(name=>{
-    const radios=[...document.querySelectorAll('input[type=radio][name="'+name+'"]')]; if(!radios.length) return;
-    const first=radios[0], host=first.closest('.seg')||first.closest('label');
-    const opts=radios.map(r=>[r.value,(r.closest('label')?.textContent||r.value).trim()]);
-    const sel=_mkSelect(DD_RADIOS[name],opts,v=>{ const r=radios.find(x=>x.value===v); if(r){ r.checked=true; r.dispatchEvent(new Event('change',{bubbles:true})); } });
-    sel.dataset.radio=name;
-    host.parentNode.insertBefore(sel,host);
-    radios.forEach(r=>(r.closest('.seg')||r.closest('label')).classList.add('dd-src'));
-  });
-  // Échelle de temps : graduation des jours
-  const dh=document.getElementById('day-step-host');
-  if(dh){
-    const s2=_mkSelect('Jours affichés',DAY_STEP_NAMES.map((t,i)=>[String(i),t]),v=>onDayStepChange(+v)); s2.id='day-step-select';
-    dh.appendChild(s2);
-  }
-  syncDropdowns();
-}
-function syncDropdowns(){
-  document.querySelectorAll('select.dd[data-radio]').forEach(sel=>{
-    const c=document.querySelector('input[type=radio][name="'+sel.dataset.radio+'"]:checked'); if(c&&sel.value!==c.value) sel.value=c.value;
-  });
-  if(typeof applyScaleUI==='function') applyScaleUI();
-  const s2=document.getElementById('day-step-select'); if(s2){ const r=[...document.querySelectorAll('input[name="day-step"]')].findIndex(x=>x.checked); if(r>=0) s2.value=String(r); }
-}
-buildDropdowns();
+// Synchronise l'interface de l'échelle de temps (appelée au début de chaque rendu)
+function syncDropdowns(){ if(typeof applyScaleUI==='function') applyScaleUI(); }
 
 // ═══ PATCH saveState dans renderData ══════════════════════════
 const _origRenderData = renderData;
