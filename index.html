@@ -167,6 +167,15 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 .dtabs button[aria-selected="true"] { background:#fff; color:#c0392b; box-shadow:0 1px 2px rgba(0,0,0,.18); }
 .dtabs button:focus-visible { outline:2px solid #c0392b; outline-offset:1px; }
 .pane-hidden { display:none !important; }
+.ts-block + .ts-block { margin-top:12px; padding-top:10px; border-top:1px solid #eceff3; }
+.ts-title { font-size:11px; font-weight:600; color:#374151; margin:9px 0 2px; }
+.ts-title.first { margin-top:0; }
+.ts-sub { font-size:10.5px; color:#6b7280; margin:7px 0 0; }
+.ts-unit label { flex:1 1 auto; padding:5px 3px; font-size:10.5px; }
+.ts-block .seg { margin:3px 0 4px; }
+.ts-block .fld select.dd, .ts-block #day-step-host select.dd { margin:3px 0 0; }
+.ts-sample { font-size:10.5px; color:#6b7280; margin-top:8px; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ts-sample b { font-weight:600; color:#374151; }
 .dd-src { display:none !important; }
 select.dd { display:block; width:100%; box-sizing:border-box; height:30px; margin:3px 0 6px; padding:0 28px 0 10px; border:1px solid #cfd5dd; border-radius:8px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%236b7685' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center; -webkit-appearance:none; appearance:none; color:#1c2430; font-size:11.5px; font-weight:500; line-height:1; font-family:inherit; cursor:pointer; text-overflow:ellipsis; transition:border-color .15s, box-shadow .15s; }
 select.dd:hover { border-color:#aab3be; }
@@ -349,40 +358,51 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <div>
       <div class="collapsible-head" onclick="toggleSection('time-scale-body','time-scale-chev')"><h3 style="margin:0;">ÉCHELLE DE TEMPS</h3><span class="chev" id="time-scale-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="time-scale-body" style="margin-top:10px;">
-        <div>
-          <div style="font-size:12px;font-weight:700;color:#333;">Graduations principales</div>
-          <div class="scale-cur" id="scale-cur-lbl">Semaine</div>
-          <input type="range" id="scale-slider" min="0" max="7" step="1" value="2" oninput="onScaleChange(+this.value)"/>
-          <div class="scale-labels"><span>J</span><span>J-i</span><span>S</span><span>S-i</span><span>M</span><span>M-i</span><span>Tri</span><span>An</span></div>
+        <div class="ts-block">
+          <div class="ts-title first" id="ts-unit-lbl">Unité de la graduation</div>
+          <div class="seg ts-unit" role="radiogroup" aria-labelledby="ts-unit-lbl">
+            <label><input type="radio" name="scale-unit" value="day" onchange="onScaleUnitChange(this.value)"/> Jour</label>
+            <label><input type="radio" name="scale-unit" value="week" checked onchange="onScaleUnitChange(this.value)"/> Semaine</label>
+            <label><input type="radio" name="scale-unit" value="month" onchange="onScaleUnitChange(this.value)"/> Mois</label>
+            <label title="Trimestre"><input type="radio" name="scale-unit" value="quarter" onchange="onScaleUnitChange(this.value)"/> Trim.</label>
+            <label><input type="radio" name="scale-unit" value="year" onchange="onScaleUnitChange(this.value)"/> Année</label>
+          </div>
+          <div id="ts-count-wrap">
+            <div class="ts-title" id="ts-count-lbl">Repères</div>
+            <div class="seg" role="radiogroup" aria-labelledby="ts-count-lbl">
+              <label title="Dates réelles du calendrier"><input type="radio" name="scale-count" value="cal" checked onchange="onScaleCountChange(this.value)"/> Calendrier</label>
+              <label title="Compteur à partir du début du planning"><input type="radio" name="scale-count" value="num" onchange="onScaleCountChange(this.value)"/> Depuis le début</label>
+            </div>
+          </div>
+          <div id="day-step-wrap" style="display:none;">
+            <div class="ts-title">Jours affichés</div>
+            <div id="day-step-host"></div>
+            <div style="display:none;">
+              <input type="radio" name="day-step" value="1"/>
+              <input type="radio" name="day-step" value="2"/>
+              <input type="radio" name="day-step" value="5" checked/>
+              <input type="radio" name="day-step" value="10"/>
+            </div>
+          </div>
+          <div class="ts-sample" id="ts-sample" aria-live="polite"></div>
         </div>
-        <div id="day-step-wrap" class="adv" style="margin-top:10px;">
-          <div style="font-size:12px;font-weight:700;color:#333;">Graduation jours</div>
-          <div class="scale-cur" id="day-step-cur-lbl">Multiples de 5</div>
-          <input type="range" id="day-step-slider" min="0" max="3" step="1" value="2" oninput="onDayStepChange(+this.value)"/>
-          <div class="scale-labels"><span>1</span><span>2</span><span>5</span><span>10</span></div>
-                  <div style="display:none;">
-            <input type="radio" name="day-step" value="1"/>
-            <input type="radio" name="day-step" value="2"/>
-            <input type="radio" name="day-step" value="5" checked/>
-            <input type="radio" name="day-step" value="10"/>
+        <div class="ts-block">
+          <div class="ts-title first">Période affichée</div>
+          <div class="fld"><div class="ts-sub">Début</div>
+            <div class="radio-group seg">
+              <label><input type="radio" name="tl-start" value="0" onchange="renderTimeline(); saveState()"/> Début du premier mois</label>
+              <label><input type="radio" name="tl-start" value="1" checked onchange="renderTimeline(); saveState()"/> Début du mois précédent</label>
+            </div>
+          </div>
+          <div class="fld"><div class="ts-sub">Fin</div>
+            <div class="radio-group seg seg-v">
+              <label><input type="radio" name="tl-end" value="2" onchange="renderTimeline(); saveState()"/> Dernier jour du planning</label>
+              <label><input type="radio" name="tl-end" value="0" checked onchange="renderTimeline(); saveState()"/> Fin du dernier mois</label>
+              <label><input type="radio" name="tl-end" value="1" onchange="renderTimeline(); saveState()"/> Fin du mois suivant</label>
+            </div>
           </div>
         </div>
-        <div class="adv" style="margin-top:12px;">
-          <div style="font-size:12px;font-weight:700;color:#333;">Début de la barre</div>
-          <div class="radio-group seg">
-            <label><input type="radio" name="tl-start" value="0" onchange="renderTimeline(); saveState()"/> Début 1er mois</label>
-            <label><input type="radio" name="tl-start" value="1" checked onchange="renderTimeline(); saveState()"/> Début 1er mois − 1</label>
-          </div>
-        </div>
-        <div class="adv" style="margin-top:12px;">
-          <div style="font-size:12px;font-weight:700;color:#333;">Fin de la barre</div>
-          <div class="radio-group seg seg-v">
-            <label><input type="radio" name="tl-end" value="2" onchange="renderTimeline(); saveState()"/> Dernier jour</label>
-            <label><input type="radio" name="tl-end" value="0" checked onchange="renderTimeline(); saveState()"/> Fin dernier mois</label>
-            <label><input type="radio" name="tl-end" value="1" onchange="renderTimeline(); saveState()"/> Fin dernier mois + 1</label>
-          </div>
-        </div>
-        <button class="btn adv" style="justify-content:center;margin-top:10px;" onclick="resetTimeScaleDefaults()">Valeurs par défaut</button>
+        <button class="btn" style="justify-content:center;margin-top:12px;width:100%;" onclick="resetTimeScaleDefaults()">Valeurs par défaut</button>
       </div>
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
@@ -735,6 +755,10 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Barre latérale : le mode « Simplifié » disparaît ; toutes les options d'affichage, les tailles et la palette sont toujours visibles.</li>
         <li>Affichages : les phases se présentent soit en colonne (comme avant), soit en liste, avec un bandeau coloré portant le nom de la phase au-dessus de ses tâches.</li>
         <li>Affichages : le trait pointillé des jalons peut s'arrêter au jalon (comme avant) ou aller jusqu'en bas du Gantt.</li>
+        <li>Affichage : « Barre de temps » est toujours active et « Ligne de temps » passe au premier niveau.</li>
+        <li>Gantt : « + ajouter » crée l'élément et place le curseur dans son nom ; Échap annule, OK valide et en crée un nouveau.</li>
+        <li>Barre latérale : Affichages et Tailles sont réunis dans un seul menu « Affichage » à deux onglets, et les choix exclusifs deviennent des listes déroulantes.</li>
+        <li>Échelle de temps : choix de l'unité (jour, semaine, mois, trimestre, année), repères au calendrier ou comptés depuis le début, exemple en direct, et bloc « Période affichée » regroupé.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
@@ -944,18 +968,60 @@ function fmtLabel(d){ const day=DAYS_SHORT[d.getDay()]; const dd=String(d.getDat
 
 
 const DAY_STEP_VALUES=[1,2,5,10];
-const DAY_STEP_NAMES=['Tous les jours','Multiples de 2','Multiples de 5','Multiples de 10'];
+const DAY_STEP_NAMES=['Tous les jours','Tous les 2 jours','Tous les 5 jours','Tous les 10 jours'];
 function updateDayStepVisibility(){
   const wrap=document.getElementById('day-step-wrap');
   if(wrap) wrap.style.display = scaleIdx <= 1 ? 'block' : 'none';
 }
 function onDayStepChange(idx){
   idx=Math.max(0,Math.min(3,idx));
-  const slider=document.getElementById('day-step-slider'); if(slider) slider.value=idx;
-  const lbl=document.getElementById('day-step-cur-lbl'); if(lbl) lbl.textContent=DAY_STEP_NAMES[idx];
   document.querySelectorAll('input[name="day-step"]').forEach((el,i)=>{ el.checked = i===idx; });
+  const sel=document.getElementById('day-step-select'); if(sel) sel.value=String(idx);
+  updateScaleSample();
   saveState();
   renderTimeline();
+}
+// ── Échelle de temps : unité + repères ↔ scaleIdx (0 J, 1 J-i, 2 S, 3 S-i, 4 M, 5 M-i, 6 Trim, 7 An)
+let _scaleNum=false;
+const SCALE_BASE={day:0,week:2,month:4,quarter:6,year:7};
+function scaleUnit(i){ i=(i===undefined?scaleIdx:i); return i<=1?'day':i<=3?'week':i<=5?'month':i===6?'quarter':'year'; }
+function updateScaleSample(){
+  const box=document.getElementById('ts-sample'); if(!box) return;
+  const u=scaleUnit(), num=(scaleIdx<=5&&scaleIdx%2===1), p2=n=>String(n).padStart(2,'0');
+  let d=null; try{ lanes.forEach(l=>l.tasks.forEach(t=>{ if(t.start&&validISO(t.start)){ const x=parseD(t.start); if(!d||x<d) d=x; } })); }catch(e){}
+  d=d?new Date(d):new Date(); d.setHours(0,0,0,0);
+  let out=[];
+  if(u==='day'){
+    const step=+(document.querySelector('input[name="day-step"]:checked')?.value||5);
+    for(let k=0;k<62&&out.length<6;k++){ const x=addDays(d,k); const dn=num?k+1:x.getDate(); if(k===0||dn%step===0||(!num&&dn===1)) out.push(p2(dn)); }
+  } else if(u==='week'){
+    const m=new Date(d); const dw=m.getDay(); m.setDate(m.getDate()-(dw===0?6:dw-1));
+    for(let k=0;k<4;k++) out.push('S'+p2(num?k+1:isoWeek(addDays(m,7*k))));
+  } else if(u==='month'){
+    for(let k=0;k<3;k++){ const x=new Date(d.getFullYear(),d.getMonth()+k,1); out.push(num?('Mois '+p2(k+1)):(MONTHS[x.getMonth()]+' '+x.getFullYear())); }
+  } else if(u==='quarter'){
+    for(let k=0;k<3;k++){ const x=new Date(d.getFullYear(),Math.floor(d.getMonth()/3)*3+3*k,1); out.push('T'+(Math.floor(x.getMonth()/3)+1)+' '+x.getFullYear()); }
+  } else {
+    for(let k=0;k<3;k++) out.push(String(d.getFullYear()+k));
+  }
+  box.innerHTML='Exemple\u00a0: <b>'+out.join(' · ')+'</b>';
+}
+function applyScaleUI(){
+  const u=scaleUnit(), countable=(u==='day'||u==='week'||u==='month');
+  if(countable) _scaleNum=(scaleIdx%2===1);
+  document.querySelectorAll('input[name="scale-unit"]').forEach(r=>{ r.checked=(r.value===u); });
+  document.querySelectorAll('input[name="scale-count"]').forEach(r=>{ r.checked=(r.value===(_scaleNum?'num':'cal')); });
+  const cw=document.getElementById('ts-count-wrap'); if(cw) cw.style.display=countable?'':'none';
+  updateDayStepVisibility(); updateScaleSample();
+}
+function setScale(i){ scaleIdx=i; applyScaleUI(); saveState(); renderTimeline(); }
+function onScaleUnitChange(unit){ const base=SCALE_BASE[unit]; if(base===undefined) return; setScale(base+((unit==='day'||unit==='week'||unit==='month')&&_scaleNum?1:0)); }
+function onScaleCountChange(v){ _scaleNum=(v==='num'); const u=scaleUnit(); if(SCALE_BASE[u]===undefined||u==='quarter'||u==='year') return; setScale(SCALE_BASE[u]+(_scaleNum?1:0)); }
+function applyTimeScaleDefaults(){
+  scaleIdx=2; _scaleNum=false;
+  document.querySelectorAll('input[name="day-step"]').forEach(r=>{ r.checked=(r.value==='5'); });
+  const s0=document.querySelector('input[name="tl-start"][value="1"]'); if(s0) s0.checked=true;
+  const e0=document.querySelector('input[name="tl-end"][value="0"]'); if(e0) e0.checked=true;
 }
 
 
@@ -1529,7 +1595,7 @@ function showTab(tab){
   document.getElementById('tab-t').classList.toggle('active',tab==='timeline');
   if(tab==='timeline') requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ renderTimeline(); }); });
 }
-function onScaleChange(v){ scaleIdx=v; document.getElementById('scale-cur-lbl').textContent=SCALE_NAMES[v]; updateDayStepVisibility(); saveState(); renderTimeline(); }
+function onScaleChange(v){ setScale(+v); }
 document.querySelectorAll('input[name="task-label-pos"]').forEach(r=>{
   r.addEventListener('change',function(){
     if(this.value==='left') document.querySelector('input[name="tl-start"][value="1"]').checked=true;
@@ -2453,13 +2519,7 @@ function renderTimeline(){
 
 
 function resetTimeScaleDefaults(){
-  scaleIdx = 2;
-  const sr = document.getElementById('scale-slider'); if(sr) sr.value = 2;
-  const lbl = document.getElementById('scale-cur-lbl'); if(lbl) lbl.textContent = SCALE_NAMES[2];
-  onDayStepChange(2);
-  const s0=document.querySelector('input[name="tl-start"][value="1"]'); if(s0) s0.checked=true;
-  const e0=document.querySelector('input[name="tl-end"][value="0"]'); if(e0) e0.checked=true;
-  updateDayStepVisibility(); saveState(); renderTimeline();
+  applyTimeScaleDefaults(); applyScaleUI(); syncDropdowns(); saveState(); renderTimeline();
 }
 function resetAfficherDefaults(){
   const set=(id,v)=>{ const el=document.getElementById(id); if(el) el.checked=v; };
@@ -2490,9 +2550,8 @@ function resetPaletteDefaults(){
 
 function resetDefaults() {
   if (!confirm('Etes vous sur ?')) return;
-  scaleIdx = 2; taskRH = 24; jalonRH = 16; jalonS = 10;
-  const sr = document.getElementById('scale-slider'); if (sr) sr.value = 2;
-  document.getElementById('scale-cur-lbl').textContent = SCALE_NAMES[2];
+  taskRH = 24; jalonRH = 16; jalonS = 10;
+  applyTimeScaleDefaults(); applyScaleUI();
   document.getElementById('task-size-val').textContent = 24;
   document.getElementById('jalon-size-val').textContent = 16;
   document.getElementById('jalon-s-val').textContent = 10;
@@ -2533,11 +2592,6 @@ function resetDefaults() {
   document.getElementById('chk-task-label').checked = true;
   const r1=document.querySelector('input[name="dates-pos"][value="right"]'); if(r1) r1.checked=true;
   const r2=document.querySelector('input[name="task-label-pos"][value="left"]'); if(r2) r2.checked=true;
-  const r3=document.querySelector('input[name="day-step"][value="1"]'); if(r3) r3.checked=true;
-  const dps=document.getElementById('day-step-slider'); if(dps) dps.value=0;
-  const dpl=document.getElementById('day-step-cur-lbl'); if(dpl) dpl.textContent='Tous les jours';
-  const r4=document.querySelector('input[name="tl-start"][value="0"]'); if(r4) r4.checked=true;
-  const r5=document.querySelector('input[name="tl-end"][value="0"]'); if(r5) r5.checked=true;
   const ab=document.getElementById('display-body'), ac=document.getElementById('display-chev'); if(ab && ac){ ab.classList.add('collapsed'); ac.textContent='▸'; }
   if(typeof showDisplayTab==='function') showDisplayTab('elements');
   const tb=document.getElementById('time-scale-body'), tc=document.getElementById('time-scale-chev'); if(tb && tc){ tb.classList.add('collapsed'); tc.textContent='▸'; }
@@ -2935,9 +2989,7 @@ function restoreSidebar(s) {
   taskRH   = s.taskRH   ?? 24;
   jalonRH  = s.jalonRH  ?? 16;
   jalonS   = s.jalonS   ?? 10;
-  const sr = document.getElementById('scale-slider');
-  if (sr) { sr.value = scaleIdx; }
-  document.getElementById('scale-cur-lbl').textContent = SCALE_NAMES[scaleIdx];
+  applyScaleUI();
   document.getElementById('task-size-val').textContent = taskRH;
   jalonRH = s.jalonRH ?? 40;
   document.getElementById('jalon-size-val').textContent = jalonRH;
@@ -3470,7 +3522,6 @@ const DD_RADIOS={
   'lane-view':'Affichage des phases','task-label-pos':'Position du titre des tâches','dates-pos':'Position des dates des tâches',
   'tl-start':'Début de la barre de temps','tl-end':'Fin de la barre de temps','default-jalon-colors-mode':'Couleurs des jalons par défaut'
 };
-const SCALE_LABELS=['Jours','Jours numérotés (J-i)','Semaines','Semaines numérotées (S-i)','Mois','Mois numérotés (M-i)','Trimestres','Années'];
 function _mkSelect(label,opts,onChange){
   const sel=document.createElement('select'); sel.className='dd'; sel.setAttribute('aria-label',label);
   opts.forEach(([v,t])=>{ const o=document.createElement('option'); o.value=v; o.textContent=t; sel.appendChild(o); });
@@ -3487,18 +3538,11 @@ function buildDropdowns(){
     host.parentNode.insertBefore(sel,host);
     radios.forEach(r=>(r.closest('.seg')||r.closest('label')).classList.add('dd-src'));
   });
-  // Échelle de temps : graduations principales et graduation des jours
-  const sl=document.getElementById('scale-slider');
-  if(sl){
-    const s1=_mkSelect('Graduations principales',SCALE_LABELS.map((t,i)=>[String(i),t]),v=>onScaleChange(+v)); s1.id='scale-select';
-    sl.parentNode.insertBefore(s1,sl);
-    ['scale-cur-lbl'].forEach(id=>document.getElementById(id)?.classList.add('dd-src')); sl.classList.add('dd-src'); sl.nextElementSibling?.classList.add('dd-src');
-  }
-  const ds=document.getElementById('day-step-slider');
-  if(ds){
-    const s2=_mkSelect('Graduation jours',DAY_STEP_NAMES.map((t,i)=>[String(i),t]),v=>onDayStepChange(+v)); s2.id='day-step-select';
-    ds.parentNode.insertBefore(s2,ds);
-    document.getElementById('day-step-cur-lbl')?.classList.add('dd-src'); ds.classList.add('dd-src'); ds.nextElementSibling?.classList.add('dd-src');
+  // Échelle de temps : graduation des jours
+  const dh=document.getElementById('day-step-host');
+  if(dh){
+    const s2=_mkSelect('Jours affichés',DAY_STEP_NAMES.map((t,i)=>[String(i),t]),v=>onDayStepChange(+v)); s2.id='day-step-select';
+    dh.appendChild(s2);
   }
   syncDropdowns();
 }
@@ -3506,7 +3550,7 @@ function syncDropdowns(){
   document.querySelectorAll('select.dd[data-radio]').forEach(sel=>{
     const c=document.querySelector('input[type=radio][name="'+sel.dataset.radio+'"]:checked'); if(c&&sel.value!==c.value) sel.value=c.value;
   });
-  const s1=document.getElementById('scale-select'); if(s1&&typeof scaleIdx!=='undefined') s1.value=String(scaleIdx);
+  if(typeof applyScaleUI==='function') applyScaleUI();
   const s2=document.getElementById('day-step-select'); if(s2){ const r=[...document.querySelectorAll('input[name="day-step"]')].findIndex(x=>x.checked); if(r>=0) s2.value=String(r); }
 }
 buildDropdowns();
