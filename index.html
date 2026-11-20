@@ -10,8 +10,6 @@
 html, body { width:100%; height:100%; margin:0; overflow:hidden !important; overscroll-behavior:none; }
 body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; font-size: 13px; position:relative; --header-h:48px; }
 .header-shell { position:absolute; top:0; left:0; right:0; height:var(--header-h); background:#fff; border-bottom:1px solid #ddd; z-index:2000; overflow:hidden; }
-.collapsible-head { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
-.collapsible-head .chev { font-size:11px; color:#999; }
 .collapsible-body.collapsed { display:none !important; }
 .topbar { background:#fff; padding:7px 14px; display:flex; align-items:center; gap:10px; width:100%; height:var(--header-h); box-sizing:border-box; position:relative; overflow:hidden; }
 .btn { padding:5px 12px; border-radius:5px; border:1px solid #ccc; cursor:pointer; font-size:12px; background:#fff; display:inline-flex; align-items:center; gap:5px; }
@@ -40,12 +38,9 @@ body.menu-closed #burger-btn .burger-icon { transform:rotate(90deg); }
 .app-body { display:flex; width:100%; height:100%; overflow:hidden !important; min-height:0; overscroll-behavior:none; }
 .app-body { display:flex; width:100%; height:100%; overflow:hidden !important; min-height:0; overscroll-behavior:none; }
 .shell { display:flex; min-height:0; }
-.sidebar { width:220px; background:#fff; border-right:1px solid #ddd; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; padding:14px 12px; gap:16px; transition:width .18s ease, padding .18s ease, border-color .18s ease; }
 .app-body.sidebar-closed .sidebar { width:0; padding:0; border-right-color:transparent; overflow:hidden; }
 .app-body.sidebar-closed .main { width:100%; }
-.sidebar h3 { font-size:11px; font-weight:700; color:#888; text-transform:uppercase; letter-spacing:.5px; margin-bottom:4px; }
 .sidebar input[type=range] { width:100%; accent-color:#c0392b; }
-.scale-labels { display:flex; justify-content:space-between; font-size:9px; color:#000; margin-top:2px; }
 .radio-group { display:flex; flex-direction:column; gap:5px; }
 .radio-group label { display:flex; align-items:center; gap:6px; font-size:12px; cursor:pointer; }
 .radio-group input[type=radio], .radio-group input[type=checkbox] { accent-color:#c0392b; }
@@ -58,34 +53,7 @@ input[type=checkbox]:focus-visible { outline:2px solid #c0392b; outline-offset:2
 input[type=checkbox]:disabled { opacity:.45; cursor:not-allowed; }
 @media (prefers-reduced-motion:reduce) { input[type=checkbox], input[type=checkbox]::before { transition:none; } }
 /* ── Panneau Affichages : lignes à interrupteur, groupes en retrait, boutons segmentés ── */
-#afficher-body { gap:2px; }
-#afficher-body label { display:flex; flex-direction:row-reverse; justify-content:space-between; align-items:center; gap:10px; min-height:26px; padding:1px 14px 1px 0; font-size:11px; font-weight:500; color:#1f2937; cursor:pointer; }
-#afficher-body .sub-options { margin:2px 0 6px 0; padding:3px 10px; gap:0; background:#f4f5f7; border-radius:8px; border-left:3px solid #d9dde3; }
-#afficher-body .sub-options label { font-size:10.5px; font-weight:400; color:#4b5563; min-height:24px; padding-right:6px; }
-#afficher-body .sub-options .sub-options label { padding-right:0; }
-#afficher-body .sub-options .sub-options { background:#eaecf0; border-left-color:#c9ced6; margin:2px 0 6px 0; }
-#afficher-body .opt-sub-title { font-size:10px; font-weight:600; letter-spacing:.02em; color:#6b7280; margin:6px 0 4px; }
-.seg { display:flex; gap:2px; padding:2px; margin:3px 0 6px; background:#dfe3e8; border-radius:8px; }
-.sub-options .sub-options .seg { background:#d5d9df; }
-#afficher-body .seg label, .seg label { flex:1; flex-direction:row; justify-content:center; min-height:0; padding:4px 6px; border-radius:6px; font-size:11px; font-weight:500; text-align:center; color:#4b5563; cursor:pointer; transition:background .15s,color .15s; }
-.seg label input[type=radio] { position:absolute; opacity:0; width:0; height:0; margin:0; -webkit-appearance:none; appearance:none; pointer-events:none; }
-.seg label:has(input:checked) { background:#fff; color:#c0392b; font-weight:600; box-shadow:0 1px 2px rgba(0,0,0,.18); }
-.seg label:has(input:focus-visible) { outline:2px solid #c0392b; outline-offset:1px; }
-@media (prefers-reduced-motion:reduce) { .seg label { transition:none; } }
-#afficher-body .seg.seg-v label { justify-content:flex-start; text-align:left; padding:5px 10px; }
-#afficher-body .seg label { font-size:10px; padding-right:4px; }
 
-.radio-group.seg { flex-direction:row; gap:2px; }
-.seg.seg-v, .radio-group.seg.seg-v { flex-direction:column; }
-.seg.seg-v label { justify-content:flex-start; text-align:left; padding:5px 10px; }
-.seg label { white-space:normal; min-width:0; line-height:1.2; padding:4px 4px; }
-#afficher-body .sub-options { padding:3px 8px 3px 10px; border-left-width:2px; }
-#afficher-body .sub-options .sub-options { padding:2px 6px 2px 8px; }
-#afficher-body .sub-options label { gap:6px; }
-.sidebar-sep { border:none; border-top:1px solid #eee; margin-top:var(--sep-margin,0px) !important; margin-bottom:var(--sep-margin,0px) !important; }
-.scale-cur { font-size:11px; color:#c0392b; font-weight:700; margin-bottom:6px; }
-.sub-options { margin-left:18px; margin-top:3px; display:flex; flex-direction:column; gap:4px; }
-.sub-options label { font-size:11px; color:#555; display:flex; align-items:center; gap:5px; cursor:pointer; }
 .main { flex:1; overflow:hidden !important; display:flex; flex-direction:column; min-width:0; overscroll-behavior:none; }
 .view { display:none; flex:1; overflow-y:auto !important; overflow-x:hidden; padding:14px; overscroll-behavior:auto; }
 .view.active { display:flex; flex-direction:column; }
@@ -161,26 +129,7 @@ td input[type=color] { width:28px; height:22px; padding:1px; border:1px solid #d
 svg text, svg tspan { text-rendering: geometricPrecision; }
 
 /* ── Section « Affichage » : onglets Éléments / Tailles, menus déroulants ── */
-.dtabs { display:flex; gap:2px; padding:2px; background:#e6e9ee; border-radius:9px; }
-.dtabs button { flex:1; padding:6px 8px; border:0; border-radius:7px; background:transparent; color:#4b5563; font-size:11.5px; font-weight:600; line-height:1.2; font-family:inherit; cursor:pointer; transition:background .15s,color .15s; }
-.dtabs button:hover { color:#1c2430; }
-.dtabs button[aria-selected="true"] { background:#fff; color:#c0392b; box-shadow:0 1px 2px rgba(0,0,0,.18); }
-.dtabs button:focus-visible { outline:2px solid #c0392b; outline-offset:1px; }
 .pane-hidden { display:none !important; }
-.ts-block + .ts-block { margin-top:12px; padding-top:10px; border-top:1px solid #eceff3; }
-.ts-title { font-size:11px; font-weight:600; color:#374151; margin:9px 0 2px; }
-.ts-title.first { margin-top:0; }
-.ts-sub { font-size:10.5px; color:#6b7280; margin:7px 0 0; }
-.ts-unit label { flex:1 1 auto; padding:5px 3px; font-size:10.5px; }
-.ts-block .seg { margin:3px 0 4px; }
-.ts-block .fld select.dd, .ts-block #day-step-host select.dd { margin:3px 0 0; }
-.ts-sample { font-size:10.5px; color:#6b7280; margin-top:8px; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-.ts-sample b { font-weight:600; color:#374151; }
-.dd-src { display:none !important; }
-select.dd { display:block; width:100%; box-sizing:border-box; height:30px; margin:3px 0 6px; padding:0 28px 0 10px; border:1px solid #cfd5dd; border-radius:8px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%236b7685' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 9px center; -webkit-appearance:none; appearance:none; color:#1c2430; font-size:11.5px; font-weight:500; line-height:1; font-family:inherit; cursor:pointer; text-overflow:ellipsis; transition:border-color .15s, box-shadow .15s; }
-select.dd:hover { border-color:#aab3be; }
-select.dd:focus-visible { outline:none; border-color:#c0392b; box-shadow:0 0 0 3px rgba(192,57,43,.18); }
-@media (prefers-reduced-motion:reduce) { .dtabs button, select.dd { transition:none; } }
 #print-root { display:none; }
 @media print {
   body > *:not(#print-root) { display:none !important; }
@@ -214,11 +163,6 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 .tab { display:inline-flex; align-items:center; gap:6px; border:none; background:transparent; color:#4b5563; border-radius:6px; padding:5px 14px; font-family:inherit; font-weight:600; transition:background .12s,color .12s; }
 .tab:hover { color:#111827; }
 .tab.active { background:#fff; color:#c0392b; box-shadow:0 1px 2px rgba(16,24,40,.12); }
-.sidebar { border-right-color:#e5e7eb; }
-.sidebar h3 { color:#6b7280; letter-spacing:.07em; font-size:10.5px; }
-.collapsible-head { padding:2px 0; border-radius:4px; }
-.collapsible-head:hover h3 { color:#111827; }
-.sidebar-sep { border-top-color:#eef0f3; }
 .phase { border-radius:10px; box-shadow:0 1px 2px rgba(16,24,40,.06), 0 1px 3px rgba(16,24,40,.06); border:1px solid #e5e7eb; }
 ::-webkit-scrollbar { width:10px; height:10px; }
 ::-webkit-scrollbar-thumb { background:#cfd4dc; border-radius:8px; border:2px solid transparent; background-clip:content-box; }
@@ -233,6 +177,87 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 #conv-menu .btn { border-color:transparent; justify-content:flex-start; font-size:12px; font-weight:600; height:30px; padding:0 12px; white-space:nowrap; text-decoration:none; }
 #conv-menu .btn:hover { background:#f3f4f6; }
 #btn-export[aria-expanded="true"] { background:#f3f4f6; border-color:#e5e7eb; color:#111827; }
+/* ═══ Barre latérale : règles de design ═══
+   Une seule échelle : texte 12 px (lignes), 11 px (aides), 13 px (titres de section) ; rayons 8 px ; lignes 32 px.
+   Couleur : encre (#111827) pour tout ce qui est actif ; le rouge de la marque ne sert qu'au focus. */
+.sidebar { --ink:#111827; --text:#1f2937; --muted:#4b5563; --faint:#6b7280; --line:#e8ebef; --fill:#f3f4f6; --fill-2:#e8ebef; --edge:#d3d8df; --on:#1f2937;
+  width:272px; background:#fff; border-right:1px solid #e5e7eb; flex-shrink:0; display:flex; flex-direction:column; overflow-y:auto; padding:4px 16px 20px; gap:0; font-size:12px; color:var(--text);
+  transition:width .18s ease, padding .18s ease, border-color .18s ease; }
+.sidebar > div { min-width:0; }
+.sidebar-sep { border:none; border-top:1px solid var(--line); margin:var(--sep-margin,0px) 0 !important; }
+.collapsible-head { display:flex; align-items:center; justify-content:space-between; gap:8px; cursor:pointer; user-select:none; padding:13px 2px 13px 0; border-radius:6px; }
+.collapsible-head h3 { margin:0 !important; font-size:13px; font-weight:600; letter-spacing:0; text-transform:none; color:var(--ink); }
+.collapsible-head .chev { flex:none; width:16px; height:16px; font-size:0; color:transparent; opacity:.55; transition:transform .18s ease, opacity .12s;
+  background:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cpath d='M6 3.5 10.5 8 6 12.5' fill='none' stroke='%23111827' stroke-width='1.7' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center/16px no-repeat; }
+.collapsible-head:hover .chev { opacity:1; }
+.collapsible-head:has(+ .collapsible-body:not(.collapsed)) .chev { transform:rotate(90deg); opacity:.9; }
+.collapsible-head:focus-visible { outline:2px solid #c0392b66; outline-offset:2px; }
+.sidebar .collapsible-body { margin-top:0 !important; padding:0 0 16px; }
+.sidebar .collapsible-body > * + .ts-title, .sidebar .collapsible-body > .ts-title:not(.first) { margin-top:14px; }
+.ts-title { font-size:12px; font-weight:600; color:var(--ink); margin:14px 0 4px; }
+.ts-title.first { margin-top:0; }
+.ts-sub, .opt-sub-title { font-size:11px; font-weight:500; color:var(--faint); margin:10px 0 2px; }
+.ts-block + .ts-block { margin-top:18px; padding-top:14px; border-top:1px solid var(--line); }
+.ts-sample { font-size:11px; color:var(--faint); margin-top:10px; font-variant-numeric:tabular-nums; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.ts-sample b { font-weight:600; color:var(--text); }
+.grp { font-size:11px; font-weight:600; color:var(--faint); margin:16px 0 2px; padding-bottom:6px; border-bottom:1px solid var(--line); }
+.grp:first-child { margin-top:0; }
+/* Interrupteurs */
+.sidebar input[type=checkbox] { width:30px; height:18px; background:#cdd2d9; }
+.sidebar input[type=checkbox]::before { top:2px; left:2px; width:14px; height:14px; box-shadow:0 1px 2px rgba(16,24,40,.3); }
+.sidebar input[type=checkbox]:checked { background:var(--on); }
+.sidebar input[type=checkbox]:checked::before { transform:translateX(12px); }
+.sidebar input[type=checkbox]:focus-visible { outline:2px solid #c0392b88; outline-offset:2px; }
+/* Lignes d'options */
+#afficher-body { display:flex; flex-direction:column; gap:0; }
+#afficher-body :not(.seg) > label, #afficher-body > label { display:flex; flex-direction:row-reverse; justify-content:space-between; align-items:center; gap:12px; min-height:34px; padding:0 2px 0 0; font-size:12px; font-weight:500; color:var(--text); cursor:pointer; }
+.sub-options { display:flex; flex-direction:column; gap:0; margin:0 0 8px 6px; padding:2px 0 2px 14px; border-left:1px solid var(--edge); background:none; }
+.sub-options label, #afficher-body .sub-options :not(.seg) > label { min-height:32px; font-size:12px; font-weight:400; color:var(--muted); }
+.sub-options .sub-options { margin-left:6px; margin-bottom:4px; }
+/* Boutons segmentés et onglets */
+.seg, .dtabs { display:flex; gap:2px; padding:2px; margin:4px 0 6px; background:var(--fill-2); border-radius:9px; }
+.radio-group.seg { flex-direction:row; gap:2px; }
+.seg label, .dtabs button { flex:1 1 0; min-width:0; display:flex; align-items:center; justify-content:center; min-height:28px; padding:0 8px; border:0; border-radius:7px; background:transparent; font-family:inherit; font-size:12px; font-weight:500; line-height:1.15; text-align:center; color:var(--muted); cursor:pointer; transition:background .15s, color .15s, box-shadow .15s; }
+.dtabs button { min-height:30px; font-weight:600; }
+.seg label:hover, .dtabs button:hover { color:var(--ink); }
+.seg label:has(input:checked), .dtabs button[aria-selected="true"] { background:#fff; color:var(--ink); font-weight:600; box-shadow:0 1px 2px rgba(16,24,40,.16), 0 0 0 .5px rgba(16,24,40,.05); }
+.seg label input[type=radio] { position:absolute; opacity:0; width:0; height:0; margin:0; -webkit-appearance:none; appearance:none; pointer-events:none; }
+.seg label:has(input:focus-visible), .dtabs button:focus-visible { outline:2px solid #c0392b88; outline-offset:1px; }
+.seg.seg-v { flex-direction:column; }
+.seg.seg-v label { justify-content:flex-start; padding:0 10px; min-height:30px; }
+.ts-unit label { flex:1 1 auto; padding:0 3px; font-size:11.5px; }
+.pane-hidden { display:none !important; }
+/* Listes déroulantes */
+.dd-src { display:none !important; }
+select.dd { display:block; width:100%; box-sizing:border-box; height:32px; margin:4px 0 6px; padding:0 30px 0 10px; border:1px solid var(--edge); border-radius:8px; background:#fff url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M2.5 4.5 6 8l3.5-3.5' fill='none' stroke='%234b5563' stroke-width='1.6' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") no-repeat right 10px center; -webkit-appearance:none; appearance:none; color:var(--ink); font-size:12px; font-weight:500; line-height:1; font-family:inherit; cursor:pointer; text-overflow:ellipsis; transition:border-color .15s, box-shadow .15s; }
+select.dd:hover { border-color:#aeb6c1; }
+select.dd:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 0 3px rgba(17,24,39,.12); }
+.ts-block .fld select.dd, .ts-block #day-step-host select.dd { margin:4px 0 0; }
+/* Boutons et champs */
+.sbtn, .sidebar .btn { display:inline-flex; align-items:center; justify-content:center; gap:6px; min-height:32px; padding:0 10px; border:1px solid var(--edge); border-radius:8px; background:#fff; color:var(--text); font-family:inherit; font-size:12px; font-weight:500; cursor:pointer; box-shadow:none; transition:background .12s, border-color .12s, color .12s; }
+.sbtn:hover, .sidebar .btn:hover { background:var(--fill); border-color:#c3cad3; }
+.sbtn:focus-visible, .sidebar .btn:focus-visible { outline:2px solid #c0392b88; outline-offset:1px; }
+.sidebar .btn.btn-reset { width:100%; margin-top:14px; border-color:transparent; background:transparent; color:var(--faint); }
+.sidebar .btn.btn-reset:hover { background:var(--fill); color:var(--ink); }
+.sidebar .btn-danger, .sidebar .btn-warn, .sidebar .btn-muted { padding-left:2px; border-color:transparent; background:transparent; color:var(--muted); justify-content:flex-start !important; }
+.sidebar .btn-danger:hover { background:#fef2f2; color:#b91c1c; }
+.sidebar .btn-warn:hover { background:#fff7ed; color:#c2410c; }
+.sidebar .btn-muted:hover { background:var(--fill); color:var(--ink); }
+.pairs { display:grid; grid-template-columns:1fr 1fr; gap:6px; margin:4px 0 2px; }
+.fld-in, .sidebar input[type=date] { box-sizing:border-box; width:100%; height:32px; margin:4px 0 0; padding:0 10px; border:1px solid var(--edge); border-radius:8px; background:#fff; color:var(--ink); font-family:inherit; font-size:12px; }
+.fld-in:focus-visible, .sidebar input[type=date]:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 0 3px rgba(17,24,39,.12); }
+.sidebar input[type=color] { width:32px !important; height:26px !important; padding:2px !important; border:1px solid var(--edge) !important; border-radius:7px; background:#fff !important; cursor:pointer; }
+/* Tailles : lignes avec − / + */
+#sizes-body { display:flex; flex-direction:column; gap:0 !important; margin-top:0 !important; }
+.row { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:36px; }
+.row-l { font-size:12px; font-weight:500; color:var(--text); }
+.step { display:flex; align-items:center; gap:1px; padding:2px; background:var(--fill); border-radius:8px; }
+.step button { width:26px; height:26px; padding:0; border:0; border-radius:6px; background:transparent; color:var(--ink); font-family:inherit; font-size:15px; line-height:1; cursor:pointer; transition:background .12s, box-shadow .12s; }
+.step button:hover { background:#fff; box-shadow:0 1px 2px rgba(16,24,40,.16); }
+.step button:active { background:var(--fill-2); }
+.step button:focus-visible { outline:2px solid #c0392b88; outline-offset:1px; }
+.step span { min-width:32px; text-align:center; font-size:12px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
+@media (prefers-reduced-motion:reduce) { .seg label, .dtabs button, select.dd, .collapsible-head .chev, .sbtn, .sidebar .btn, .step button { transition:none; } }
 </style>
 </head>
 <body>
@@ -348,15 +373,21 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="app-body">
   <div class="sidebar">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">DÉPLACEMENT DU PLANNING</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
-      <div class="collapsible-body collapsed" id="deplacement-planning-body" style="margin-top:10px;">
-        <div style="font-size:12px;font-weight:700;color:#333;">Sauts de puce</div><div style="display:flex;flex-direction:column;gap:4px;margin-bottom:10px;"><div style="display:flex;gap:6px;"><button type="button" onclick="shiftPlanningDays(-1)"   style="font-size:11px;padding:3px 8px;flex:1;">- 1 jour</button><button type="button" onclick="shiftPlanningDays(1)"    style="font-size:11px;padding:3px 8px;flex:1;">+ 1 jour</button></div><div style="display:flex;gap:6px;"><button type="button" onclick="shiftPlanningWeeks(-1)"  style="font-size:11px;padding:3px 8px;flex:1;">- 1 sem.</button><button type="button" onclick="shiftPlanningWeeks(1)"   style="font-size:11px;padding:3px 8px;flex:1;">+ 1 sem.</button></div><div style="display:flex;gap:6px;"><button type="button" onclick="shiftPlanningMonths(-1)" style="font-size:11px;padding:3px 8px;flex:1;">- 1 mois</button><button type="button" onclick="shiftPlanningMonths(1)"  style="font-size:11px;padding:3px 8px;flex:1;">+ 1 mois</button></div></div>
-        <div style="margin-top:10px;"><div style="font-size:12px;font-weight:700;color:#333;">Changer le T0</div><div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap;"><input type="date" id="t0-new-date" style="font-size:11px;padding:2px 4px;"></div></div>
+      <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">Déplacement du planning</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
+      <div class="collapsible-body collapsed" id="deplacement-planning-body">
+        <div class="ts-title first">Décaler tout le planning</div>
+        <div class="pairs">
+          <button type="button" class="sbtn" onclick="shiftPlanningDays(-1)">− 1 jour</button><button type="button" class="sbtn" onclick="shiftPlanningDays(1)">+ 1 jour</button>
+          <button type="button" class="sbtn" onclick="shiftPlanningWeeks(-1)">− 1 semaine</button><button type="button" class="sbtn" onclick="shiftPlanningWeeks(1)">+ 1 semaine</button>
+          <button type="button" class="sbtn" onclick="shiftPlanningMonths(-1)">− 1 mois</button><button type="button" class="sbtn" onclick="shiftPlanningMonths(1)">+ 1 mois</button>
+        </div>
+        <div class="ts-title">Changer le T0</div>
+        <input type="date" id="t0-new-date" class="fld-in">
       </div>
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('time-scale-body','time-scale-chev')"><h3 style="margin:0;">ÉCHELLE DE TEMPS</h3><span class="chev" id="time-scale-chev">▸</span></div>
+      <div class="collapsible-head" onclick="toggleSection('time-scale-body','time-scale-chev')"><h3 style="margin:0;">Échelle de temps</h3><span class="chev" id="time-scale-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="time-scale-body" style="margin-top:10px;">
         <div class="ts-block">
           <div class="ts-title first" id="ts-unit-lbl">Unité de la graduation</div>
@@ -364,7 +395,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
             <label><input type="radio" name="scale-unit" value="day" onchange="onScaleUnitChange(this.value)"/> Jour</label>
             <label><input type="radio" name="scale-unit" value="week" checked onchange="onScaleUnitChange(this.value)"/> Semaine</label>
             <label><input type="radio" name="scale-unit" value="month" onchange="onScaleUnitChange(this.value)"/> Mois</label>
-            <label title="Trimestre"><input type="radio" name="scale-unit" value="quarter" onchange="onScaleUnitChange(this.value)"/> Trim.</label>
+            <label><input type="radio" name="scale-unit" value="quarter" onchange="onScaleUnitChange(this.value)"/> Trimestre</label>
             <label><input type="radio" name="scale-unit" value="year" onchange="onScaleUnitChange(this.value)"/> Année</label>
           </div>
           <div id="ts-count-wrap">
@@ -402,12 +433,12 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
             </div>
           </div>
         </div>
-        <button class="btn" style="justify-content:center;margin-top:12px;width:100%;" onclick="resetTimeScaleDefaults()">Valeurs par défaut</button>
+        <button class="btn btn-reset" type="button" onclick="resetTimeScaleDefaults()"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Valeurs par défaut</button>
       </div>
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('display-body','display-chev')"><h3 style="margin:0;">AFFICHAGE</h3><span class="chev" id="display-chev">▸</span></div>
+      <div class="collapsible-head" onclick="toggleSection('display-body','display-chev')"><h3 style="margin:0;">Affichage</h3><span class="chev" id="display-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="display-body" style="margin-top:10px;">
       <div class="dtabs" role="tablist" aria-label="Affichage">
         <button type="button" role="tab" id="dtab-elements" aria-selected="true" aria-controls="afficher-body" onclick="showDisplayTab('elements')">Éléments</button>
@@ -442,8 +473,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           </div>
           <label><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
           <div class="sub-options" id="jalon-lines-sub">
-            <div class="seg seg-v"><label><input type="radio" name="jalon-line-pos" value="first" onchange="renderTimeline(); saveState()"/> Première ligne</label>
-            <label><input type="radio" name="jalon-line-pos" value="last" checked onchange="renderTimeline(); saveState()"/> Dernière ligne</label></div>
+            <div class="seg"><label><input type="radio" name="jalon-line-pos" value="first" onchange="renderTimeline(); saveState()"/> Première</label>
+            <label><input type="radio" name="jalon-line-pos" value="last" checked onchange="renderTimeline(); saveState()"/> Dernière</label></div>
           </div>
         </div>
 
@@ -469,219 +500,58 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           </div>
         </div>
 
-        <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetAfficherDefaults()">Valeurs par défaut</button>
+        <button class="btn btn-reset" type="button" onclick="resetAfficherDefaults()"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Valeurs par défaut</button>
       </div>
       <div class="pane-hidden" id="sizes-body" role="tabpanel" aria-labelledby="dtab-sizes" style="display:flex;flex-direction:column;gap:7px;margin-top:10px;">
-        <div style="font-weight:700; color:#555; font-size:11px; margin-top:8px; border-bottom:1px solid #ddd; padding-bottom:2px; text-transform:uppercase;">Global</div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Hauteur du header</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeHeaderHeight(-2)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="header-h-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">36</span>
-            <button onclick="changeHeaderHeight(2)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:12px;">Espace séparateurs</span><div style="display:flex;align-items:center;gap:4px;"><button onclick="changeSepMargin(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button><span id="sep-margin-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">6</span><button onclick="changeSepMargin(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button></div></div>
+        <div class="grp">Global</div>
+<div class="row"><span class="row-l">Hauteur du header</span><div class="step"><button type="button" onclick="changeHeaderHeight(-2)" aria-label="Diminuer">−</button><span id="header-h-val">36</span><button type="button" onclick="changeHeaderHeight(2)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Espace séparateurs</span><div class="step"><button type="button" onclick="changeSepMargin(-1)" aria-label="Diminuer">−</button><span id="sep-margin-val">6</span><button type="button" onclick="changeSepMargin(1)" aria-label="Augmenter">+</button></div></div>
 
-        <div style="font-weight:700; color:#555; font-size:11px; margin-top:8px; border-bottom:1px solid #ddd; padding-bottom:2px; text-transform:uppercase;">Lignes</div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Espace entre phases</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changePhaseGap(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="phase-gap-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">1</span>
-            <button onclick="changePhaseGap(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Hauteur ligne de temps</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeTimelineGap(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="timeline-gap-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">8</span>
-            <button onclick="changeTimelineGap(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Hauteur des lignes tâches</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeTaskSize(-2)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="task-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">24</span>
-            <button onclick="changeTaskSize(2)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Hauteur des lignes jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeJalonSize(-2)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="jalon-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">16</span>
-            <button onclick="changeJalonSize(2)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
+        <div class="grp">Lignes</div>
+<div class="row"><span class="row-l">Espace entre phases</span><div class="step"><button type="button" onclick="changePhaseGap(-1)" aria-label="Diminuer">−</button><span id="phase-gap-val">1</span><button type="button" onclick="changePhaseGap(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Hauteur ligne de temps</span><div class="step"><button type="button" onclick="changeTimelineGap(-1)" aria-label="Diminuer">−</button><span id="timeline-gap-val">8</span><button type="button" onclick="changeTimelineGap(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Hauteur des lignes tâches</span><div class="step"><button type="button" onclick="changeTaskSize(-2)" aria-label="Diminuer">−</button><span id="task-size-val">24</span><button type="button" onclick="changeTaskSize(2)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Hauteur des lignes jalons</span><div class="step"><button type="button" onclick="changeJalonSize(-2)" aria-label="Diminuer">−</button><span id="jalon-size-val">16</span><button type="button" onclick="changeJalonSize(2)" aria-label="Augmenter">+</button></div></div>
 
-        <div style="font-weight:700; color:#555; font-size:11px; margin-top:8px; border-bottom:1px solid #ddd; padding-bottom:2px; text-transform:uppercase;">Barre de temps</div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Périodes (Mois, Années...)</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeTMajorFontSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="tmajor-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">10</span>
-            <button onclick="changeTMajorFontSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Numéros (Vertical)</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeTMinorUpFontSize(-0.5)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="tminor-up-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">8.5</span>
-            <button onclick="changeTMinorUpFontSize(0.5)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Numéros (Horizontal)</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeTMinorLblFontSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="tminor-lbl-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">9</span>
-            <button onclick="changeTMinorLblFontSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;"><span style="font-size:12px;">Taille flèche aujourd'hui</span><div style="display:flex;align-items:center;gap:4px;"><button onclick="changeTodayArrowSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button><span id="today-arrow-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">4</span><button onclick="changeTodayArrowSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button></div></div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Texte « Aujourd'hui »</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeTodayFontSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="today-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">8</span>
-            <button onclick="changeTodayFontSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
+        <div class="grp">Barre de temps</div>
+<div class="row"><span class="row-l">Périodes (Mois, Années...)</span><div class="step"><button type="button" onclick="changeTMajorFontSize(-1)" aria-label="Diminuer">−</button><span id="tmajor-font-size-val">10</span><button type="button" onclick="changeTMajorFontSize(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Numéros (Vertical)</span><div class="step"><button type="button" onclick="changeTMinorUpFontSize(-0.5)" aria-label="Diminuer">−</button><span id="tminor-up-font-size-val">8.5</span><button type="button" onclick="changeTMinorUpFontSize(0.5)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Numéros (Horizontal)</span><div class="step"><button type="button" onclick="changeTMinorLblFontSize(-1)" aria-label="Diminuer">−</button><span id="tminor-lbl-font-size-val">9</span><button type="button" onclick="changeTMinorLblFontSize(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Taille flèche aujourd'hui</span><div class="step"><button type="button" onclick="changeTodayArrowSize(-1)" aria-label="Diminuer">−</button><span id="today-arrow-size-val">4</span><button type="button" onclick="changeTodayArrowSize(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Texte « Aujourd'hui »</span><div class="step"><button type="button" onclick="changeTodayFontSize(-1)" aria-label="Diminuer">−</button><span id="today-font-size-val">8</span><button type="button" onclick="changeTodayFontSize(1)" aria-label="Augmenter">+</button></div></div>
 
-        <div style="font-weight:700; color:#555; font-size:11px; margin-top:8px; border-bottom:1px solid #ddd; padding-bottom:2px; text-transform:uppercase;">Phases & Tâches</div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Texte des phases</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeLaneFontSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="lane-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">13</span>
-            <button onclick="changeLaneFontSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Texte des tâches</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeTaskFontSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="task-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">11</span>
-            <button onclick="changeTaskFontSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Dates de tâches</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeTaskDateFontSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="task-date-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">8</span>
-            <button onclick="changeTaskDateFontSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-        <div style="font-weight:700; color:#555; font-size:11px; margin-top:8px; border-bottom:1px solid #ddd; padding-bottom:2px; text-transform:uppercase;">Jalons</div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Texte des jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeJalonFontSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="jalon-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">11</span>
-            <button onclick="changeJalonFontSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Dates des jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeJalonDateFontSize(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="jalon-date-font-size-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">8</span>
-            <button onclick="changeJalonDateFontSize(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Losange jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeJalonS(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="jalon-s-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">10</span>
-            <button onclick="changeJalonS(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Largeur des drapeaux jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeFlagPad('h',-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="flag-padh-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">0</span>
-            <button onclick="changeFlagPad('h',1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Hauteur des drapeaux jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeFlagPad('v',-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="flag-padv-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">6</span>
-            <button onclick="changeFlagPad('v',1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Distance mât / petit drapeau</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeFlagMastGap(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="flag-mast-gap-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">2</span>
-            <button onclick="changeFlagMastGap(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Ecart vertical entre drapeaux jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeFlagRowGap(-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="lbl-flag-row-gap" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">7</span>
-            <button onclick="changeFlagRowGap(1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Epaisseur du contour des drapeaux jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeFlagW(-0.5)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="lbl-flag-w" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">1.5</span>
-            <button onclick="changeFlagW(0.5)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Epaisseur du mat des drapeaux jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeLineW(-0.5)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="lbl-line-w" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">2</span>
-            <button onclick="changeLineW(0.5)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Quantité tirets mat des drapeaux jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeDash('dash',-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="dash-dash-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">4</span>
-            <button onclick="changeDash('dash',1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-<div style="display:flex;align-items:center;justify-content:space-between;">
-          <span style="font-size:12px;">Espace entre tirets mat des drapeaux jalons</span>
-          <div style="display:flex;align-items:center;gap:4px;">
-            <button onclick="changeDash('gap',-1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">−</button>
-            <span id="dash-gap-val" style="font-size:11px;color:#c0392b;font-weight:700;min-width:22px;text-align:center;">3</span>
-            <button onclick="changeDash('gap',1)" style="width:18px;height:18px;font-size:11px;border-radius:3px;border:1px solid #ccc;background:#fff;cursor:pointer;padding:0;line-height:1;">+</button>
-          </div>
-        </div>
-        <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetSizesDefaults()">Valeurs par défaut</button>
+        <div class="grp">Phases & Tâches</div>
+<div class="row"><span class="row-l">Texte des phases</span><div class="step"><button type="button" onclick="changeLaneFontSize(-1)" aria-label="Diminuer">−</button><span id="lane-font-size-val">13</span><button type="button" onclick="changeLaneFontSize(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Texte des tâches</span><div class="step"><button type="button" onclick="changeTaskFontSize(-1)" aria-label="Diminuer">−</button><span id="task-font-size-val">11</span><button type="button" onclick="changeTaskFontSize(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Dates de tâches</span><div class="step"><button type="button" onclick="changeTaskDateFontSize(-1)" aria-label="Diminuer">−</button><span id="task-date-font-size-val">8</span><button type="button" onclick="changeTaskDateFontSize(1)" aria-label="Augmenter">+</button></div></div>
+        <div class="grp">Jalons</div>
+<div class="row"><span class="row-l">Texte des jalons</span><div class="step"><button type="button" onclick="changeJalonFontSize(-1)" aria-label="Diminuer">−</button><span id="jalon-font-size-val">11</span><button type="button" onclick="changeJalonFontSize(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Dates des jalons</span><div class="step"><button type="button" onclick="changeJalonDateFontSize(-1)" aria-label="Diminuer">−</button><span id="jalon-date-font-size-val">8</span><button type="button" onclick="changeJalonDateFontSize(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Losange jalons</span><div class="step"><button type="button" onclick="changeJalonS(-1)" aria-label="Diminuer">−</button><span id="jalon-s-val">10</span><button type="button" onclick="changeJalonS(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Largeur des drapeaux jalons</span><div class="step"><button type="button" onclick="changeFlagPad('h',-1)" aria-label="Diminuer">−</button><span id="flag-padh-val">0</span><button type="button" onclick="changeFlagPad('h',1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Hauteur des drapeaux jalons</span><div class="step"><button type="button" onclick="changeFlagPad('v',-1)" aria-label="Diminuer">−</button><span id="flag-padv-val">6</span><button type="button" onclick="changeFlagPad('v',1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Distance mât / petit drapeau</span><div class="step"><button type="button" onclick="changeFlagMastGap(-1)" aria-label="Diminuer">−</button><span id="flag-mast-gap-val">2</span><button type="button" onclick="changeFlagMastGap(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Ecart vertical entre drapeaux jalons</span><div class="step"><button type="button" onclick="changeFlagRowGap(-1)" aria-label="Diminuer">−</button><span id="lbl-flag-row-gap">7</span><button type="button" onclick="changeFlagRowGap(1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Epaisseur du contour des drapeaux jalons</span><div class="step"><button type="button" onclick="changeFlagW(-0.5)" aria-label="Diminuer">−</button><span id="lbl-flag-w">1.5</span><button type="button" onclick="changeFlagW(0.5)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Epaisseur du mat des drapeaux jalons</span><div class="step"><button type="button" onclick="changeLineW(-0.5)" aria-label="Diminuer">−</button><span id="lbl-line-w">2</span><button type="button" onclick="changeLineW(0.5)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Quantité tirets mat des drapeaux jalons</span><div class="step"><button type="button" onclick="changeDash('dash',-1)" aria-label="Diminuer">−</button><span id="dash-dash-val">4</span><button type="button" onclick="changeDash('dash',1)" aria-label="Augmenter">+</button></div></div>
+<div class="row"><span class="row-l">Espace entre tirets mat des drapeaux jalons</span><div class="step"><button type="button" onclick="changeDash('gap',-1)" aria-label="Diminuer">−</button><span id="dash-gap-val">3</span><button type="button" onclick="changeDash('gap',1)" aria-label="Augmenter">+</button></div></div>
+        <button class="btn btn-reset" type="button" onclick="resetSizesDefaults()"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Valeurs par défaut</button>
       </div>
       </div>
     </div>
     <hr class="sidebar-sep adv" style="margin:12px 0;">
     <div class="adv">
-      <div class="collapsible-head" onclick="toggleSection('palette-body','palette-chev')"><h3 style="margin:0;">PALETTE DE COULEURS</h3><span class="chev" id="palette-chev">▸</span></div>
+      <div class="collapsible-head" onclick="toggleSection('palette-body','palette-chev')"><h3 style="margin:0;">Palette de couleurs</h3><span class="chev" id="palette-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="palette-body" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
         <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">Couleur barre de temps <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="timebar-color" value="#0b0f14" onchange="setTimebarColor(this.value)"/></label>
         <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">Couleur ligne de temps <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="todayline-color" value="#e74c3c" onchange="setTodaylineColor(this.value)"/></label>
-        <div style="font-size:12px;font-weight:700;color:#333;margin-top:4px;">Couleurs des jalons par défaut</div>
+        <div class="ts-title">Couleurs des jalons par défaut</div>
         <div class="radio-group seg" style="margin-top:2px;">
           <label><input type="radio" name="default-jalon-colors-mode" value="different" onchange="setDefaultJalonColorsMode(this.value)"/> Couleurs différentes</label>
           <label><input type="radio" name="default-jalon-colors-mode" value="lane" checked onchange="setDefaultJalonColorsMode(this.value)"/> Couleurs de la phase</label>
         </div>
-        <div style="font-size:12px;font-weight:700;color:#333;margin-top:4px;">Séquence de couleurs par défaut</div>
+        <div class="ts-title">Séquence de couleurs par défaut</div>
         <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px;">
           <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°1 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-1" value="#297FB8" onchange="setDefaultPaletteColor(0,this.value)"/></label>
           <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°2 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-2" value="#27AE60" onchange="setDefaultPaletteColor(1,this.value)"/></label>
@@ -695,7 +565,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°10 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-10" value="#50C2E5" onchange="setDefaultPaletteColor(9,this.value)"/></label>
           <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°11 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-11" value="#1F618D" onchange="setDefaultPaletteColor(10,this.value)"/></label>
         </div>
-        <button class="btn" style="justify-content:center;margin-top:10px;" onclick="resetPaletteDefaults()">Valeurs par défaut</button>
+        <button class="btn btn-reset" type="button" onclick="resetPaletteDefaults()"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Valeurs par défaut</button>
         <div style="display:flex;gap:6px;">
           <button class="btn" style="justify-content:center;flex:1;padding:4px 6px;font-size:11px;" onclick="shuffleTaskColors()" title="Réinitialiser les couleurs des tâches et des lignes selon la palette par défaut">🎨 Appliquer couleurs tâches</button>
           <button class="btn" style="justify-content:center;flex:1;padding:4px 6px;font-size:11px;" onclick="shuffleMilestoneColors()" title="Mélanger les couleurs des jalons">🎨 Appliquer couleurs jalons</button>
@@ -704,7 +574,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
-      <div class="collapsible-head" onclick="toggleSection('models-body','models-chev')"><h3 style="margin:0;">MES MODÈLES</h3><span class="chev" id="models-chev">▸</span></div>
+      <div class="collapsible-head" onclick="toggleSection('models-body','models-chev')"><h3 style="margin:0;">Mes modèles</h3><span class="chev" id="models-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="models-body" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
         <label class="btn" style="justify-content:center;width:100%;font-size:11px;cursor:pointer;margin:0;">➕ Ajout répertoire local<input type="file" webkitdirectory directory multiple style="display:none;" onchange="handleLocalDirSelect(event)"></label>
         <div id="local-dirs-container" style="display:flex;flex-direction:column;gap:4px;"></div>
@@ -758,6 +628,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Affichage : « Barre de temps » est toujours active et « Ligne de temps » passe au premier niveau.</li>
         <li>Gantt : « + ajouter » crée l'élément et place le curseur dans son nom ; Échap annule, OK valide et en crée un nouveau.</li>
         <li>Barre latérale : Affichages et Tailles sont réunis dans un seul menu « Affichage » à deux onglets, et les choix exclusifs deviennent des listes déroulantes.</li>
+        <li>Barre latérale : nouveau design (une seule échelle de tailles, interrupteurs sobres, sous-options à filet, onglets et boutons segmentés, menu plus large).</li>
         <li>Échelle de temps : choix de l'unité (jour, semaine, mois, trimestre, année), repères au calendrier ou comptés depuis le début, exemple en direct, et bloc « Période affichée » regroupé.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
@@ -3518,8 +3389,7 @@ function showDisplayTab(tab){
 }
 // Les choix exclusifs s'affichent en menu déroulant ; les boutons radio d'origine restent en place (masqués) : ils portent la valeur et les réglages enregistrés
 const DD_RADIOS={
-  'flag-type':'Type de drapeau','dash-dot-end':'Fin du trait pointillé des jalons','jalon-line-pos':'Position des lignes de jalons',
-  'lane-view':'Affichage des phases','task-label-pos':'Position du titre des tâches','dates-pos':'Position des dates des tâches',
+  'dash-dot-end':'Fin du trait pointillé des jalons','task-label-pos':'Position du titre des tâches',
   'tl-start':'Début de la barre de temps','tl-end':'Fin de la barre de temps','default-jalon-colors-mode':'Couleurs des jalons par défaut'
 };
 function _mkSelect(label,opts,onChange){
