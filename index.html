@@ -1557,7 +1557,7 @@ let editorCtx=null;
 const editorWrap=document.getElementById('tl-editor-wrap');
 const editorEl=document.getElementById('tl-editor');
 editorEl.addEventListener('input',()=>autoResize(editorEl));
-editorEl.addEventListener('keydown',e=>{if(e.key==='Escape') cancelEdit();});
+editorEl.addEventListener('keydown',e=>{ if(e.key==='Escape') cancelEdit(); else if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); commitEdit(); } }); // Entrée valide, Maj + Entrée insère un saut de ligne
 editorEl.addEventListener('blur',()=>commitEdit());
 function openEdit(ctx,val,rect){ editorCtx=ctx; editorEl.value=val; editorWrap.style.display='block'; editorWrap.style.left=rect.left+'px'; editorWrap.style.top=rect.top+'px'; editorEl.style.width=Math.max(80,rect.width+16)+'px'; editorEl.style.whiteSpace='pre-wrap'; autoResize(editorEl); editorEl.focus(); editorEl.select(); }
 function cancelEdit(){ editorCtx=null; editorWrap.style.display='none'; }
