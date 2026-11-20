@@ -241,6 +241,13 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 .fld-in, .sidebar input[type=date] { box-sizing:border-box; width:100%; height:32px; margin:4px 0 0; padding:0 10px; border:1px solid var(--edge); border-radius:8px; background:#fff; color:var(--ink); font-family:inherit; font-size:12px; }
 .fld-in:focus-visible, .sidebar input[type=date]:focus-visible { outline:none; border-color:var(--ink); box-shadow:0 0 0 3px rgba(17,24,39,.12); }
 .sidebar input[type=color] { width:32px !important; height:26px !important; padding:2px !important; border:1px solid var(--edge) !important; border-radius:7px; background:#fff !important; cursor:pointer; }
+/* Couleurs */
+#palette-body { display:flex; flex-direction:column; gap:0; }
+#palette-body.pane-hidden { display:none !important; }
+.row input[type=color] { flex:none; }
+.swatches { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:10px 8px; margin-top:8px; }
+.sw { display:flex; flex-direction:column; align-items:stretch; gap:4px; font-size:11px; font-weight:500; color:var(--faint); text-align:center; cursor:pointer; }
+.sw input[type=color] { width:100% !important; height:30px !important; }
 /* Tailles : lignes avec − / + */
 #sizes-body { display:flex; flex-direction:column; gap:0 !important; margin-top:0 !important; }
 .row { display:flex; align-items:center; justify-content:space-between; gap:10px; min-height:36px; }
@@ -436,6 +443,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <div class="dtabs" role="tablist" aria-label="Affichage">
         <button type="button" role="tab" id="dtab-elements" aria-selected="true" aria-controls="afficher-body" onclick="showDisplayTab('elements')">Éléments</button>
         <button type="button" role="tab" id="dtab-sizes" aria-selected="false" aria-controls="sizes-body" onclick="showDisplayTab('sizes')">Tailles</button>
+        <button type="button" role="tab" id="dtab-colors" aria-selected="false" aria-controls="palette-body" onclick="showDisplayTab('colors')">Couleurs</button>
       </div>
       <div class="radio-group" id="afficher-body" role="tabpanel" aria-labelledby="dtab-elements" style="margin-top:10px;">
         <label><input type="checkbox" id="chk-title" checked onchange="toggleTitle()"/> Titre planning</label>
@@ -531,38 +539,26 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="row"><span class="row-l">Espace entre tirets mat des drapeaux jalons</span><div class="step"><button type="button" onclick="changeDash('gap',-1)" aria-label="Diminuer">−</button><span id="dash-gap-val">3</span><button type="button" onclick="changeDash('gap',1)" aria-label="Augmenter">+</button></div></div>
         <button class="btn btn-reset" type="button" onclick="resetSizesDefaults()"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Valeurs par défaut</button>
       </div>
-      </div>
-    </div>
-    <hr class="sidebar-sep adv" style="margin:12px 0;">
-    <div class="adv">
-      <div class="collapsible-head" onclick="toggleSection('palette-body','palette-chev')"><h3 style="margin:0;">Palette de couleurs</h3><span class="chev" id="palette-chev">▸</span></div>
-      <div class="collapsible-body collapsed" id="palette-body" style="display:flex;flex-direction:column;gap:8px;margin-top:10px;">
-        <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">Couleur barre de temps <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="timebar-color" value="#0b0f14" onchange="setTimebarColor(this.value)"/></label>
-        <label style="display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:12px;">Couleur ligne de temps <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="todayline-color" value="#e74c3c" onchange="setTodaylineColor(this.value)"/></label>
-        <div class="ts-title">Couleurs des jalons par défaut</div>
-        <div class="radio-group seg" style="margin-top:2px;">
-          <label><input type="radio" name="default-jalon-colors-mode" value="different" onchange="setDefaultJalonColorsMode(this.value)"/> Variées</label>
-          <label><input type="radio" name="default-jalon-colors-mode" value="lane" checked onchange="setDefaultJalonColorsMode(this.value)"/> Phase</label>
+      <div class="pane-hidden" id="palette-body" role="tabpanel" aria-labelledby="dtab-colors">
+        <div class="grp">Gantt</div>
+        <div class="row"><span class="row-l">Barre de temps</span><input type="color" id="timebar-color" value="#0b0f14" onchange="setTimebarColor(this.value)" aria-label="Couleur de la barre de temps"/></div>
+        <div class="row"><span class="row-l">Ligne de temps</span><input type="color" id="todayline-color" value="#e74c3c" onchange="setTodaylineColor(this.value)" aria-label="Couleur de la ligne de temps"/></div>
+        <div class="grp">Jalons</div>
+        <div class="ts-sub" style="margin-top:6px;">Couleur par défaut</div>
+        <div class="radio-group seg">
+          <label title="Une couleur différente par jalon"><input type="radio" name="default-jalon-colors-mode" value="different" onchange="setDefaultJalonColorsMode(this.value)"/> Variées</label>
+          <label title="Couleur de la phase"><input type="radio" name="default-jalon-colors-mode" value="lane" checked onchange="setDefaultJalonColorsMode(this.value)"/> Phase</label>
         </div>
-        <div class="ts-title">Séquence de couleurs par défaut</div>
-        <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:4px 8px;">
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°1 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-1" value="#297FB8" onchange="setDefaultPaletteColor(0,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°2 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-2" value="#27AE60" onchange="setDefaultPaletteColor(1,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°3 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-3" value="#E67E22" onchange="setDefaultPaletteColor(2,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°4 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-4" value="#F1C40F" onchange="setDefaultPaletteColor(3,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°5 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-5" value="#C0392B" onchange="setDefaultPaletteColor(4,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°6 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-6" value="#9B59B6" onchange="setDefaultPaletteColor(5,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°7 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-7" value="#D3D3D3" onchange="setDefaultPaletteColor(6,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°8 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-8" value="#EFCBA2" onchange="setDefaultPaletteColor(7,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°9 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-9" value="#2C3E50" onchange="setDefaultPaletteColor(8,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°10 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-10" value="#50C2E5" onchange="setDefaultPaletteColor(9,this.value)"/></label>
-          <label style="display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;">n°11 <input type="color" style="width:34px;height:22px;padding:0;border:none;background:transparent;" id="palette-color-11" value="#1F618D" onchange="setDefaultPaletteColor(10,this.value)"/></label>
+        <div class="grp">Séquence par défaut</div>
+        <div class="swatches"><label class="sw" title="Couleur n°1"><input type="color" id="palette-color-1" value="#297FB8" onchange="setDefaultPaletteColor(0,this.value)"/><span>1</span></label><label class="sw" title="Couleur n°2"><input type="color" id="palette-color-2" value="#27AE60" onchange="setDefaultPaletteColor(1,this.value)"/><span>2</span></label><label class="sw" title="Couleur n°3"><input type="color" id="palette-color-3" value="#E67E22" onchange="setDefaultPaletteColor(2,this.value)"/><span>3</span></label><label class="sw" title="Couleur n°4"><input type="color" id="palette-color-4" value="#F1C40F" onchange="setDefaultPaletteColor(3,this.value)"/><span>4</span></label><label class="sw" title="Couleur n°5"><input type="color" id="palette-color-5" value="#C0392B" onchange="setDefaultPaletteColor(4,this.value)"/><span>5</span></label><label class="sw" title="Couleur n°6"><input type="color" id="palette-color-6" value="#9B59B6" onchange="setDefaultPaletteColor(5,this.value)"/><span>6</span></label><label class="sw" title="Couleur n°7"><input type="color" id="palette-color-7" value="#D3D3D3" onchange="setDefaultPaletteColor(6,this.value)"/><span>7</span></label><label class="sw" title="Couleur n°8"><input type="color" id="palette-color-8" value="#EFCBA2" onchange="setDefaultPaletteColor(7,this.value)"/><span>8</span></label><label class="sw" title="Couleur n°9"><input type="color" id="palette-color-9" value="#2C3E50" onchange="setDefaultPaletteColor(8,this.value)"/><span>9</span></label><label class="sw" title="Couleur n°10"><input type="color" id="palette-color-10" value="#50C2E5" onchange="setDefaultPaletteColor(9,this.value)"/><span>10</span></label><label class="sw" title="Couleur n°11"><input type="color" id="palette-color-11" value="#1F618D" onchange="setDefaultPaletteColor(10,this.value)"/><span>11</span></label></div>
+        <div class="grp">Appliquer la palette</div>
+        <div class="pairs" style="margin-top:8px;">
+          <button class="sbtn" type="button" onclick="shuffleTaskColors()" title="Réinitialiser les couleurs des tâches et des lignes selon la palette par défaut">Aux tâches</button>
+          <button class="sbtn" type="button" onclick="shuffleMilestoneColors()" title="Mélanger les couleurs des jalons">Aux jalons</button>
         </div>
         <button class="btn btn-reset" type="button" onclick="resetPaletteDefaults()"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Valeurs par défaut</button>
-        <div style="display:flex;gap:6px;">
-          <button class="btn" style="justify-content:center;flex:1;padding:4px 6px;font-size:11px;" onclick="shuffleTaskColors()" title="Réinitialiser les couleurs des tâches et des lignes selon la palette par défaut">🎨 Appliquer couleurs tâches</button>
-          <button class="btn" style="justify-content:center;flex:1;padding:4px 6px;font-size:11px;" onclick="shuffleMilestoneColors()" title="Mélanger les couleurs des jalons">🎨 Appliquer couleurs jalons</button>
-        </div>
+      </div>
+
       </div>
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
@@ -621,7 +617,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Affichage : « Barre de temps » est toujours active et « Ligne de temps » passe au premier niveau.</li>
         <li>Gantt : « + ajouter » crée l'élément et place le curseur dans son nom ; Échap annule, OK valide et en crée un nouveau.</li>
         <li>Barre latérale : Affichages et Tailles sont réunis dans un seul menu « Affichage » à deux onglets, et les choix exclusifs deviennent des listes déroulantes.</li>
-        <li>Barre latérale : nouveau design (une seule échelle de tailles, sous-options à filet, onglets et boutons segmentés sur une ligne à la place des listes déroulantes, menu plus large).</li>
+        <li>Barre latérale : nouveau design (une seule échelle de tailles, sous-options à filet, onglets et boutons segmentés sur une ligne à la place des listes déroulantes, menu plus large) ; la palette de couleurs devient l'onglet « Couleurs » du menu Affichage.</li>
         <li>Échelle de temps : choix de l'unité (jour, semaine, mois, trimestre, année), repères au calendrier ou comptés depuis le début, exemple en direct, et bloc « Période affichée » regroupé.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
@@ -1004,7 +1000,6 @@ function _saveUIPrefs() {
     depPlanning: document.getElementById('deplacement-planning-body')?.classList.contains('collapsed'),
     display: document.getElementById('display-body')?.classList.contains('collapsed'),
     timeScale: document.getElementById('time-scale-body')?.classList.contains('collapsed'),
-    palette: document.getElementById('palette-body')?.classList.contains('collapsed'),
     models: document.getElementById('models-body')?.classList.contains('collapsed')
   };
   localStorage.setItem('TEST_MP_UI_PREFS', JSON.stringify(prefs));
@@ -1025,7 +1020,6 @@ function restoreUIPrefs() {
     setSec('deplacement-planning-body', 'deplacement-planning-chev', prefs.depPlanning);
     setSec('display-body', 'display-chev', prefs.display);
     setSec('time-scale-body', 'time-scale-chev', prefs.timeScale);
-    setSec('palette-body', 'palette-chev', prefs.palette);
     setSec('models-body', 'models-chev', prefs.models);
   } catch(e){}
 }
@@ -2458,7 +2452,6 @@ function resetDefaults() {
   const ab=document.getElementById('display-body'), ac=document.getElementById('display-chev'); if(ab && ac){ ab.classList.add('collapsed'); ac.textContent='▸'; }
   if(typeof showDisplayTab==='function') showDisplayTab('elements');
   const tb=document.getElementById('time-scale-body'), tc=document.getElementById('time-scale-chev'); if(tb && tc){ tb.classList.add('collapsed'); tc.textContent='▸'; }
-  const pb=document.getElementById('palette-body'), pc=document.getElementById('palette-chev'); if(pb && pc){ pb.classList.add('collapsed'); pc.textContent='▸'; }
   timebarColor='#0b0f14'; todaylineColor='#e74c3c'; defaultTaskJalonPalette=[...DEFAULT_TASK_JALON_PALETTE]; syncPaletteInputs();
   defaultJalonColorsMode='lane'; const rLane=document.querySelector('input[name="default-jalon-colors-mode"][value="lane"]'); if(rLane) rLane.checked=true;
   toggleTitle();
@@ -3373,11 +3366,12 @@ function quickTaskToLane(laneId,taskId){
 
 // ═══ AFFICHAGE : ONGLETS ET MENUS DÉROULANTS ══════════════════
 function showDisplayTab(tab){
-  const el=tab!=='sizes';
-  document.getElementById('afficher-body')?.classList.toggle('pane-hidden',!el);
-  document.getElementById('sizes-body')?.classList.toggle('pane-hidden',el);
-  document.getElementById('dtab-elements')?.setAttribute('aria-selected',String(el));
-  document.getElementById('dtab-sizes')?.setAttribute('aria-selected',String(!el));
+  if(tab!=='sizes'&&tab!=='colors') tab='elements';
+  const panes={elements:'afficher-body',sizes:'sizes-body',colors:'palette-body'}, tabs={elements:'dtab-elements',sizes:'dtab-sizes',colors:'dtab-colors'};
+  Object.keys(panes).forEach(k=>{
+    document.getElementById(panes[k])?.classList.toggle('pane-hidden',k!==tab);
+    document.getElementById(tabs[k])?.setAttribute('aria-selected',String(k===tab));
+  });
 }
 // Synchronise l'interface de l'échelle de temps (appelée au début de chaque rendu)
 function syncDropdowns(){ if(typeof applyScaleUI==='function') applyScaleUI(); }
