@@ -160,13 +160,6 @@ td input[type=color] { width:28px; height:22px; padding:1px; border:1px solid #d
 .task-size-val { font-size:12px; color:#555; min-width:28px; text-align:center; }
 svg text, svg tspan { text-rendering: geometricPrecision; }
 
-.uimode { display:flex; margin:8px 0 0; }
-.uimode button { flex:1; padding:5px 6px; font-size:11px; border:1px solid #ccc; background:#fff; color:#555; cursor:pointer; }
-.uimode button:first-child { border-radius:6px 0 0 6px; } .uimode button:last-child { border-radius:0 6px 6px 0; border-left:none; }
-.uimode button.active { background:#2c3e50; color:#fff; border-color:#2c3e50; }
-.simple-hint { display:none; font-size:10px; color:#888; margin-top:6px; line-height:1.35; }
-.sidebar.simple .simple-hint { display:block; }
-.sidebar.simple .adv, .sidebar.simple .sub-options:not(#jalons-sub):not(#freezes-sub) { display:none !important; }
 #print-root { display:none; }
 @media print {
   body > *:not(#print-root) { display:none !important; }
@@ -257,7 +250,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.8 &mdash; Accès sécurisé
+      v4.9 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -265,7 +258,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="header-shell">
 <div class="topbar">
   <button class="btn burger-btn" id="burger-btn" type="button" onclick="toggleSidebar()" title="Ouvrir / fermer le menu" aria-label="Ouvrir / fermer le menu"><span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
-  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.8</span></div>
+  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v4.9</span></div>
   <div class="topbar-sep"></div>
   <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Phase</button>
   <button class="btn" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" style="font-weight:600;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg> Gel</button>
@@ -333,9 +326,6 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="app-shell">
 <div class="app-body">
   <div class="sidebar">
-    <div class="uimode"><button type="button" id="uimode-simple" onclick="applyUIMode('simple')">Simplifié</button><button type="button" id="uimode-adv" onclick="applyUIMode('advanced')">Avancé</button></div>
-    <div class="simple-hint">Mode simplifié : tailles, palette et options détaillées sont masquées. Passez en « Avancé » pour tout afficher.</div>
-    <hr class="sidebar-sep" style="margin:12px 0;">
     <div>
       <div class="collapsible-head" onclick="toggleSection('deplacement-planning-body','deplacement-planning-chev')"><h3 style="margin:0;">DÉPLACEMENT DU PLANNING</h3><span class="chev" id="deplacement-planning-chev">▸</span></div>
       <div class="collapsible-body collapsed" id="deplacement-planning-body" style="margin-top:10px;">
@@ -411,7 +401,11 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           <div class="opt-sub-title">Type de drapeau</div>
           <div class="seg"><label><input type="radio" name="flag-type" value="big" checked onchange="renderTimeline(); saveState()"/> Grand drapeau</label>
           <label><input type="radio" name="flag-type" value="small" onchange="renderTimeline(); saveState()"/> Petit drapeau</label></div>
-          <label class="adv"><input type="checkbox" id="chk-dash-dot" onchange="renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
+          <label><input type="checkbox" id="chk-dash-dot" onchange="toggleDashDotOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Trait pointillé jalon</label>
+          <div class="sub-options" id="dash-dot-sub">
+            <div class="seg seg-v"><label><input type="radio" name="dash-dot-end" value="jalon" checked onchange="renderTimeline(); saveState()"/> S'arrête au jalon</label>
+            <label><input type="radio" name="dash-dot-end" value="bottom" onchange="renderTimeline(); saveState()"/> Jusqu'en bas du Gantt</label></div>
+          </div>
           <label><input type="checkbox" id="chk-jalon-lines" checked onchange="toggleJalonsLinesOptions(); renderTimeline(); saveState()" style="accent-color:#c0392b;"/> Lignes jalons</label>
           <div class="sub-options" id="jalon-lines-sub">
             <div class="seg seg-v"><label><input type="radio" name="jalon-line-pos" value="first" onchange="renderTimeline(); saveState()"/> Première ligne</label>
@@ -419,7 +413,11 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           </div>
         </div>
 
-        <label><input type="checkbox" id="chk-lane-col" checked onchange="renderTimeline(); saveState()"/> Phases (colonne)</label>
+        <label><input type="checkbox" id="chk-lane-col" checked onchange="toggleLaneOptions(); renderTimeline(); saveState()"/> Phases</label>
+        <div class="sub-options" id="lane-sub">
+          <div class="seg"><label><input type="radio" name="lane-view" value="col" checked onchange="renderTimeline(); saveState()"/> Colonne</label>
+          <label><input type="radio" name="lane-view" value="list" onchange="renderTimeline(); saveState()"/> Liste</label></div>
+        </div>
         <label><input type="checkbox" id="chk-taches-master" checked onchange="toggleTachesOptions(); renderTimeline(); saveState()"/> Tâches (barres)</label>
         <div class="sub-options" id="taches-sub">
           <label><input type="checkbox" id="chk-task-label" checked onchange="toggleTaskLabelOptions()"/> Titre des tâches</label>
@@ -721,6 +719,12 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+      <div style="font-weight:700;margin:8px 0 6px;">V4.9:</div>
+      <ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Barre latérale : le mode « Simplifié » disparaît ; toutes les options d'affichage, les tailles et la palette sont toujours visibles.</li>
+        <li>Affichages : les phases se présentent soit en colonne (comme avant), soit en liste, avec un bandeau coloré portant le nom de la phase au-dessus de ses tâches.</li>
+        <li>Affichages : le trait pointillé des jalons peut s'arrêter au jalon (comme avant) ou aller jusqu'en bas du Gantt.</li>
+      </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Menus : refonte du design du panneau Affichages (interrupteurs alignés à droite, sous-options regroupées dans des cadres, boutons segmentés à la place des boutons radio). L'info-bulle de déplacement s'affiche plus bas, sous le curseur.</li>
@@ -1023,6 +1027,16 @@ function toggleJalonsLinesOptions() {
     sub.style.display = chk.checked ? 'flex' : 'none';
   }
 }
+function toggleLaneOptions() {
+  const chk = document.getElementById('chk-lane-col');
+  const sub = document.getElementById('lane-sub');
+  if (chk && sub) sub.style.display = chk.checked ? 'flex' : 'none';
+}
+function toggleDashDotOptions() {
+  const chk = document.getElementById('chk-dash-dot');
+  const sub = document.getElementById('dash-dot-sub');
+  if (chk && sub) sub.style.display = chk.checked ? 'flex' : 'none';
+}
 function toggleTachesOptions() {
   const chk = document.getElementById('chk-taches-master');
   const sub = document.getElementById('taches-sub');
@@ -1165,7 +1179,7 @@ function changeDash(type,d){
   if(type==='dash'){ dashLen=Math.max(1,Math.min(20,dashLen+d)); document.getElementById('dash-dash-val').textContent=dashLen; }
   else { dashGap=Math.max(1,Math.min(20,dashGap+d)); document.getElementById('dash-gap-val').textContent=dashGap; }
   // Les tirets n'existent que si « Trait pointillé jalon » est coché : on l'active pour que le réglage soit visible tout de suite
-  { const c=document.getElementById('chk-dash-dot'); if(c&&!c.checked){ c.checked=true; showToast('« Trait pointillé jalon » activé'); } }
+  { const c=document.getElementById('chk-dash-dot'); if(c&&!c.checked){ c.checked=true; toggleDashDotOptions(); showToast('« Trait pointillé jalon » activé'); } }
   saveState();
   renderTimeline();
 }
@@ -1636,6 +1650,7 @@ function renderTimeline(){
   const showJalonsMaster=document.getElementById('chk-jalons-master')?.checked !== false;
   const showJalonsFlags=document.getElementById('chk-jalons-flags')?.checked !== false;
   const showDashDot=document.getElementById('chk-dash-dot')?.checked === true;
+  const dashToBottom=document.querySelector('input[name="dash-dot-end"]:checked')?.value==='bottom';
   const showJalonLines=document.getElementById('chk-jalon-lines')?.checked !== false;
   const sc=scaleIdx;
   const dayStep=+document.querySelector('input[name="day-step"]:checked')?.value||1;
@@ -1662,7 +1677,8 @@ function renderTimeline(){
   const totalDays=Math.round((maxD-minD)/86400000)+1;
   const tlSvgParent = document.getElementById("tl-svg").parentElement;
   const showLaneCol=document.getElementById('chk-lane-col')?.checked??true;
-  const LL=showLaneCol?laneColW:0, TH0=showTimeBar?52:0, RH=taskRH;
+  const listMode=showLaneCol && (document.querySelector('input[name="lane-view"]:checked')?.value==='list');
+  const LL=(showLaneCol&&!listMode)?laneColW:0, TH0=showTimeBar?52:0, RH=taskRH;
   const _fzList=showFreezes?freezes.filter(f=>validISO(f.start)&&validISO(f.end)):[];
   const _holList=showHolidays?frHolidaysBetween(minD,maxD):[];
   const _holHit=[]; window._tlHol=_holHit; // zones survolables des jours fériés (infobulle immédiate)
@@ -1760,7 +1776,8 @@ function renderTimeline(){
     });
     return out.length?out:[''];
   };
-  const laneHeightOf=l=>Math.max(laneRowsCache[l.id].reduce((a,row)=>a+getRowH(row),0), laneLinesOf(l).length*Math.max(12,laneFontSize+2)+8);
+  const PHH=listMode?Math.max(24,laneFontSize+10):0; // bandeau du nom de phase en mode liste
+  const laneHeightOf=l=>PHH+Math.max(laneRowsCache[l.id].reduce((a,row)=>a+getRowH(row),0), listMode?0:laneLinesOf(l).length*Math.max(12,laneFontSize+2)+8);
   let totalH=0; lanes.forEach(l=>{ totalH+=laneHeightOf(l); });
   const VH=TOTAL_TOP+totalH+(totalRows>0 ? Math.max(0,lanes.length-1)*phaseGap : 0)+1;
 
@@ -1877,14 +1894,15 @@ function renderTimeline(){
   });
 
   // ── Phases ──
-  let rowY=TOTAL_TOP;
+  let rowY=TOTAL_TOP; const _dashExt=[];
   lanes.forEach((lane,li)=>{
     const rows=laneRowsCache[lane.id];
     if (rows.length === 0) return; // Ignore completely if no rows
     const laneH=laneHeightOf(lane);
     const lc=lane.color||'#2c3e50';
     svg.appendChild(el('rect',{x:LL,y:rowY,width:VW-LL,height:laneH,fill:li%2===0?'#fff':'#f8f8f8'}));
-    const laneColorRect=el('rect',{x:0,y:rowY,width:LL,height:laneH,fill:lc});
+    const laneColorRect=el('rect',{x:0,y:rowY,width:listMode?VW:LL,height:listMode?PHH:laneH,fill:lc});
+    const _cyTop=listMode?rowY+PHH/2:rowY+8, _cyBot=listMode?rowY+PHH/2:rowY+laneH-8;
         const phaseHeaderG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     svg.appendChild(phaseHeaderG);
     phaseHeaderG.appendChild(laneColorRect);
@@ -1895,7 +1913,7 @@ function renderTimeline(){
     // ✕ supprimer phase (hover, haut-droite du bandeau coloré)
     const laneDelG=document.createElementNS('http://www.w3.org/2000/svg','g');
     laneDelG.style.display='none'; laneDelG.style.cursor='pointer';
-    const ldcx=LL-8, ldcy=rowY+8;
+    const ldcx=listMode?VW-10:LL-8, ldcy=_cyTop;
     laneDelG.appendChild(el('circle',{cx:ldcx,cy:ldcy,r:7,fill:'#e74c3c',stroke:'white','stroke-width':1.5}));
     laneDelG.appendChild(el('line',{x1:ldcx-3.2,y1:ldcy-3.2,x2:ldcx+3.2,y2:ldcy+3.2,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
     laneDelG.appendChild(el('line',{x1:ldcx+3.2,y1:ldcy-3.2,x2:ldcx-3.2,y2:ldcy+3.2,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
@@ -1912,7 +1930,7 @@ function renderTimeline(){
     // ⧉ dupliquer phase (hover, à gauche du +)
     const laneDupG=document.createElementNS('http://www.w3.org/2000/svg','g');
     laneDupG.style.display='none'; laneDupG.style.cursor='pointer';
-    const lpcx=LL-40, lpcy=rowY+8;
+    const lpcx=listMode?VW-42:LL-40, lpcy=_cyTop;
     laneDupG.appendChild(el('circle',{cx:lpcx,cy:lpcy,r:7,fill:'#8e44ad',stroke:'white','stroke-width':1.5}));
     laneDupG.appendChild(el('rect',{x:lpcx-3.4,y:lpcy-2.1,width:4.8,height:4.8,rx:0.8,fill:'none',stroke:'white','stroke-width':1.4}));
     laneDupG.appendChild(el('rect',{x:lpcx-1.2,y:lpcy-4.3,width:4.8,height:4.8,rx:0.8,fill:'none',stroke:'white','stroke-width':1.4}));
@@ -1922,7 +1940,7 @@ function renderTimeline(){
     // + ajouter (hover, en haut à droite juste avant la croix supprimer)
     const laneAddG=document.createElementNS('http://www.w3.org/2000/svg','g');
     laneAddG.style.display='none'; laneAddG.style.cursor='pointer';
-    const lacx=LL-24, lacy=rowY+8;
+    const lacx=listMode?VW-26:LL-24, lacy=_cyTop;
     laneAddG.appendChild(el('circle',{cx:lacx,cy:lacy,r:7,fill:'#27ae60',stroke:'white','stroke-width':1.5}));
     laneAddG.appendChild(el('line',{x1:lacx,y1:lacy-3.5,x2:lacx,y2:lacy+3.5,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
     laneAddG.appendChild(el('line',{x1:lacx-3.5,y1:lacy,x2:lacx+3.5,y2:lacy,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
@@ -1954,13 +1972,13 @@ function renderTimeline(){
     const laneLines=laneLinesOf(lane);
     const laneLineH=Math.max(12,laneFontSize+2);
     const laneBaseY=rowY + (laneH/2) - ((laneLines.length-1)*laneLineH)/2 + 5;
-    const lnEl=multiText(LL/2,laneBaseY,laneLines.join('\n'),{fill:'white','font-size':laneFontSize,'font-weight':'bold',cursor:'text'},laneLineH,'middle');
+    const lnEl=listMode?el('text',{x:34,y:rowY+PHH/2+laneFontSize*0.35,'text-anchor':'start',fill:'white','font-size':laneFontSize,'font-weight':'bold',cursor:'text'},String(lane.name||'').replace(/\n/g,' ')):multiText(LL/2,laneBaseY,laneLines.join('\n'),{fill:'white','font-size':laneFontSize,'font-weight':'bold',cursor:'text'},laneLineH,'middle');
     lnEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'lane',laneId:lane.id},lane.name,lnEl.getBoundingClientRect());}); phaseHeaderG.appendChild(lnEl);
 
     // ⬆ monter phase (hover, haut-centre)
     const laneUpG=document.createElementNS('http://www.w3.org/2000/svg','g');
     laneUpG.style.display='none'; laneUpG.style.cursor='pointer';
-    const lucx=LL/2, lucy=rowY+10;
+    const lucx=listMode?VW-118:LL/2, lucy=listMode?rowY+PHH/2:rowY+10;
     if(li > 0) {
       laneUpG.appendChild(el('rect',{x:lucx-12,y:lucy-7,width:24,height:14,fill:'rgba(0,0,0,0.3)',rx:3}));
       laneUpG.appendChild(el('text',{x:lucx,y:lucy+4,'text-anchor':'middle','font-size':10,fill:'white'},'▲'));
@@ -1971,7 +1989,7 @@ function renderTimeline(){
     // ⬇ descendre phase (hover, bas-centre)
     const laneDownG=document.createElementNS('http://www.w3.org/2000/svg','g');
     laneDownG.style.display='none'; laneDownG.style.cursor='pointer';
-    const ldcx2=LL/2, ldcy2=rowY+laneH-10;
+    const ldcx2=listMode?VW-90:LL/2, ldcy2=listMode?rowY+PHH/2:rowY+laneH-10;
     if(li < lanes.length - 1) {
       laneDownG.appendChild(el('rect',{x:ldcx2-12,y:ldcy2-7,width:24,height:14,fill:'rgba(0,0,0,0.3)',rx:3}));
       laneDownG.appendChild(el('text',{x:ldcx2,y:ldcy2+4,'text-anchor':'middle','font-size':10,fill:'white'},'▼'));
@@ -1992,7 +2010,7 @@ function renderTimeline(){
     // ➜ déplacement planning de phase (hover, bas-droite)
     const laneShiftG=document.createElementNS('http://www.w3.org/2000/svg','g');
     laneShiftG.style.display='none'; laneShiftG.style.cursor='pointer';
-    const lscx=LL-24, lscy=rowY+laneH-8;
+    const lscx=listMode?VW-58:LL-24, lscy=_cyBot;
     laneShiftG.appendChild(el('circle',{cx:lscx,cy:lscy,r:7,fill:'#2980b9',stroke:'white','stroke-width':1.5}));
     laneShiftG.appendChild(el('line',{x1:lscx-3.5,y1:lscy,x2:lscx+2.2,y2:lscy,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
     laneShiftG.appendChild(el('line',{x1:lscx-0.2,y1:lscy-3,x2:lscx+3.2,y2:lscy,stroke:'white','stroke-width':2,'stroke-linecap':'round'}));
@@ -2010,7 +2028,7 @@ function renderTimeline(){
     // 🎨 Changer couleur (hover, haut-gauche)
     const laneColorFOG = document.createElementNS('http://www.w3.org/2000/svg','foreignObject');
     laneColorFOG.setAttribute('x', 2);
-    laneColorFOG.setAttribute('y', rowY+2);
+    laneColorFOG.setAttribute('y', listMode?rowY+(PHH-22)/2:rowY+2);
     laneColorFOG.setAttribute('width', 22);
     laneColorFOG.setAttribute('height', 22);
     laneColorFOG.style.display = 'none';
@@ -2084,7 +2102,7 @@ function renderTimeline(){
     });
 
     rows.forEach((row,ri)=>{
-      const ty=rowY+rows.slice(0,ri).reduce((s,r)=>s+getRowH(r),0);
+      const ty=rowY+PHH+rows.slice(0,ri).reduce((s,r)=>s+getRowH(r),0);
       const rowHasOnlyJalon = row.tasks.length && row.tasks.every(t=>t.type==='J');
       if(!showJalonLines && rowHasOnlyJalon) return;
       row.tasks.forEach(task=>{
@@ -2093,6 +2111,7 @@ function renderTimeline(){
           const mx=dX(task.end||task.start), my=ty+getRowH(row)/2, s=jalonS;
           if (showJalonsMaster) {
             if(showDashDot) svg.appendChild(el('line',{x1:mx,y1:MA+TH,x2:mx,y2:my-s,stroke:tc,'stroke-width':1.5,'stroke-dasharray':`${dashLen},${dashGap}`}));
+            if(showDashDot&&dashToBottom) _dashExt.push(el('line',{x1:mx,y1:my+s,x2:mx,y2:VH,stroke:tc,'stroke-width':1.5,'stroke-dasharray':`${dashLen},${dashGap}`,'pointer-events':'none'}));
             const poly=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s} ${mx-s},${my}`,fill:tc,stroke:'white','stroke-width':2,cursor:'grab'});
             poly.style.touchAction='none';
             poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); if(e.shiftKey||e.ctrlKey||e.metaKey){ toggleSelected(lane.id,task.id); return; } const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; if(selHas(lane.id,task.id)&&tlSel.keys.size>1){ tlDrag.mode='move-group'; tlDrag.origs=selItems().map(i=>({laneId:i.lane.id,id:i.task.id,start:i.task.start,end:i.task.end})); } document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
@@ -2305,6 +2324,7 @@ function renderTimeline(){
     svg.appendChild(el('line',{x1:0,y1:rowY+laneH,x2:VW,y2:rowY+laneH,stroke:'#ccc','stroke-width':1.5}));
     rowY+=laneH+(li<lanes.length-1?phaseGap:0);
   });
+  _dashExt.forEach(l=>svg.appendChild(l));
   svg.appendChild(el('line',{x1:LL,y1:MA+TH,x2:LL,y2:VH,stroke:'#ddd','stroke-width':1}));
 
   // Ligne de temps aujourd'hui
@@ -2384,7 +2404,7 @@ function renderTimeline(){
   if(typeof _delGroups!=='undefined') _delGroups.forEach(g=>svg.appendChild(g));
   _quickAdd.forEach(g=>svg.appendChild(g));
   tlBands=_laneBands; tlBoxes=_taskBoxes; tlLLv=LL; tlVBw=VW; tlVBh=VH;
-  if(showLaneCol){
+  if(showLaneCol&&!listMode){
     const hg=document.createElementNS(NS,'g'); hg.style.cursor='col-resize'; hg.style.touchAction='none';
     hg.appendChild(el('rect',{x:LL-4,y:MA,width:8,height:Math.max(0,VH-MA),fill:'#ffffff','fill-opacity':0.001}));
     const grip=el('rect',{x:LL-1.5,y:MA+TH+timelineGap,width:3,height:Math.max(0,VH-(MA+TH+timelineGap)),rx:1.5,fill:'#c0392b',opacity:'0'}); grip.style.pointerEvents='none'; hg.appendChild(grip);
@@ -2427,12 +2447,14 @@ function resetAfficherDefaults(){
   const fl=document.querySelector('input[name="flag-type"][value="big"]'); if(fl) fl.checked=true;
   const ts=document.querySelector('input[name="tl-start"][value="1"]'); if(ts) ts.checked=true; // lié à la position du titre des tâches (« à gauche »)
   const jl=document.querySelector('input[name="jalon-line-pos"][value="last"]'); if(jl) jl.checked=true;
+  { const lv=document.querySelector('input[name="lane-view"][value="col"]'); if(lv) lv.checked=true; const de=document.querySelector('input[name="dash-dot-end"][value="jalon"]'); if(de) de.checked=true; }
+  toggleLaneOptions(); toggleDashDotOptions();
   toggleTitle(); toggleDatesOptions(); toggleTaskLabelOptions(); toggleTodayLineOptions(); toggleFreezesOptions(); toggleJalonsOptions(); toggleJalonsLinesOptions(); toggleTachesOptions(); saveState(); renderTimeline();
 }
 function resetSizesDefaults(){
   taskRH = 24; jalonRH = 16; jalonS = 10; flagPadH = 6; flagPadV = 6; flagMastGap = 2; flagRowGap = 7; flagW = 1.5; lineW = 2; dashLen = 4; dashGap = 3; laneFontSize = 13; taskFontSize = 11; taskDateFontSize = 8; jalonFontSize = 11; jalonDateFontSize = 8; todayFontSize = 8; tMajorFontSize = 10; tMinorUpFontSize = 8.5; tMinorLblFontSize = 9; headerH = 36; sepMargin = 0; todayArrowSize = 4;
   phaseGap = 1; timelineGap = 8;
-  { const ft=document.querySelector('input[name="flag-type"][value="big"]'); if(ft) ft.checked=true; const dd=document.getElementById('chk-dash-dot'); if(dd) dd.checked=false; const td=document.getElementById('chk-task-dash-dot'); if(td) td.checked=true; }
+  { const ft=document.querySelector('input[name="flag-type"][value="big"]'); if(ft) ft.checked=true; const dd=document.getElementById('chk-dash-dot'); if(dd) dd.checked=false; const de=document.querySelector('input[name="dash-dot-end"][value="jalon"]'); if(de) de.checked=true; toggleDashDotOptions(); const td=document.getElementById('chk-task-dash-dot'); if(td) td.checked=true; }
   laneColW = 130; { const e=document.getElementById('lane-col-w'); if(e) e.value=130; const v=document.getElementById('lane-col-w-val'); if(v) v.textContent=130; }
   document.getElementById('sep-margin-val').textContent=0; document.documentElement.style.setProperty('--sep-margin','0px'); document.getElementById('header-h-val').textContent=36; applyHeaderHeight(); const tas=document.getElementById('today-arrow-size-val'); if(tas) tas.textContent=4;
   const pairs=[['task-size-val',24],['jalon-size-val',16],['jalon-s-val',10],['flag-padh-val',6],['flag-padv-val',6],['flag-mast-gap-val',2],['lbl-flag-row-gap',7],['lbl-flag-w',1.5],['lbl-line-w',2],['dash-dash-val',4],['dash-gap-val',3],['lane-font-size-val',13],['task-font-size-val',11],['task-date-font-size-val',8],['jalon-font-size-val',11],['jalon-date-font-size-val',8],['today-font-size-val',8],['tmajor-font-size-val',10],['tminor-up-font-size-val',8.5],['tminor-lbl-font-size-val',9],['header-h-val',36],['sep-margin-val',0],['today-arrow-size-val',4],['phase-gap-val',6],['timeline-gap-val',8]];
@@ -2483,6 +2505,8 @@ function resetDefaults() {
   document.getElementById('chk-todayline').checked = true;
   const cTachesMaster=document.getElementById('chk-taches-master'); if(cTachesMaster) cTachesMaster.checked = true;
   const cLaneCol=document.getElementById('chk-lane-col'); if(cLaneCol) cLaneCol.checked = true;
+  { const lv=document.querySelector('input[name="lane-view"][value="col"]'); if(lv) lv.checked=true; const de=document.querySelector('input[name="dash-dot-end"][value="jalon"]'); if(de) de.checked=true; }
+  toggleLaneOptions(); toggleDashDotOptions();
   laneColW=130; { const e=document.getElementById('lane-col-w'); if(e) e.value=130; const v=document.getElementById('lane-col-w-val'); if(v) v.textContent=130; }
   document.getElementById('chk-dates').checked = true;
   document.getElementById('chk-task-label').checked = true;
@@ -2792,6 +2816,8 @@ function saveState() {
     showTaskDashDot: document.getElementById('chk-task-dash-dot')?.checked,
     datesPos: document.querySelector('input[name="dates-pos"]:checked')?.value || 'right',
     jalonLinePos: document.querySelector('input[name="jalon-line-pos"]:checked')?.value || 'last',
+      laneView: document.querySelector('input[name="lane-view"]:checked')?.value || 'col',
+      dashDotEnd: document.querySelector('input[name="dash-dot-end"]:checked')?.value || 'jalon',
     taskLabelPos: document.querySelector('input[name="task-label-pos"]:checked')?.value || 'inside',
     dayStep: document.querySelector('input[name="day-step"]:checked')?.value || '5',
     tlStart: document.querySelector('input[name="tl-start"]:checked')?.value || '1',
@@ -2866,6 +2892,8 @@ saveState._orig = function(){
       showTaskDashDot: document.getElementById('chk-task-dash-dot')?.checked,
       datesPos: document.querySelector('input[name="dates-pos"]:checked')?.value || 'right',
       jalonLinePos: document.querySelector('input[name="jalon-line-pos"]:checked')?.value || 'last',
+      laneView: document.querySelector('input[name="lane-view"]:checked')?.value || 'col',
+      dashDotEnd: document.querySelector('input[name="dash-dot-end"]:checked')?.value || 'jalon',
       taskLabelPos: document.querySelector('input[name="task-label-pos"]:checked')?.value || 'inside',
       dayStep: document.querySelector('input[name="day-step"]:checked')?.value || '5',
       tlStart: document.querySelector('input[name="tl-start"]:checked')?.value || '1',
@@ -2965,6 +2993,9 @@ function restoreSidebar(s) {
   const setRadio = (name, val) => { if (!val) return; const r = document.querySelector(`input[name="${name}"][value="${val}"]`); if (r) r.checked = true; };
   setRadio('dates-pos', s.datesPos);
   setRadio('jalon-line-pos', s.jalonLinePos || 'last');
+  setRadio('lane-view', s.laneView || 'col');
+  setRadio('dash-dot-end', s.dashDotEnd || 'jalon');
+  toggleLaneOptions(); toggleDashDotOptions();
   setRadio('task-label-pos', s.taskLabelPos);
   setRadio('day-step', s.dayStep || '5');
   onDayStepChange(['1','2','5','10'].indexOf(s.dayStep||'5'));
@@ -4301,17 +4332,6 @@ function toggleConvMenu(ev){
 document.addEventListener('pointerdown',e=>{ if(!e.target.closest('#conv-menu') && !e.target.closest('#btn-png2json')) closeConvMenu(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeConvMenu(); });
 window.addEventListener('resize',closeConvMenu);
-
-// ═══ MODE D'INTERFACE : SIMPLIFIÉ / AVANCÉ ═══════════════════
-// Le mode n'est pas mémorisé : l'application s'ouvre toujours en « Simplifié »
-try{ localStorage.removeItem('test_mp_uimode_v1'); }catch(e){}
-function applyUIMode(mode){
-  mode=(mode==='advanced')?'advanced':'simple';
-  document.querySelector('.sidebar')?.classList.toggle('simple',mode==='simple');
-  document.getElementById('uimode-simple')?.classList.toggle('active',mode==='simple');
-  document.getElementById('uimode-adv')?.classList.toggle('active',mode==='advanced');
-}
-applyUIMode('simple');
 
 // ═══ PÉRIODES DE GEL ═════════════════════════════════════════
 function validISO(s){ if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false; const d=parseD(s); return !isNaN(d) && fmt(d)===s; }
