@@ -592,14 +592,14 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
             <div style="font-weight:700;margin:8px 0 6px;">V4.9:</div><ul style="margin:0 0 10px 18px;padding:0;">
-        <li><b>Nouveau</b> : échelle de temps par unité (jour à année), repères Calendrier ou Numéroté, exemple en direct.</li>
-        <li><b>Nouveau</b> : phases en liste ou en colonne ; trait pointillé des jalons jusqu'en bas (option).</li>
-        <li><b>Nouveau</b> : « + ajouter » place le curseur dans le nom ; l'encerclement peut démarrer hors du Gantt.</li>
-        <li><b>Nouveau</b> : couleur des jalons « Aligné Phase / Palette Coul. », appliquée aussitôt ; MS Project en JSON (tbd).</li>
-        <li><b>Retiré</b> : mode Simplifié, interrupteur Barre de temps, Déplacement du planning, Mes modèles, sections repliables.</li>
-        <li><b>Modifié</b> : menu de gauche redessiné : onglets Éléments / Tailles / Couleurs, titres rouges collants, boutons sur une ligne.</li>
-        <li><b>Modifié</b> : « Ligne de temps » remonte au premier niveau d'Affichage.</li>
-        <li><b>Corrigé</b> : « Valeurs par défaut » recolore les jalons ; « Tout réinitialiser » rétablit 5 jours et mois précédent.</li>
+        <li>Nouveau : échelle de temps par unité (jour à année), repères Calendrier ou Numéroté, exemple en direct.</li>
+        <li>Nouveau : phases en liste ou en colonne ; trait pointillé des jalons jusqu'en bas (option).</li>
+        <li>Nouveau : « + ajouter » place le curseur dans le nom ; l'encerclement peut démarrer hors du Gantt.</li>
+        <li>Nouveau : couleur des jalons « Aligné Phase / Palette Coul. », appliquée aussitôt ; MS Project en JSON (tbd).</li>
+        <li>Retiré : mode Simplifié, interrupteur Barre de temps, Déplacement du planning, Mes modèles, sections repliables.</li>
+        <li>Modifié : menu de gauche redessiné : onglets Éléments / Tailles / Couleurs, titres rouges collants, boutons sur une ligne.</li>
+        <li>Modifié : « Ligne de temps » remonte au premier niveau d'Affichage.</li>
+        <li>Corrigé : « Valeurs par défaut » recolore les jalons ; « Tout réinitialiser » rétablit 5 jours et mois précédent.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
@@ -1412,11 +1412,11 @@ document.querySelectorAll('input[name="task-label-pos"]').forEach(r=>{
 
 
 document.addEventListener('wheel', function(e){
-  const allowed = e.target.closest('.sidebar, .view, .tl-outer');
+  const allowed = e.target.closest('.sidebar, .view, .tl-outer, .modal-box');
   if(!allowed) e.preventDefault();
 }, {passive:false});
 document.addEventListener('touchmove', function(e){
-  const allowed = e.target.closest('.sidebar, .view, .tl-outer');
+  const allowed = e.target.closest('.sidebar, .view, .tl-outer, .modal-box');
   if(!allowed) e.preventDefault();
 }, {passive:false});
 document.addEventListener('keydown', function(e){
@@ -1424,7 +1424,7 @@ document.addEventListener('keydown', function(e){
   const tag = document.activeElement ? document.activeElement.tagName : '';
   const isEditable = tag==='INPUT' || tag==='TEXTAREA' || document.activeElement.isContentEditable;
   if(isEditable) return;
-  const allowed = document.activeElement && document.activeElement.closest && document.activeElement.closest('.sidebar, .view, .tl-outer');
+  const allowed = document.activeElement && document.activeElement.closest && document.activeElement.closest('.sidebar, .view, .tl-outer, .modal-box');
   if(keys.includes(e.key) && !allowed) e.preventDefault();
 }, {passive:false});
 
