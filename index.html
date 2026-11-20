@@ -2355,7 +2355,7 @@ function resetSizesDefaults(){
   renderTimeline();
 }
 function resetPaletteDefaults(){
-  timebarColor='#0b0f14'; todaylineColor='#e74c3c'; defaultJalonColorsMode='lane'; defaultTaskJalonPalette=[...DEFAULT_TASK_JALON_PALETTE]; syncPaletteInputs(); saveState(); renderTimeline();
+  timebarColor='#0b0f14'; todaylineColor='#e74c3c'; defaultJalonColorsMode='lane'; defaultTaskJalonPalette=[...DEFAULT_TASK_JALON_PALETTE]; syncPaletteInputs(); shuffleMilestoneColors(); // recolore aussitôt les jalons selon « Aligné Phase »
 }
 
 function resetDefaults() {
@@ -2416,6 +2416,7 @@ function resetDefaults() {
   if(typeof toggleTachesOptions==='function') toggleTachesOptions();
   saveState();
   renderTimeline();
+  shuffleMilestoneColors();
 }
 
 
