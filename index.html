@@ -724,6 +724,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Menus : refonte du design du panneau Affichages (interrupteurs alignés à droite, sous-options regroupées dans des cadres, boutons segmentés à la place des boutons radio). L'info-bulle de déplacement s'affiche plus bas, sous le curseur.</li>
+        <li>Correction : « Valeurs par défaut » réinitialise désormais aussi le type de drapeau, la position des lignes de jalons et la largeur de la colonne des phases.</li>
         <li>Popup de déplacement de tâches : taille alignée sur celui des phases (astuce déplacée en infobulle) et placé plus bas sous la dernière tâche sélectionnée.</li>
         <li>Déplacement d'une tâche, d'un jalon ou d'une période de gel : l'info-bulle affiche le nombre de jours, la date de début et la date de fin avec le jour de la semaine. Idem pour un déplacement multiple.</li>
         <li>Menus : les cases à cocher deviennent des interrupteurs on/off.</li>
@@ -2423,11 +2424,15 @@ function resetAfficherDefaults(){
   set('chk-title', true); set('chk-timebar', true); set('chk-todayline', true); set('chk-todayline-vline', true); set('chk-todayline-hline', true); set('chk-todayline-circle', true); set('chk-todayline-date', false); set('chk-freezes', true); set('chk-holidays', false); set('chk-todayline-arrow', true); set('chk-taches-master', true); set('chk-lane-col', true); set('chk-dates', true); set('chk-task-label', true); set('chk-task-dash-dot', true); set('chk-jalons-master', true); set('chk-jalons-flags', true); set('chk-jalon-lines', true); set('chk-dash-dot', false);
   const d=document.querySelector('input[name="dates-pos"][value="right"]'); if(d) d.checked=true;
   const t=document.querySelector('input[name="task-label-pos"][value="left"]'); if(t) t.checked=true;
+  const fl=document.querySelector('input[name="flag-type"][value="big"]'); if(fl) fl.checked=true;
+  const ts=document.querySelector('input[name="tl-start"][value="1"]'); if(ts) ts.checked=true; // lié à la position du titre des tâches (« à gauche »)
+  const jl=document.querySelector('input[name="jalon-line-pos"][value="last"]'); if(jl) jl.checked=true;
   toggleTitle(); toggleDatesOptions(); toggleTaskLabelOptions(); toggleTodayLineOptions(); toggleFreezesOptions(); toggleJalonsOptions(); toggleJalonsLinesOptions(); toggleTachesOptions(); saveState(); renderTimeline();
 }
 function resetSizesDefaults(){
   taskRH = 24; jalonRH = 16; jalonS = 10; flagPadH = 6; flagPadV = 6; flagMastGap = 2; flagRowGap = 7; flagW = 1.5; lineW = 2; dashLen = 4; dashGap = 3; laneFontSize = 13; taskFontSize = 11; taskDateFontSize = 8; jalonFontSize = 11; jalonDateFontSize = 8; todayFontSize = 8; tMajorFontSize = 10; tMinorUpFontSize = 8.5; tMinorLblFontSize = 9; headerH = 36; sepMargin = 0; todayArrowSize = 4;
   phaseGap = 1; timelineGap = 8;
+  laneColW = 130; { const e=document.getElementById('lane-col-w'); if(e) e.value=130; const v=document.getElementById('lane-col-w-val'); if(v) v.textContent=130; }
   document.getElementById('sep-margin-val').textContent=0; document.documentElement.style.setProperty('--sep-margin','0px'); document.getElementById('header-h-val').textContent=36; applyHeaderHeight(); const tas=document.getElementById('today-arrow-size-val'); if(tas) tas.textContent=4;
   const pairs=[['task-size-val',24],['jalon-size-val',16],['jalon-s-val',10],['flag-padh-val',6],['flag-padv-val',6],['flag-mast-gap-val',2],['lbl-flag-row-gap',7],['lbl-flag-w',1.5],['lbl-line-w',2],['dash-dash-val',4],['dash-gap-val',3],['lane-font-size-val',13],['task-font-size-val',11],['task-date-font-size-val',8],['jalon-font-size-val',11],['jalon-date-font-size-val',8],['today-font-size-val',8],['tmajor-font-size-val',10],['tminor-up-font-size-val',8.5],['tminor-lbl-font-size-val',9],['header-h-val',36],['sep-margin-val',0],['today-arrow-size-val',4],['phase-gap-val',6],['timeline-gap-val',8]];
   pairs.forEach(([id,v])=>{ const el=document.getElementById(id); if(el) el.textContent=v; });
