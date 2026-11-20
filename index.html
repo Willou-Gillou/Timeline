@@ -299,18 +299,18 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 </div>
 </div>
 <div id="drag-tip"></div>
-<div id="sel-menu" role="dialog" aria-label="Déplacement de tâches" style="display:none;position:fixed;z-index:10030;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);padding:10px;min-width:220px;">
+<div id="sel-menu" role="dialog" aria-label="Déplacement de tâches" style="display:none;position:fixed;z-index:10030;background:#fff;border:1px solid #ddd;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.18);padding:10px;min-width:220px;max-width:240px;">
   <div id="sel-menu-head" style="display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px;cursor:move;user-select:none;">
-    <div style="font-size:12px;font-weight:700;color:#333;">Déplacement de tâches</div>
+    <div style="font-size:12px;font-weight:700;color:#333;" title="Maj + clic sur une activité pour l'ajouter ou la retirer ; faites glisser une barre sélectionnée pour déplacer tout le groupe.">Déplacement de tâches</div>
     <button type="button" onclick="clearSelection()" title="Désélectionner (Échap)" aria-label="Fermer" style="border:none;background:transparent;cursor:pointer;font-size:13px;color:#888;padding:0 2px;">✕</button>
   </div>
-  <div id="sel-count" style="font-size:11px;color:#666;margin-bottom:8px;"></div>
+  <div id="sel-count" style="font-size:10.5px;color:#666;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;"></div>
   <div style="font-size:11px;font-weight:700;color:#333;">Sauts de puce</div>
   <div style="display:flex;flex-direction:column;gap:4px;margin:6px 0 10px;">
     <div style="display:flex;gap:6px;"><button type="button" onclick="shiftSel(-1,'d')" style="font-size:11px;padding:4px 8px;flex:1;">- 1 jour</button><button type="button" onclick="shiftSel(1,'d')" style="font-size:11px;padding:4px 8px;flex:1;">+ 1 jour</button></div>
     <div style="display:flex;gap:6px;"><button type="button" onclick="shiftSel(-1,'w')" style="font-size:11px;padding:4px 8px;flex:1;">- 1 sem.</button><button type="button" onclick="shiftSel(1,'w')" style="font-size:11px;padding:4px 8px;flex:1;">+ 1 sem.</button></div>
     <div style="display:flex;gap:6px;"><button type="button" onclick="shiftSel(-1,'m')" style="font-size:11px;padding:4px 8px;flex:1;">- 1 mois</button><button type="button" onclick="shiftSel(1,'m')" style="font-size:11px;padding:4px 8px;flex:1;">+ 1 mois</button></div>
-    <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#555;margin-top:2px;cursor:pointer;" title="Les sauts en jours et en semaines ignorent les samedis et dimanches"><input type="checkbox" id="sel-biz" checked> Jours ouvrés (jours / sem.)</label>
+    <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:#555;margin-top:2px;cursor:pointer;" title="Les sauts en jours et en semaines ignorent les samedis et dimanches"><input type="checkbox" id="sel-biz" checked> Jours ouvrés (j. / sem.)</label>
   </div>
   <div style="margin-top:4px;">
     <div style="font-size:11px;font-weight:700;color:#333;margin-bottom:6px;">Changer la date de début</div>
@@ -319,7 +319,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <button type="button" onclick="changeSelT0()" style="font-size:11px;padding:4px 8px;">Appliquer</button>
     </div>
   </div>
-  <div style="font-size:10.5px;color:#888;margin-top:10px;line-height:1.35;">Astuce : Maj + clic sur une activité pour l'ajouter ou la retirer ; faites glisser une barre sélectionnée pour déplacer tout le groupe.</div>
+
 </div>
 <div id="conv-menu" role="menu" style="display:none;">
   <a class="btn" role="menuitem" href="https://m365.cloud.microsoft/chat/?titleId=T_26a2fcc3-c3fd-6d09-eff7-a65b904a0b40&amp;source=embedded-builder" target="_blank" rel="noopener noreferrer" onclick="closeConvMenu()">Convertir une image en JSON</a>
@@ -724,6 +724,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
       <ul style="margin:0 0 10px 18px;padding:0;">
         <li>Menus : refonte du design du panneau Affichages (interrupteurs alignés à droite, sous-options regroupées dans des cadres, boutons segmentés à la place des boutons radio). L'info-bulle de déplacement s'affiche plus bas, sous le curseur.</li>
+        <li>Popup de déplacement de tâches : taille alignée sur celui des phases (astuce déplacée en infobulle) et placé plus bas sous la dernière tâche sélectionnée.</li>
         <li>Déplacement d'une tâche, d'un jalon ou d'une période de gel : l'info-bulle affiche le nombre de jours, la date de début et la date de fin avec le jour de la semaine. Idem pour un déplacement multiple.</li>
         <li>Menus : les cases à cocher deviennent des interrupteurs on/off.</li>
         <li>Vue Données : une phase vide affiche une zone « glissez une tâche ici » pour y déposer une tâche.</li>
@@ -4162,7 +4163,7 @@ function placeSelMenu(){
   const r=svg.getBoundingClientRect(), k=r.width/tlVBw;
   const minX=Math.min(...bs.map(b=>b.x0)), minY=Math.min(...bs.map(b=>b.y0)), maxY=Math.max(...bs.map(b=>b.y1));
   const w=menu.offsetWidth, h=menu.offsetHeight;
-  let x=r.left+minX*k, y=r.top+(maxY+8)*k;
+  let x=r.left+minX*k, y=r.top+maxY*k+28;
   if(y+h>window.innerHeight-8){ const above=r.top+(minY-8)*k-h; y=above>=8?above:Math.max(8,window.innerHeight-h-8); }
   x=Math.max(8,Math.min(window.innerWidth-w-8,x));
   menu.style.left=Math.round(x)+'px'; menu.style.top=Math.round(y)+'px';
