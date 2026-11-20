@@ -1687,7 +1687,7 @@ function renderTimeline(){
   const is3D=document.getElementById('chk-3d')?.checked===true;
   if(is3D){
     const defs3=el('defs',{}); const gr=el('linearGradient',{id:'g3d',x1:0,y1:0,x2:0,y2:1});
-    [[0,'#fff',0.6],[0.5,'#fff',0],[1,'#000',0.22]].forEach(([o,c,a])=>gr.appendChild(el('stop',{offset:o,'stop-color':c,'stop-opacity':a})));
+    [[0,'#fff',0.35],[0.5,'#fff',0],[1,'#000',0.12]].forEach(([o,c,a])=>gr.appendChild(el('stop',{offset:o,'stop-color':c,'stop-opacity':a})));
     defs3.appendChild(gr); svg.appendChild(defs3);
   }
   if(MA>0) svg.appendChild(el('rect',{x:0,y:0,width:VW,height:MA,fill:'#f0f0f0'}));
@@ -1735,7 +1735,7 @@ function renderTimeline(){
 
   // Labels jalons — 2ème passe : drapeaux (différés)
   const flagGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
-  if(is3D) flagGroup.style.filter='drop-shadow(3px 4px 0 rgba(0,0,0,0.22))';
+  if(is3D) flagGroup.style.filter='drop-shadow(2px 2px 0 rgba(0,0,0,0.16))';
   allMilestones.forEach(m=>{
     const labelY=m.labelTopY;
     const lw=m.lw, lh=m.lh;
@@ -1809,7 +1809,6 @@ function renderTimeline(){
         const phaseHeaderG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     svg.appendChild(phaseHeaderG);
     phaseHeaderG.appendChild(laneColorRect);
-    if(is3D){ const lg=el('rect',{x:0,y:rowY,width:listMode?VW:LL,height:listMode?PHH:laneH,fill:'url(#g3d)'}); lg.style.pointerEvents='none'; phaseHeaderG.appendChild(lg); }
     if(is3D){ const w3=listMode?VW:LL, h3=listMode?PHH:laneH, nP=(r)=>{ r.style.pointerEvents='none'; phaseHeaderG.appendChild(r); };
       nP(el('rect',{x:0,y:rowY,width:w3,height:2.5,fill:'#fff','fill-opacity':0.55}));
       nP(el('rect',{x:0,y:rowY,width:2.5,height:h3,fill:'#fff','fill-opacity':0.35}));
@@ -2024,12 +2023,12 @@ function renderTimeline(){
           if (showJalonsMaster) {
             if(showDashDot) svg.appendChild(el('line',{x1:mx,y1:MA+TH,x2:mx,y2:my-s,stroke:tc,'stroke-width':1.5,'stroke-dasharray':`${dashLen},${dashGap}`}));
             if(showDashDot&&dashToBottom) _dashExt.push(el('line',{x1:mx,y1:my+s,x2:mx,y2:VH,stroke:tc,'stroke-width':1.5,'stroke-dasharray':`${dashLen},${dashGap}`,'pointer-events':'none'}));
-            if(is3D){ const dp=(dy,f)=>el('polygon',{points:`${mx},${my-s+dy} ${mx+s},${my+dy} ${mx},${my+s+dy} ${mx-s},${my+dy}`,fill:f}); svg.appendChild(dp(8,'rgba(0,0,0,0.18)')); svg.appendChild(dp(5,darken(darken(tc)))); }
+            if(is3D){ const dp=(dy,f)=>el('polygon',{points:`${mx},${my-s+dy} ${mx+s},${my+dy} ${mx},${my+s+dy} ${mx-s},${my+dy}`,fill:f}); svg.appendChild(dp(4,'rgba(0,0,0,0.12)')); svg.appendChild(dp(2.5,darken(darken(tc)))); }
             const poly=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s} ${mx-s},${my}`,fill:tc,stroke:'white','stroke-width':2,cursor:'grab'});
             poly.style.touchAction='none';
             poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); if(e.shiftKey||e.ctrlKey||e.metaKey){ toggleSelected(lane.id,task.id); return; } const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; if(selHas(lane.id,task.id)&&tlSel.keys.size>1){ tlDrag.mode='move-group'; tlDrag.origs=selItems().map(i=>({laneId:i.lane.id,id:i.task.id,start:i.task.start,end:i.task.end})); } document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
             svg.appendChild(poly);
-            if(is3D){ const f1=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s}`,fill:'rgba(0,0,0,0.2)'}), f2=el('polygon',{points:`${mx},${my-s} ${mx-s},${my} ${mx},${my}`,fill:'rgba(255,255,255,0.35)'}); f1.style.pointerEvents='none'; f2.style.pointerEvents='none'; svg.appendChild(f1); svg.appendChild(f2); }
+            if(is3D){ const f1=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s}`,fill:'rgba(0,0,0,0.12)'}), f2=el('polygon',{points:`${mx},${my-s} ${mx-s},${my} ${mx},${my}`,fill:'rgba(255,255,255,0.2)'}); f1.style.pointerEvents='none'; f2.style.pointerEvents='none'; svg.appendChild(f1); svg.appendChild(f2); }
             _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:mx-s,x1:mx+s,y0:my-s,y1:my+s});
           }
 
@@ -2040,7 +2039,7 @@ function renderTimeline(){
           if(!task.start||!task.end)return;
           const x1=dX(task.start), x2=dX(task.end);
           const rowHh=getRowH(row); const bw=Math.max(8,x2-x1), bh=rowHh*0.55, by=ty+(rowHh-bh)/2;
-          if(is3D){ svg.appendChild(el('rect',{x:x1+3,y:by+6,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.16)'})); svg.appendChild(el('rect',{x:x1,y:by+4,width:bw,height:bh,rx:4,fill:darken(darken(tc))})); }
+          if(is3D){ svg.appendChild(el('rect',{x:x1+3,y:by+3,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.12)'})); svg.appendChild(el('rect',{x:x1,y:by+2,width:bw,height:bh,rx:4,fill:darken(darken(tc))})); }
           else svg.appendChild(el('rect',{x:x1+2,y:by+2,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.07)'}));
           _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:x1,x1:x1+bw,y0:by,y1:by+bh});
           const barEl=el('rect',{x:x1,y:by,width:bw,height:bh,rx:4,fill:tc,cursor:'grab'});
