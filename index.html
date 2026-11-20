@@ -601,6 +601,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Barre latérale : Affichages et Tailles sont réunis dans un seul menu « Affichage » à deux onglets, et les choix exclusifs deviennent des listes déroulantes.</li>
         <li>Barre latérale : nouveau design (une seule échelle de tailles, sous-options à filet, onglets et boutons segmentés sur une ligne à la place des listes déroulantes, menu plus large) ; la palette de couleurs devient l'onglet « Couleurs » du menu Affichage.</li>
         <li>Barre latérale : « Déplacement du planning » et « Mes modèles » sont retirés ; « Échelle de temps » et « Affichage » restent toujours ouverts.</li>
+        <li>Gantt : la sélection par encerclement peut maintenant démarrer en dehors du Gantt, dans la marge au-dessus ou la zone vide en dessous.</li>
         <li>Menu de conversion JSON : ajout de « Convertir un fichier MS Project en JSON (tbd) », sans lien pour l'instant.</li>
         <li>Barre latérale : titres de section sur des bandeaux rouges de deux nuances qui restent empilés en haut au défilement, onglets Éléments / Tailles / Couleurs collants, libellés de la période plus clairs.</li>
         <li>Échelle de temps : choix de l'unité (jour, semaine, mois, trimestre, année), repères au calendrier ou comptés depuis le début, exemple en direct, et bloc « Période affichée » regroupé.</li>
@@ -4146,24 +4147,39 @@ function startLaneColResize(ev){
   const pt=e=>{ const r=svg.getBoundingClientRect(); return { x:(e.clientX-r.left)*(tlVBw/r.width), y:(e.clientY-r.top)*(tlVBh/r.height) }; };
   let st=null, box=null;
   const yMinB=()=>Math.min(...tlBands.map(b=>b.y0)), yMaxB=()=>Math.max(...tlBands.map(b=>b.y1));
+  // Fond « neutre » : ni élément cliquable (curseur main, flèches…) ni jalon déplaçable
+  const isBg=el=>{ if(!el||el===svg) return true; if(el.closest&&el.closest('g[style*="cursor"]')) return false; const c=getComputedStyle(el).cursor; return c==='auto'||c==='default'; };
+  const clampP=p=>({ x:Math.max(tlLLv,Math.min(tlVBw,p.x)), y:Math.max(yMinB(),Math.min(yMaxB(),p.y)) });
   svg.addEventListener('pointerdown',e=>{
-    if(e.button!==0||tlDrag) return;
+    if(e.button!==0||tlDrag||!tlBands.length) return;
     if(e.target.closest&&e.target.closest('g[style*="cursor"]')) return;
     const p=pt(e);
     if(p.x<tlLLv) return;
-    const band=tlBands.find(b=>p.y>=b.y0&&p.y<b.y1); if(!band) return;
-    st={ id:e.pointerId, x:p.x, y:p.y, cx:e.clientX, cy:e.clientY, band, moved:false, add:e.shiftKey||e.ctrlKey||e.metaKey };
+    const band=tlBands.find(b=>p.y>=b.y0&&p.y<b.y1);
+    if(!band&&!isBg(e.target)) return; // au-dessus ou en dessous des phases : seulement sur le fond
+    const q=clampP(p);
+    st={ id:e.pointerId, x:q.x, y:q.y, cx:e.clientX, cy:e.clientY, moved:false, add:e.shiftKey||e.ctrlKey||e.metaKey };
   });
-  svg.addEventListener('pointermove',e=>{
+  // Départ possible en dehors du Gantt (marge au-dessus ou zone vide en dessous)
+  const view=document.getElementById('view-timeline');
+  view?.addEventListener('pointerdown',e=>{
+    if(e.button!==0||tlDrag||!tlBands.length||svg.contains(e.target)) return;
+    if(e.target!==view&&!(e.target.classList&&e.target.classList.contains('tl-outer'))) return;
+    const vr=view.getBoundingClientRect();
+    if(e.clientX-vr.left>=view.clientWidth||e.clientY-vr.top>=view.clientHeight) return; // barres de défilement
+    const q=clampP(pt(e));
+    st={ id:e.pointerId, x:q.x, y:q.y, cx:e.clientX, cy:e.clientY, moved:false, add:e.shiftKey||e.ctrlKey||e.metaKey };
+  });
+  document.addEventListener('pointermove',e=>{
     if(!st||e.pointerId!==st.id) return;
-    if(!st.moved){ if(Math.hypot(e.clientX-st.cx,e.clientY-st.cy)<5) return; st.moved=true; try{ svg.setPointerCapture(e.pointerId); }catch(_){}
+    if(!st.moved){ if(Math.hypot(e.clientX-st.cx,e.clientY-st.cy)<5) return; st.moved=true; document.body.style.userSelect='none'; try{ svg.setPointerCapture(e.pointerId); }catch(_){}
       box=document.createElementNS(SVGNS,'rect'); box.setAttribute('class','sel-ui'); box.setAttribute('fill','rgba(37,99,235,0.12)'); box.setAttribute('stroke','#2563eb'); box.setAttribute('stroke-width','1.2'); box.setAttribute('stroke-dasharray','5,3'); box.style.pointerEvents='none'; svg.appendChild(box); }
     const p=pt(e), y=Math.max(yMinB(),Math.min(yMaxB(),p.y)), x=Math.max(tlLLv,Math.min(tlVBw,p.x));
     box.setAttribute('x',Math.min(st.x,x)); box.setAttribute('y',Math.min(st.y,y)); box.setAttribute('width',Math.abs(x-st.x)); box.setAttribute('height',Math.abs(y-st.y));
   });
   const end=e=>{
     if(!st||e.pointerId!==st.id) return;
-    const s0=st; st=null;
+    const s0=st; st=null; document.body.style.userSelect='';
     try{ svg.releasePointerCapture(e.pointerId); }catch(_){}
     if(!s0.moved){ if(!s0.add) clearSelection(); return; }
     const p=pt(e), y=Math.max(yMinB(),Math.min(yMaxB(),p.y)), x=Math.max(tlLLv,Math.min(tlVBw,p.x));
@@ -4174,7 +4190,7 @@ function startLaneColResize(ev){
     tlSel.anchor={x:e.clientX+14,y:e.clientY+14}; if(!tlSel.keys.size) tlSel.anchor=null;
     renderSelectionUI();
   };
-  svg.addEventListener('pointerup',end); svg.addEventListener('pointercancel',end);
+  document.addEventListener('pointerup',end); document.addEventListener('pointercancel',end);
   document.addEventListener('keydown',e=>{ if(e.key==='Escape'&&tlSel.keys.size&&!e.target.closest?.('input,textarea,select')) clearSelection(); });
   window.addEventListener('resize',()=>renderSelectionUI());
   document.getElementById('view-timeline')?.addEventListener('scroll',()=>placeSelMenu(),{passive:true});
