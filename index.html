@@ -774,6 +774,8 @@ function dur(s,e){ if(!s||!e)return '-'; const d=Math.round((parseD(e)-parseD(s)
 // injecté via innerHTML DOIT être wrappé dans esc(). Ne jamais injecter de champ
 // texte libre directement dans un template littéral sans esc().
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;'); }
+function lighten(hex){ try{ const n=parseInt(hex.slice(1),16); const f=v=>Math.min(255,v+60).toString(16).padStart(2,'0'); return '#'+f(n>>16)+f((n>>8)&0xff)+f(n&0xff); }catch(e){return hex;} }
+function box3D(g,x,y,w,h,d,col){ const pt=a=>a.map(q=>q.join(',')).join(' '); const mk=(pts,f)=>{ const e=document.createElementNS('http://www.w3.org/2000/svg','polygon'); e.setAttribute('points',pt(pts)); e.setAttribute('fill',f); e.style.pointerEvents='none'; g.appendChild(e); }; mk([[x,y],[x+d,y-d],[x+w+d,y-d],[x+w,y]],lighten(col)); mk([[x+w,y],[x+w+d,y-d],[x+w+d,y+h-d],[x+w,y+h]],darken(darken(col))); }
 function darken(hex){ try{ const n=parseInt(hex.slice(1),16); const f=v=>Math.max(0,v-40).toString(16).padStart(2,'0'); return '#'+f(n>>16)+f((n>>8)&0xff)+f(n&0xff); }catch(e){return hex;} }
 function getLane(id){ return lanes.find(l=>l.id===id); }
 
@@ -1809,14 +1811,7 @@ function renderTimeline(){
         const phaseHeaderG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
     svg.appendChild(phaseHeaderG);
     phaseHeaderG.appendChild(laneColorRect);
-    if(is3D){ const w3=listMode?VW:LL, h3=listMode?PHH:laneH, nP=(r)=>{ r.style.pointerEvents='none'; phaseHeaderG.appendChild(r); };
-      nP(el('rect',{x:0,y:rowY,width:w3,height:2.5,fill:'#fff','fill-opacity':0.55}));
-      nP(el('rect',{x:0,y:rowY,width:2.5,height:h3,fill:'#fff','fill-opacity':0.35}));
-      nP(el('rect',{x:0,y:rowY+h3-5,width:w3,height:5,fill:'#000','fill-opacity':0.3}));
-      nP(el('rect',{x:w3-5,y:rowY,width:5,height:h3,fill:'#000','fill-opacity':0.24}));
-      nP(el('rect',{x:0.5,y:rowY+0.5,width:w3-1,height:h3-1,fill:'none',stroke:'#000','stroke-opacity':0.35,'stroke-width':1}));
-      if(!listMode) nP(el('rect',{x:LL,y:rowY+h3-3,width:VW-LL,height:3,fill:'#000','fill-opacity':0.1}));
-    }
+    if(is3D){ const dd=7, w3=(listMode?VW-dd:LL), h3=listMode?PHH:laneH, g3=document.createElementNS('http://www.w3.org/2000/svg','g'); g3.style.pointerEvents='none'; box3D(g3,0,rowY,w3,h3,dd,lc); phaseHeaderG.insertBefore(g3,laneColorRect); }
     if(li === 0) {
       phaseHeaderG.appendChild(el('line',{x1:0,y1:rowY,x2:VW,y2:rowY,stroke:'#ccc','stroke-width':1.5}));
     }
@@ -2038,7 +2033,7 @@ function renderTimeline(){
           if(!task.start||!task.end)return;
           const x1=dX(task.start), x2=dX(task.end);
           const rowHh=getRowH(row); const bw=Math.max(8,x2-x1), bh=rowHh*0.55, by=ty+(rowHh-bh)/2;
-          if(is3D){ svg.appendChild(el('rect',{x:x1+3,y:by+5,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.16)'})); svg.appendChild(el('rect',{x:x1,y:by+3,width:bw,height:bh,rx:4,fill:darken(darken(tc))})); }
+          if(is3D) box3D(svg,x1,by,bw,bh,Math.min(7,Math.round(bh*0.5)),tc);
           else svg.appendChild(el('rect',{x:x1+2,y:by+2,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.07)'}));
           _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:x1,x1:x1+bw,y0:by,y1:by+bh});
           const barEl=el('rect',{x:x1,y:by,width:bw,height:bh,rx:4,fill:tc,cursor:'grab'});
@@ -2048,7 +2043,6 @@ function renderTimeline(){
           svg.appendChild(taskHeaderG);
           taskHeaderG.appendChild(barEl);
           const pctEl=task.pct>0?el('rect',{x:x1,y:by,width:bw*task.pct/100,height:bh,rx:4,fill:darken(tc)}):null; if(pctEl) taskHeaderG.appendChild(pctEl);
-          if(is3D){ const gl=el('rect',{x:x1,y:by,width:bw,height:bh,rx:4,fill:'url(#g3d)'}); gl.style.pointerEvents='none'; taskHeaderG.appendChild(gl); }
           const hw=Math.min(8,bw/4);
           [['resize-l',x1],['resize-r',x1+bw-hw]].forEach(([mode,hx])=>{ const h=el('rect',{x:hx,y:by,width:hw,height:bh,rx:4,fill:'rgba(0,0,0,0.13)',cursor:'ew-resize'}); h.style.touchAction='none'; h.addEventListener('pointerdown',e=>{e.stopPropagation();tlPointerDown(e,mode,lane.id,task.id);}); taskHeaderG.appendChild(h); });
 
