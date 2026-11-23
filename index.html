@@ -1735,7 +1735,6 @@ function renderTimeline(){
 
   // Labels jalons — 2ème passe : drapeaux (différés)
   const flagGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
-  if(is3D) flagGroup.style.filter='drop-shadow(2px 2px 0 rgba(0,0,0,0.16))';
   allMilestones.forEach(m=>{
     const labelY=m.labelTopY;
     const lw=m.lw, lh=m.lh;
