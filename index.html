@@ -1687,7 +1687,7 @@ function renderTimeline(){
   const is3D=document.getElementById('chk-3d')?.checked===true;
   if(is3D){
     const defs3=el('defs',{}); const gr=el('linearGradient',{id:'g3d',x1:0,y1:0,x2:0,y2:1});
-    [[0,'#fff',0.5],[0.5,'#fff',0],[1,'#000',0.2]].forEach(([o,c,a])=>gr.appendChild(el('stop',{offset:o,'stop-color':c,'stop-opacity':a})));
+    [[0,'#fff',0.35],[0.5,'#fff',0],[1,'#000',0.12]].forEach(([o,c,a])=>gr.appendChild(el('stop',{offset:o,'stop-color':c,'stop-opacity':a})));
     defs3.appendChild(gr); svg.appendChild(defs3);
   }
   if(MA>0) svg.appendChild(el('rect',{x:0,y:0,width:VW,height:MA,fill:'#f0f0f0'}));
@@ -1751,12 +1751,12 @@ function renderTimeline(){
       flagEl=el('rect',{x:m.x,y:labelY,width:lw,height:lh,fill:'#ffffff','fill-opacity':0.001,cursor:'grab'});
       flagEl.addEventListener('pointerdown',dragFlag);
       flagGroup.appendChild(flagEl);
-      const sfp=el('path',{d:`M ${m.x+SF_G+fi},${labelY+fi} L ${m.x+SF_G+SF_PW-fi},${labelY+ph/2} L ${m.x+SF_G+fi},${labelY+ph-fi} Z`,fill:m.color,stroke:m.color,'stroke-width':flagW,'stroke-linejoin':'round','pointer-events':'none'}); if(is3D) sfp.style.filter='drop-shadow(3px 4px 0 rgba(0,0,0,0.22))'; flagGroup.appendChild(sfp);
+      const sfp=el('path',{d:`M ${m.x+SF_G+fi},${labelY+fi} L ${m.x+SF_G+SF_PW-fi},${labelY+ph/2} L ${m.x+SF_G+fi},${labelY+ph-fi} Z`,fill:m.color,stroke:m.color,'stroke-width':flagW,'stroke-linejoin':'round','pointer-events':'none'}); if(is3D) sfp.style.filter='drop-shadow(2px 3px 0 rgba(0,0,0,0.2))'; flagGroup.appendChild(sfp);
     } else {
       const r=5;
       const flagPath=`M ${m.x},${labelY+lh+tipH} L ${m.x},${labelY} H ${m.x+lw-r} Q ${m.x+lw},${labelY} ${m.x+lw},${labelY+r} V ${labelY+lh-r} Q ${m.x+lw},${labelY+lh} ${m.x+lw-r},${labelY+lh} H ${m.x} Z`;
       flagEl=el('path',{d:flagPath,fill:'white',stroke:m.color,'stroke-width':flagW,cursor:'grab'});
-      if(is3D) flagEl.style.filter='drop-shadow(5px 6px 0 rgba(0,0,0,0.22))';
+      if(is3D) flagEl.style.filter='drop-shadow(3px 4px 0 rgba(0,0,0,0.2))';
       flagEl.addEventListener('pointerdown',dragFlag);
       flagGroup.appendChild(flagEl);
     }
@@ -1810,10 +1810,10 @@ function renderTimeline(){
     svg.appendChild(phaseHeaderG);
     phaseHeaderG.appendChild(laneColorRect);
     if(is3D){ const w3=listMode?VW:LL, h3=listMode?PHH:laneH, nP=(r)=>{ r.style.pointerEvents='none'; phaseHeaderG.appendChild(r); };
-      nP(el('rect',{x:0,y:rowY,width:w3,height:3.5,fill:'#fff','fill-opacity':0.6}));
-      nP(el('rect',{x:0,y:rowY,width:3.5,height:h3,fill:'#fff','fill-opacity':0.4}));
-      nP(el('rect',{x:0,y:rowY+h3-8,width:w3,height:8,fill:'#000','fill-opacity':0.34}));
-      nP(el('rect',{x:w3-8,y:rowY,width:8,height:h3,fill:'#000','fill-opacity':0.28}));
+      nP(el('rect',{x:0,y:rowY,width:w3,height:2.5,fill:'#fff','fill-opacity':0.55}));
+      nP(el('rect',{x:0,y:rowY,width:2.5,height:h3,fill:'#fff','fill-opacity':0.35}));
+      nP(el('rect',{x:0,y:rowY+h3-5,width:w3,height:5,fill:'#000','fill-opacity':0.3}));
+      nP(el('rect',{x:w3-5,y:rowY,width:5,height:h3,fill:'#000','fill-opacity':0.24}));
       nP(el('rect',{x:0.5,y:rowY+0.5,width:w3-1,height:h3-1,fill:'none',stroke:'#000','stroke-opacity':0.35,'stroke-width':1}));
       if(!listMode) nP(el('rect',{x:LL,y:rowY+h3-3,width:VW-LL,height:3,fill:'#000','fill-opacity':0.1}));
     }
@@ -2027,7 +2027,7 @@ function renderTimeline(){
             poly.style.touchAction='none';
             poly.addEventListener('pointerdown',e=>{ if(e.button!==0)return; e.preventDefault(); e.stopPropagation(); if(e.shiftKey||e.ctrlKey||e.metaKey){ toggleSelected(lane.id,task.id); return; } const d=task.end||task.start; tlDrag={mode:'move-milestone',laneId:lane.id,taskId:task.id,startX:e.clientX,origStart:d,origEnd:d}; if(selHas(lane.id,task.id)&&tlSel.keys.size>1){ tlDrag.mode='move-group'; tlDrag.origs=selItems().map(i=>({laneId:i.lane.id,id:i.task.id,start:i.task.start,end:i.task.end})); } document.addEventListener('pointermove',tlPointerMove,{passive:false}); document.addEventListener('pointerup',tlPointerUp); });
             svg.appendChild(poly);
-            if(is3D){ const f1=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s}`,fill:'rgba(0,0,0,0.2)'}), f2=el('polygon',{points:`${mx},${my-s} ${mx-s},${my} ${mx},${my}`,fill:'rgba(255,255,255,0.35)'}); f1.style.pointerEvents='none'; f2.style.pointerEvents='none'; svg.appendChild(f1); svg.appendChild(f2); }
+            if(is3D){ const f1=el('polygon',{points:`${mx},${my-s} ${mx+s},${my} ${mx},${my+s}`,fill:'rgba(0,0,0,0.12)'}), f2=el('polygon',{points:`${mx},${my-s} ${mx-s},${my} ${mx},${my}`,fill:'rgba(255,255,255,0.2)'}); f1.style.pointerEvents='none'; f2.style.pointerEvents='none'; svg.appendChild(f1); svg.appendChild(f2); }
             _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:mx-s,x1:mx+s,y0:my-s,y1:my+s});
           }
 
@@ -2038,7 +2038,7 @@ function renderTimeline(){
           if(!task.start||!task.end)return;
           const x1=dX(task.start), x2=dX(task.end);
           const rowHh=getRowH(row); const bw=Math.max(8,x2-x1), bh=rowHh*0.55, by=ty+(rowHh-bh)/2;
-          if(is3D){ svg.appendChild(el('rect',{x:x1+5,y:by+9,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.18)'})); svg.appendChild(el('rect',{x:x1+2,y:by+5,width:bw,height:bh,rx:4,fill:darken(darken(tc))})); }
+          if(is3D){ svg.appendChild(el('rect',{x:x1+3,y:by+5,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.16)'})); svg.appendChild(el('rect',{x:x1,y:by+3,width:bw,height:bh,rx:4,fill:darken(darken(tc))})); }
           else svg.appendChild(el('rect',{x:x1+2,y:by+2,width:bw,height:bh,rx:4,fill:'rgba(0,0,0,0.07)'}));
           _taskBoxes.push({laneId:lane.id,taskId:task.id,x0:x1,x1:x1+bw,y0:by,y1:by+bh});
           const barEl=el('rect',{x:x1,y:by,width:bw,height:bh,rx:4,fill:tc,cursor:'grab'});
