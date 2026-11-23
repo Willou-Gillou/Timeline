@@ -1751,11 +1751,12 @@ function renderTimeline(){
       flagEl=el('rect',{x:m.x,y:labelY,width:lw,height:lh,fill:'#ffffff','fill-opacity':0.001,cursor:'grab'});
       flagEl.addEventListener('pointerdown',dragFlag);
       flagGroup.appendChild(flagEl);
-      flagGroup.appendChild(el('path',{d:`M ${m.x+SF_G+fi},${labelY+fi} L ${m.x+SF_G+SF_PW-fi},${labelY+ph/2} L ${m.x+SF_G+fi},${labelY+ph-fi} Z`,fill:m.color,stroke:m.color,'stroke-width':flagW,'stroke-linejoin':'round','pointer-events':'none'}));
+      const sfp=el('path',{d:`M ${m.x+SF_G+fi},${labelY+fi} L ${m.x+SF_G+SF_PW-fi},${labelY+ph/2} L ${m.x+SF_G+fi},${labelY+ph-fi} Z`,fill:m.color,stroke:m.color,'stroke-width':flagW,'stroke-linejoin':'round','pointer-events':'none'}); if(is3D) sfp.style.filter='drop-shadow(2px 3px 0 rgba(0,0,0,0.2))'; flagGroup.appendChild(sfp);
     } else {
       const r=5;
       const flagPath=`M ${m.x},${labelY+lh+tipH} L ${m.x},${labelY} H ${m.x+lw-r} Q ${m.x+lw},${labelY} ${m.x+lw},${labelY+r} V ${labelY+lh-r} Q ${m.x+lw},${labelY+lh} ${m.x+lw-r},${labelY+lh} H ${m.x} Z`;
       flagEl=el('path',{d:flagPath,fill:'white',stroke:m.color,'stroke-width':flagW,cursor:'grab'});
+      if(is3D) flagEl.style.filter='drop-shadow(3px 4px 0 rgba(0,0,0,0.2))';
       flagEl.addEventListener('pointerdown',dragFlag);
       flagGroup.appendChild(flagEl);
     }
