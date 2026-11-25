@@ -172,9 +172,9 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 #export-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
 #export-menu .btn { border-color:transparent; justify-content:center; font-size:10.5px; font-weight:700; letter-spacing:.04em; width:44px; height:28px; padding:0; }
 #export-menu .btn:hover { background:#f3f4f6; }
-#conv-menu, #help-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
-#conv-menu .btn, #help-menu .btn { border-color:transparent; justify-content:flex-start; font-size:12px; font-weight:600; height:30px; padding:0 12px; white-space:nowrap; text-decoration:none; }
-#conv-menu .btn:hover, #help-menu .btn:hover { background:#f3f4f6; }
+#conv-menu { position:fixed; z-index:10040; background:#fff; border:1px solid #e5e7eb; border-radius:8px; box-shadow:0 8px 24px rgba(16,24,40,.16); padding:4px; flex-direction:column; gap:2px; }
+#conv-menu .btn { border-color:transparent; justify-content:flex-start; font-size:12px; font-weight:600; height:30px; padding:0 12px; white-space:nowrap; text-decoration:none; }
+#conv-menu .btn:hover { background:#f3f4f6; }
 #conv-menu .btn[aria-disabled="true"] { opacity:.55; cursor:default; pointer-events:none; }
 #btn-export[aria-expanded="true"] { background:#f3f4f6; border-color:#e5e7eb; color:#111827; }
 /* ═══ Barre latérale : règles de design ═══
@@ -336,7 +336,8 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <div class="topbar-sep"></div>
   <div class="topbar-group">
     <span class="topbar-group-label">Aide</span>
-    <button class="btn btn-icon" id="btn-help" type="button" onclick="toggleHelpMenu(event)" title="Aide : guide utilisateur et historique des versions" aria-label="Aide" aria-haspopup="menu" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg></button>
+    <a class="btn btn-icon" href="guide-utilisateur.pdf" target="_blank" rel="noopener" title="Guide utilisateur" aria-label="Guide utilisateur" style="text-decoration:none;"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></a>
+    <button class="btn btn-icon" type="button" onclick="openVersionHistory()" title="Historique des versions" aria-label="Historique des versions"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
   </div>
   <div class="tab-bar">
     <button class="tab" id="tab-d" onclick="showTab('data')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg> Données</button>
@@ -371,10 +372,6 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <a class="btn" role="menuitem" href="https://m365.cloud.microsoft/chat/?titleId=T_26a2fcc3-c3fd-6d09-eff7-a65b904a0b40&amp;source=embedded-builder" target="_blank" rel="noopener noreferrer" onclick="closeConvMenu()">Convertir une image en JSON</a>
   <a class="btn" role="menuitem" href="https://m365.cloud.microsoft/chat/?titleId=T_fed89d2e-b025-173e-d6e7-132a328f9e82&amp;source=embedded-builder" target="_blank" rel="noopener noreferrer" onclick="closeConvMenu()">Convertir un costmodel en JSON</a>
   <span class="btn" role="menuitem" aria-disabled="true" tabindex="-1">Convertir un fichier MS Project en JSON (tbd)</span>
-</div>
-<div id="help-menu" role="menu" style="display:none;">
-  <a class="btn" role="menuitem" href="guide-utilisateur.pdf" target="_blank" rel="noopener" onclick="closeHelpMenu()"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg> Guide utilisateur</a>
-  <button class="btn" role="menuitem" type="button" onclick="closeHelpMenu();openVersionHistory()"><svg class="ic" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Historique des versions</button>
 </div>
 <div id="export-menu" role="menu" style="display:none;">
   <button class="btn" role="menuitem" onclick="closeExportMenu();copyMacroPlanningImage()" title="Image PNG">PNG</button>
@@ -4240,7 +4237,7 @@ function toggleExportMenu(ev){
   if(ev) ev.stopPropagation();
   const m=document.getElementById('export-menu'), b=document.getElementById('btn-export'); if(!m||!b) return;
   if(m.style.display!=='none'){ closeExportMenu(); return; }
-  closeConvMenu(); closeHelpMenu();
+  closeConvMenu();
   const r=b.getBoundingClientRect();
   m.style.display='flex';
   m.style.top=(r.bottom+6)+'px';
@@ -4255,7 +4252,7 @@ function toggleConvMenu(ev){
   if(ev) ev.stopPropagation();
   const m=document.getElementById('conv-menu'), b=document.getElementById('btn-png2json'); if(!m||!b) return;
   if(m.style.display!=='none'){ closeConvMenu(); return; }
-  closeExportMenu(); closeHelpMenu();
+  closeExportMenu();
   const r=b.getBoundingClientRect();
   m.style.display='flex';
   m.style.top=(r.bottom+6)+'px';
@@ -4265,23 +4262,6 @@ function toggleConvMenu(ev){
 document.addEventListener('pointerdown',e=>{ if(!e.target.closest('#conv-menu') && !e.target.closest('#btn-png2json')) closeConvMenu(); });
 document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeConvMenu(); });
 window.addEventListener('resize',closeConvMenu);
-
-// ═══ MENU AIDE ═══════════════════════════════════════════════
-function closeHelpMenu(){ const m=document.getElementById('help-menu'), b=document.getElementById('btn-help'); if(m) m.style.display='none'; if(b) b.setAttribute('aria-expanded','false'); }
-function toggleHelpMenu(ev){
-  if(ev) ev.stopPropagation();
-  const m=document.getElementById('help-menu'), b=document.getElementById('btn-help'); if(!m||!b) return;
-  if(m.style.display!=='none'){ closeHelpMenu(); return; }
-  closeExportMenu(); closeConvMenu();
-  const r=b.getBoundingClientRect();
-  m.style.display='flex';
-  m.style.top=(r.bottom+6)+'px';
-  m.style.left=Math.max(4,Math.min(window.innerWidth-m.offsetWidth-4,Math.round(r.left+r.width/2-m.offsetWidth/2)))+'px';
-  b.setAttribute('aria-expanded','true');
-}
-document.addEventListener('pointerdown',e=>{ if(!e.target.closest('#help-menu') && !e.target.closest('#btn-help')) closeHelpMenu(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape') closeHelpMenu(); });
-window.addEventListener('resize',closeHelpMenu);
 
 // ═══ PÉRIODES DE GEL ═════════════════════════════════════════
 function validISO(s){ if(typeof s!=='string'||!/^\d{4}-\d{2}-\d{2}$/.test(s)) return false; const d=parseD(s); return !isNaN(d) && fmt(d)===s; }
