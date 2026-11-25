@@ -600,7 +600,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
             <div style="font-weight:700;margin:8px 0 6px;">V4.9:</div><ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : option « Gantt en 3D » (relief sur phases, tâches et jalons), en tête d'Affichage.</li>
+        <li>Nouveau : option « Gantt en 3D » (relief sur phases, tâches, jalons et barre de temps), en tête d'Affichage.</li>
         <li>Nouveau : échelle de temps par unité (jour à année), repères Calendrier ou Numéroté, exemple en direct.</li>
         <li>Nouveau : phases en liste ou en colonne ; trait pointillé des jalons jusqu'en bas (option).</li>
         <li>Nouveau : « + ajouter » place le curseur dans le nom ; l'encerclement peut démarrer hors du Gantt.</li>
@@ -1704,6 +1704,9 @@ function renderTimeline(){
 
   const timebarBgGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
   if(showTimeBar) timebarBgGroup.appendChild(el('rect',{x:0,y:MA,width:VW,height:TH,fill:timebarColor}));
+  if(showTimeBar&&is3D){ // relief : ombre portée sous la barre, reflet, biseau clair en haut et sombre en bas (le texte reste net, au-dessus)
+    [{y:MA+TH,h:5,f:'rgba(0,0,0,0.16)'},{y:MA,h:TH,f:'url(#g3d)'},{y:MA,h:2,f:'rgba(255,255,255,0.4)'},{y:MA+TH-2,h:2,f:'rgba(0,0,0,0.35)'}].forEach(o=>{ const r=el('rect',{x:0,y:o.y,width:VW,height:o.h,fill:o.f}); r.style.pointerEvents='none'; timebarBgGroup.appendChild(r); });
+  }
   svg.appendChild(timebarBgGroup);
   const timebarGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
   timebarGroup.setAttribute('id','timebar-group');
