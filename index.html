@@ -305,6 +305,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   </div>
 </div>
 <!-- ═══ FIN LICENCE ═══════════════════════════════════════════ -->
+<input type="color" id="lane-color-proxy" tabindex="-1" aria-hidden="true" style="position:fixed;left:0;top:0;width:24px;height:24px;opacity:0;pointer-events:none;border:0;padding:0;z-index:-1;">
 <div class="header-shell">
 <div class="topbar">
   <button class="btn burger-btn" id="burger-btn" type="button" onclick="toggleSidebar()" title="Ouvrir / fermer le menu" aria-label="Ouvrir / fermer le menu"><span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
@@ -610,6 +611,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Modifié : menu de gauche redessiné : onglets Éléments / Tailles / Couleurs, titres rouges collants, boutons sur une ligne.</li>
         <li>Modifié : « Ligne de temps » remonte au premier niveau d'Affichage.</li>
         <li>Modifié : guide utilisateur et historique des versions regroupés dans une section « Aide » de la barre du haut.</li>
+        <li>Corrigé : la couleur d'une phase change en direct pendant le glissement dans le sélecteur de couleur.</li>
         <li>Corrigé : « Valeurs par défaut » recolore les jalons ; « Tout réinitialiser » rétablit 5 jours et mois précédent.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
@@ -786,20 +788,44 @@ function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;').rep
 function darken(hex){ try{ const n=parseInt(hex.slice(1),16); const f=v=>Math.max(0,v-40).toString(16).padStart(2,'0'); return '#'+f(n>>16)+f((n>>8)&0xff)+f(n&0xff); }catch(e){return hex;} }
 function getLane(id){ return lanes.find(l=>l.id===id); }
 
+function setLaneColorData(lane, color){
+  lane.color = color;
+  if(lane.tasks) lane.tasks.forEach(t => { if (t.type !== 'J' || defaultJalonColorsMode === 'lane') t.color = color; });
+}
 window.updateLaneColor = function(lid, color) {
   const lane = getLane(lid);
   if (lane) {
-    lane.color = color;
-    if(lane.tasks) {
-      lane.tasks.forEach(t => {
-        if (t.type !== 'J' || defaultJalonColorsMode === 'lane') t.color = color;
-      });
-    }
+    setLaneColorData(lane, color);
     renderData();
     renderTimeline();
     saveState();
   }
 };
+// Sélecteur de couleur de phase « en direct » : un champ couleur permanent (hors des zones redessinées) sert de relais,
+// pour que le choix s'applique pendant le glissement, sans fermer le sélecteur.
+const _lcp={ id:null, raf:0 };
+function openLaneColorPicker(lid, anchor){
+  const p=document.getElementById('lane-color-proxy'), lane=getLane(lid); if(!p||!lane) return;
+  const r=anchor.getBoundingClientRect();
+  p.style.left=r.left+'px'; p.style.top=r.top+'px'; p.style.width=Math.max(20,r.width)+'px'; p.style.height=Math.max(20,r.height)+'px';
+  p.value=lane.color; _lcp.id=lid;
+  try{ p.showPicker(); }catch(_){ p.click(); }
+}
+function _lcpApply(){
+  _lcp.raf=0;
+  const p=document.getElementById('lane-color-proxy'), lane=getLane(_lcp.id); if(!p||!lane) return;
+  setLaneColorData(lane, p.value);
+  renderData(); renderTimeline();
+}
+(function(){
+  const p=document.getElementById('lane-color-proxy'); if(!p) return;
+  p.addEventListener('input',()=>{ if(_lcp.id==null||_lcp.raf) return; _lcp.raf=requestAnimationFrame(_lcpApply); });
+  p.addEventListener('change',()=>{
+    if(_lcp.raf){ cancelAnimationFrame(_lcp.raf); _lcp.raf=0; }
+    if(_lcp.id!=null){ _lcpApply(); saveState(); }
+    _lcp.id=null; window._colorPickerActive=false;
+  });
+})();
 
 function getTask(lid2,tid2){ return getLane(lid2)?.tasks.find(t=>t.id===tid2); }
 function getGlobalJalonCount(){ let n=0; lanes.forEach(l=>(l.tasks||[]).forEach(t=>{ if(t.type==='J') n++; })); return n; }
@@ -1347,7 +1373,7 @@ function renderData(){
         </div>
 
         <div class="phase-title-wrap"><div class="phase-title-display" id="ln-display-${lane.id}">${esc(lane.name)}</div><textarea id="ln-${lane.id}" rows="1" placeholder="Nom..." oninput="syncLaneName(${lane.id},this.value)">${esc(lane.name)}</textarea></div>
-        <input type="color" class="sh-color" value="${lane.color}" onchange="updateLaneColor(${lane.id}, this.value)" title="Changer la couleur de la phase"/>
+        <input type="color" class="sh-color" value="${lane.color}" onclick="event.preventDefault();openLaneColorPicker(${lane.id}, this)" title="Changer la couleur de la phase"/>
         <button class="btn-add-task" style="width:auto;padding:2px 7px;font-size:11px;color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:4px;" title="Dupliquer la phase" onclick="event.stopPropagation();duplicateLane(${lane.id})">⧉</button>
         <button class="btn-add-task" style="width:auto;padding:2px 7px;font-size:11px;color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:4px;" title="Ajouter un élément" onclick="event.stopPropagation();showAddMenuData(${lane.id},event)">＋</button>
         <button class="btn-del-lane" onclick="askDelLane(${lane.id}, event)">✕</button>
@@ -1960,7 +1986,7 @@ function renderTimeline(){
     colInput.value = lc;
     colInput.style.cssText = 'width:20px;height:20px;padding:0;border:1px solid rgba(255,255,255,0.85);background:transparent;cursor:pointer;border-radius:4px;box-shadow:0 1px 3px rgba(0,0,0,0.4);';
     colInput.title = "Changer la couleur de la ligne";
-    colInput.onchange = (e) => updateLaneColor(lane.id, e.target.value);
+    colInput.addEventListener('click', ev => { ev.preventDefault(); openLaneColorPicker(lane.id, colInput); });
     colInput.onpointerdown = (e) => e.stopPropagation();
     laneColorFOG.appendChild(colInput);
     phaseHeaderG.appendChild(laneColorFOG); _delGroups.push(laneColorFOG);
