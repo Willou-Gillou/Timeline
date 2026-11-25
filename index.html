@@ -366,6 +366,9 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       <button type="button" onclick="changeSelT0()" style="font-size:11px;padding:4px 8px;">Appliquer</button>
     </div>
   </div>
+  <div style="margin-top:10px;padding-top:8px;border-top:1px solid #eee;">
+    <button type="button" id="sel-del" onclick="deleteSel()" title="Supprimer les activités sélectionnées (touche Suppr). Le bouton Retour permet d'annuler." style="width:100%;font-size:11px;padding:5px 8px;border:1px solid #e0b4b4;background:#fff5f5;color:#c0392b;border-radius:6px;font-weight:600;">Supprimer la sélection</button>
+  </div>
 
 </div>
 <div id="conv-menu" role="menu" style="display:none;">
@@ -602,9 +605,11 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Nouveau : phases en liste ou en colonne ; trait pointillé des jalons jusqu'en bas (option).</li>
         <li>Nouveau : « + ajouter » place le curseur dans le nom ; l'encerclement peut démarrer hors du Gantt.</li>
         <li>Nouveau : couleur des jalons « Aligné Phase / Palette Coul. », appliquée aussitôt ; MS Project en JSON (tbd).</li>
+        <li>Nouveau : suppression d'un groupe d'activités sélectionnées (bouton « Supprimer la sélection » ou touche Suppr), annulable par Retour.</li>
         <li>Retiré : mode Simplifié, interrupteur Barre de temps, Déplacement du planning, Mes modèles, sections repliables.</li>
         <li>Modifié : menu de gauche redessiné : onglets Éléments / Tailles / Couleurs, titres rouges collants, boutons sur une ligne.</li>
         <li>Modifié : « Ligne de temps » remonte au premier niveau d'Affichage.</li>
+        <li>Modifié : guide utilisateur et historique des versions regroupés dans une section « Aide » de la barre du haut.</li>
         <li>Corrigé : « Valeurs par défaut » recolore les jalons ; « Tout réinitialiser » rétablit 5 jours et mois précédent.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
@@ -4108,6 +4113,20 @@ function renderSelectionUI(){
   placeSelMenu();
   menu.style.visibility='visible';
 }
+function deleteSel(){
+  const items=selItems(); if(!items.length) return;
+  const n=items.length;
+  items.forEach(({lane,task})=>{ lane.tasks=lane.tasks.filter(t=>t.id!==task.id); });
+  clearSelection();
+  saveState(); renderData(); renderTimeline();
+  showToast(n+' activité'+(n>1?'s supprimées':' supprimée')+' (bouton Retour pour annuler)');
+}
+document.addEventListener('keydown',e=>{
+  if((e.key!=='Delete'&&e.key!=='Backspace')||!tlSel.keys.size||e.isComposing||e.altKey||e.ctrlKey||e.metaKey) return;
+  if(e.target.closest?.('input,textarea,select,[contenteditable="true"]')) return;
+  if(!document.getElementById('view-timeline')?.classList.contains('active')) return;
+  e.preventDefault(); deleteSel();
+});
 function placeSelMenu(){
   const menu=document.getElementById('sel-menu'), svg=document.getElementById('tl-svg');
   if(!menu||menu.style.display==='none'||!svg||tlSel.manual) return;
