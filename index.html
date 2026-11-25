@@ -1449,9 +1449,9 @@ const editorEl=document.getElementById('tl-editor');
 editorEl.addEventListener('input',()=>autoResize(editorEl));
 editorEl.addEventListener('keydown',e=>{
   const c=editorCtx;
-  if(c&&c.isNew){ // activité tout juste créée dans le Gantt : Échap l'annule, Entrée valide puis en crée une nouvelle
+  if(c&&c.isNew){ // activité tout juste créée dans le Gantt : Échap l'annule, Entrée valide (sans en créer une autre)
     if(e.key==='Escape'){ e.preventDefault(); cancelNewTask(c); return; }
-    if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); commitEdit(); addTask(c.laneId,c.ttype||'T'); return; }
+    if(e.key==='Enter'&&!e.shiftKey&&!e.isComposing){ e.preventDefault(); commitEdit(); return; }
   }
   if(e.key==='Escape') cancelEdit();
 });
