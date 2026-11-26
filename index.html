@@ -4442,6 +4442,12 @@ function setFreeze(id,k,v){
   if(k==='start'||k==='end') renderFreezePanel();
   afterFreezeChange();
 }
+function liveFreezeAllColor(v){ // couleur de toutes les périodes de gel, en direct (sans redessiner le sélecteur)
+  freezes.forEach(f=>{ f.color=v; });
+  const hd=document.getElementById('fz-head'); if(hd) hd.style.background=v;
+  document.querySelectorAll('#freezes-panel .fz-row-color').forEach(e=>{ e.value=v; });
+  if(document.getElementById('view-timeline').classList.contains('active')) renderTimeline();
+}
 function afterFreezeChange(){
   saveState();
   if(document.getElementById('view-timeline').classList.contains('active')) renderTimeline();
@@ -4450,10 +4456,13 @@ function renderFreezePanel(){
   const host=document.getElementById('freezes-panel'); if(!host) return;
   const ae=document.activeElement;
   if(ae && host.contains(ae) && ae.tagName==='TEXTAREA') return; // ne pas casser la saisie en cours
-  const HDR='#607D8B';
+  const HDR_DEF='#607D8B';
+  const allSame=freezes.length>0 && freezes.every(f=>(f.color||'').toLowerCase()===(freezes[0].color||'').toLowerCase());
+  const HDR=allSame?freezes[0].color:HDR_DEF;
   let h='<div class="phase">'
-    +'<div class="phase-header" style="background:'+HDR+'">'
-    +'<span style="position:absolute;left:12px;top:8px;width:24px;height:24px;display:flex;align-items:center;justify-content:center;color:#fff;"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg></span>'
+    +'<div class="phase-header" id="fz-head" style="background:'+HDR+'">'
+    +'<input type="color" class="sh-color" id="fz-head-color" value="'+HDR+'" oninput="liveFreezeAllColor(this.value)" onchange="liveFreezeAllColor(this.value);saveState()" title="Changer la couleur de toutes les périodes de gel"/>'
+    +'<div class="lane-move-btns" aria-hidden="true"></div>'  // même encombrement que les flèches de phase : titre aligné
     +'<div class="phase-title-wrap"><div class="phase-title-display">Périodes de gel</div></div>'
     +'<button class="btn-add-task" style="width:auto;padding:2px 7px;font-size:11px;color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:4px;" title="Ajouter une période de gel" onclick="event.stopPropagation();addFreeze()">＋</button>'
     +'</div>';
@@ -4468,7 +4477,7 @@ function renderFreezePanel(){
       h+='<tr class="task-row">'
         +'<td><span class="drag-handle" style="visibility:hidden">⠿</span></td>'
         +'<td><textarea rows="1" placeholder="Titre..." oninput="setFreeze('+f.id+',\'title\',this.value);autoResize(this)">'+esc(f.title)+'</textarea></td>'
-        +'<td><div class="type-badge"><input type="color" value="'+f.color+'" onchange="setFreeze('+f.id+',\'color\',this.value)"/></div></td>'
+        +'<td><div class="type-badge"><input type="color" class="fz-row-color" value="'+f.color+'" oninput="setFreeze('+f.id+',\'color\',this.value)" onchange="setFreeze('+f.id+',\'color\',this.value)"/></div></td>'
         +'<td>'+dur(f.start,f.end)+'</td>'
         +'<td><input type="date" value="'+f.start+'" onchange="setFreeze('+f.id+',\'start\',this.value)"/></td>'
         +'<td><input type="date" value="'+f.end+'" onchange="setFreeze('+f.id+',\'end\',this.value)"/></td>'
