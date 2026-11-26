@@ -1300,6 +1300,11 @@ function setField(lid2,tid2,k,v){
   else if(k==='start'||k==='end'){ syncDataFields(lid2,tid2); renderTimeline(); saveState(); }
   else syncDataRow(lid2,tid2);
 }
+let _ltcRaf=0;
+function liveTaskColor(lid2,tid2,v){ // couleur d'une tâche en direct depuis la vue Données (sans redessiner le champ couleur)
+  const t=getTask(lid2,tid2); if(!t) return; t.color=v;
+  if(!_ltcRaf) _ltcRaf=requestAnimationFrame(()=>{ _ltcRaf=0; renderTimeline(); });
+}
 function updateJalonDate(lid2,tid2,v){
   const t=getTask(lid2,tid2); if(!t)return;
   t.start=v; t.end=v;
@@ -1422,7 +1427,7 @@ function renderData(){
         <td><span class="drag-handle">⠿</span></td>
         <td><textarea id="ta-${task.id}" rows="1" placeholder="Titre..." oninput="setField(${lane.id},${task.id},'title',this.value);autoResize(this)">${esc(task.title)}</textarea></td>
         <td><div class="type-badge">
-          <input type="color" value="${task.color}" onchange="setField(${lane.id},${task.id},'color',this.value); renderData(); saveState()"/>
+          <input type="color" value="${task.color}" oninput="liveTaskColor(${lane.id},${task.id},this.value)" onchange="setField(${lane.id},${task.id},'color',this.value); renderData(); saveState()"/>
           <select onchange="setField(${lane.id},${task.id},'type',this.value); renderData(); saveState()">
             <option value="T" ${!isJ?'selected':''}>T</option>
             <option value="J" ${isJ?'selected':''}>J</option>
@@ -2297,6 +2302,12 @@ function renderTimeline(){
           tColInput.type = 'color';
           tColInput.value = tc;
           tColInput.style.cssText = 'width:22px;height:22px;padding:0;border:none;background:none;cursor:pointer;border-radius:11px;overflow:hidden;box-shadow:0 0 0 2px white;outline:none;';
+          tColInput.addEventListener('input', ev => { // couleur en direct pendant le glissement du sélecteur
+            const newColor=ev.target.value;
+            const t2=getTask(lane.id, task.id); if(t2) t2.color=newColor;
+            barEl.setAttribute('fill', newColor);
+            if(pctEl) pctEl.setAttribute('fill', darken(newColor));
+          });
           tColInput.addEventListener('change', ev => {
             const newColor=ev.target.value;
             const t2=getTask(lane.id, task.id); if(t2) t2.color=newColor;
