@@ -37,7 +37,8 @@ body.menu-closed #burger-btn .burger-icon { transform:rotate(90deg); }
 .app-body { display:flex; width:100%; height:100%; overflow:hidden !important; min-height:0; overscroll-behavior:none; }
 .app-body { display:flex; width:100%; height:100%; overflow:hidden !important; min-height:0; overscroll-behavior:none; }
 .shell { display:flex; min-height:0; }
-.app-body.sidebar-closed .sidebar { width:0; padding:0; border-right-color:transparent; overflow:hidden; }
+.app-body.sidebar-closed .sidebar { width:0; padding:0; border-right-width:0; overflow:hidden; }
+.app-body.sidebar-closed .sidebar { transition:none; } /* le menu masqué ne doit jamais « rétrécir » en repassant dans la mise en page (sinon le Gantt se redessine) */
 .app-body.sidebar-closed .main { width:100%; }
 .sidebar input[type=range] { width:100%; accent-color:#c0392b; }
 .radio-group { display:flex; flex-direction:column; gap:5px; }
@@ -146,7 +147,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 .app-body { position:relative; }
 #sidebar-edge { position:absolute; left:0; top:0; bottom:0; width:8px; z-index:39; display:none; }
 .app-body.sidebar-closed:not(.sidebar-peek) #sidebar-edge { display:block; }
-.app-body.sidebar-closed.sidebar-peek .sidebar { position:absolute; left:0; top:0; bottom:0; width:272px; padding:0 16px 20px; border-right-color:#e5e7eb; overflow-y:auto; z-index:40; box-shadow:6px 0 24px -6px rgba(16,24,40,.28); animation:sbPeek .14s ease-out; }
+.app-body.sidebar-closed.sidebar-peek .sidebar { position:absolute; left:0; top:0; bottom:0; width:272px; padding:0 16px 20px; border-right:1px solid #e5e7eb; overflow-y:auto; z-index:40; box-shadow:6px 0 24px -6px rgba(16,24,40,.28); animation:sbPeek .14s ease-out; }
 @keyframes sbPeek { from { transform:translateX(-14px); opacity:.4; } to { transform:none; opacity:1; } }
 .sb-pin { margin-left:auto; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border:none; border-radius:6px; background:transparent; color:rgba(255,255,255,.65); cursor:pointer; padding:0; }
 .sb-pin:hover { background:rgba(255,255,255,.18); color:#fff; }
@@ -4031,8 +4032,11 @@ function startApp() {
   updateHistoryButtons();
   const _tlOuter=document.querySelector('.tl-outer');
   if(_tlOuter && window.ResizeObserver){
-    let _roTimer=null;
+    let _roTimer=null, _roW=-1, _roH=-1;
     const _ro=new ResizeObserver(()=>{
+      const w=Math.round(_tlOuter.clientWidth), h=Math.round(_tlOuter.clientHeight);
+      if(w===_roW && h===_roH) return; // taille inchangée (ex. menu qui se superpose) : pas de redessin
+      _roW=w; _roH=h;
       if(_roTimer) clearTimeout(_roTimer);
       _roTimer=setTimeout(()=>{ if(document.getElementById('view-timeline')?.classList.contains('active')) renderTimeline(); }, 80);
     });
