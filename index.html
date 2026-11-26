@@ -2423,17 +2423,19 @@ function renderTimeline(){
       if(lbl && lbl.length*fzFont*0.58 < (x2-x1)-6) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:showTimeBar?'#fff':'#263238','pointer-events':'none'},lbl));
       if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // sous la barre de temps
     });
+    const holG=document.createElementNS(NS,'g'); holG.setAttribute('id','holiday-group'); holG.setAttribute('pointer-events','none'); // jours fériés : toujours au-dessus des gels
     _holList.forEach(h=>{
       const x1=Math.max(LL,dX(h.d)), x2=Math.min(VW,dX(h.d)+PPD);
       if(x2<=x1) return;
       const band=el('rect',{x:x1,y:fzY+2,width:x2-x1,height:FZ-4,rx:2,fill:'#78909c','fill-opacity':0.85,stroke:'#546e7a','stroke-width':1});
       _holHit.push({x1,x2,name:h.name,date:h.d});
-      fzG.appendChild(band);
-      fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:'#78909c','fill-opacity':0.2})); // sur toute la hauteur
-      if(h.name.length*fzFont*0.58 < (x2-x1)-4) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:'#fff','pointer-events':'none'},h.name));
+      holG.appendChild(band);
+      holG.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:'#78909c','fill-opacity':0.28})); // sur toute la hauteur
+      if(h.name.length*fzFont*0.58 < (x2-x1)-4) holG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:'#fff','pointer-events':'none'},h.name));
     });
     svg.appendChild(fzG);
     if(fzOver.childNodes.length) svg.appendChild(fzOver);
+    svg.appendChild(holG);
   }
   if(todayLabel) svg.appendChild(todayLabel);
   if(typeof _delGroups!=='undefined') _delGroups.forEach(g=>svg.appendChild(g));
