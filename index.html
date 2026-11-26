@@ -147,7 +147,7 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
 #sidebar-edge { position:absolute; left:0; top:0; bottom:0; width:8px; z-index:39; display:none; }
 .app-body.sidebar-closed:not(.sidebar-peek) #sidebar-edge { display:block; }
 .app-body.sidebar-closed.sidebar-peek .main { width:auto; }
-.app-body.sidebar-closed.sidebar-peek .sidebar { width:272px; padding:0 16px 20px; border-right-width:1px; box-shadow:4px 0 18px -8px rgba(16,24,40,.25); }
+.app-body.sidebar-closed.sidebar-peek .sidebar { width:272px; padding:0 16px 20px; border-right-width:1px; overflow-y:auto; overflow-x:hidden; box-shadow:4px 0 18px -8px rgba(16,24,40,.25); }
 .sb-pin { margin-left:auto; width:26px; height:26px; display:flex; align-items:center; justify-content:center; border:none; border-radius:6px; background:transparent; color:rgba(255,255,255,.65); cursor:pointer; padding:0; }
 .sb-pin:hover { background:rgba(255,255,255,.18); color:#fff; }
 .sb-pin[aria-pressed="true"] { color:#fff; background:rgba(255,255,255,.22); }
@@ -2719,7 +2719,7 @@ function importModelByIndex(idx) {
 
     const titleEl = document.getElementById('planning-title');
     if (titleEl) {
-      titleEl.value = (state.sidebar && state.sidebar.planningTitle) ? state.sidebar.planningTitle : fileObj.name.replace(/\.json$/i, '');
+      titleEl.value = (state.sidebar && state.sidebar.planningTitle) ? state.sidebar.planningTitle : 'Macro-planning projet';
       saveState();
     }
 
@@ -3101,7 +3101,7 @@ function restoreSidebar(s) {
   onDayStepChange(['1','2','5','10'].indexOf(s.dayStep||'5'));
   setRadio('tl-start', s.tlStart || '1');
   setRadio('tl-end', s.tlEnd);
-  if (s.planningTitle) { const pt = document.getElementById('planning-title'); if (pt) pt.value = s.planningTitle; }
+  { const pt = document.getElementById('planning-title'); if (pt) pt.value = s.planningTitle || 'Macro-planning projet'; }
   toggleTitle();
   toggleDatesOptions();
   toggleTaskLabelOptions();
