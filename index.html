@@ -605,10 +605,12 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
             <div style="font-weight:700;margin:8px 0 6px;">V5.0:</div><ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : nom de l'activité à droite de la barre, date de l'activité à gauche (Affichage &gt; Éléments).</li>
+        <li>Nouveau : raccourcis sur le Gantt : Ctrl/Cmd + C copie l'image du planning (avec message temporisé), Ctrl/Cmd + Z revient en arrière, Maj + Ctrl/Cmd + Z revient en avant.</li>
         <li>Nouveau : conversion d'un export PDF MS Project en JSON (menu Conversion vers JSON).</li>
         <li>Nouveau : début de la période affichée : 1er du mois, mois − 1 ou mois − 2.</li>
         <li>Modifié : un nom d'activité qui toucherait la barre passe à la ligne, et la hauteur de la ligne s'agrandit.</li>
-        <li>Corrigé : la couleur d'une phase change en direct pendant le glissement dans le sélecteur de couleur.</li>
+        <li>Corrigé : la couleur d'une phase, d'une tâche et des périodes de gel change en direct pendant le glissement dans le sélecteur de couleur.</li>
+        <li>Modifié : vue Données, pastille de couleur sur le cadre Périodes de gel et titre aligné sur celui des phases ; gels dessinés au-dessus des jours fériés.</li>
       </ul>
             <div style="font-weight:700;margin:8px 0 6px;">V4.9:</div><ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : option « Gantt en 3D » (relief sur phases, tâches, jalons et barre de temps), en tête d'Affichage.</li>
@@ -3206,9 +3208,26 @@ async function copyPlanningToClipboard(){
       img.src='data:image/svg+xml;charset=utf-8,'+encodeURIComponent(xml);
     });
     await navigator.clipboard.write([new ClipboardItem({'image/png':blobPromise})]);
-    showCenterNotice('Image du macro-planning Gantt copiée dans le presse-papier');
+    showCenterNotice('Le planning Gantt vient d\'être copié dans votre presse-papier');
   } catch(err){ showToast('Copie impossible : autorisez le presse-papier ou utilisez PNG.'); }
 }
+
+// Raccourcis : Ctrl/Cmd+C copie l'image du planning (vue Gantt), Ctrl/Cmd+Z retour, Maj+Ctrl/Cmd+Z (ou Ctrl+Y) retour avant
+document.addEventListener('keydown',e=>{
+  if(!(e.ctrlKey||e.metaKey)||e.altKey||e.isComposing) return;
+  const ae=document.activeElement, tag=ae?ae.tagName:'';
+  if(tag==='INPUT'||tag==='TEXTAREA'||tag==='SELECT'||(ae&&ae.isContentEditable)) return; // laisser les champs de saisie gérer leurs propres raccourcis
+  const modal=[...document.querySelectorAll('#login-overlay,#license-overlay,#modal-overlay,#modal-save-overlay,#modal-folder-overlay')].some(m=>m.offsetParent!==null||getComputedStyle(m).display==='flex'||getComputedStyle(m).display==='block');
+  if(modal) return;
+  const k=(e.key||'').toLowerCase();
+  if(k==='z'){ e.preventDefault(); if(e.shiftKey) redoPlanning(); else undoPlanning(); }
+  else if(k==='y'&&!e.shiftKey){ e.preventDefault(); redoPlanning(); }
+  else if(k==='c'&&!e.shiftKey){
+    if(!document.getElementById('view-timeline').classList.contains('active')) return;
+    const sel=window.getSelection&&window.getSelection(); if(sel&&String(sel).length) return; // texte sélectionné : copie normale
+    e.preventDefault(); copyPlanningToClipboard();
+  }
+});
 
 function promptSaveJSON() {
   const titleEl = document.getElementById('planning-title');
