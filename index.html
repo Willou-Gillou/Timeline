@@ -386,7 +386,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <div class="app-body">
   <div class="sidebar">
     <div class="sec">
-      <div class="sec-head c-scale"><h3>Échelle de temps</h3></div>
+      <div class="sec-head c-scale" onclick="toggleSidebarScroll()" title="Cliquer : aller à « Affichage » / revenir en haut" style="cursor:pointer;"><h3>Échelle de temps</h3></div>
       <div class="sec-body" id="time-scale-body">
         <div class="ts-block">
           <div class="ts-title first" id="ts-unit-lbl">Unité de la graduation</div>
@@ -428,7 +428,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
             <div class="radio-group seg seg3">
               <label title="Dernier jour du planning"><input type="radio" name="tl-end" value="2" onchange="renderTimeline(); saveState()"/> Dernier jour</label>
               <label title="Fin du dernier mois"><input type="radio" name="tl-end" value="0" checked onchange="renderTimeline(); saveState()"/> Fin de mois</label>
-              <label title="Fin du mois suivant"><input type="radio" name="tl-end" value="1" onchange="renderTimeline(); saveState()"/> Mois suivant</label>
+              <label title="Fin du mois suivant"><input type="radio" name="tl-end" value="1" onchange="renderTimeline(); saveState()"/> Mois + 1</label>
             </div>
           </div>
         </div>
@@ -866,6 +866,14 @@ function onDayStepChange(idx){
   updateScaleSample();
   saveState();
   renderTimeline();
+}
+function toggleSidebarScroll(){
+  const sb=document.querySelector('.sidebar'); const body=document.getElementById('display-body');
+  if(!sb||!body) return;
+  const hh=parseFloat(getComputedStyle(sb).getPropertyValue('--head-h'))||44;
+  // le corps de « Affichage » est à (haut naturel de son titre + hh) ; le titre se fige sous celui de « Échelle de temps »
+  const target=Math.max(0,body.offsetTop-sb.offsetTop-2*hh);
+  sb.scrollTo({top:sb.scrollTop<4?target:0,behavior:'smooth'});
 }
 // ── Échelle de temps : unité + repères ↔ scaleIdx (0 J, 1 J-i, 2 S, 3 S-i, 4 M, 5 M-i, 6 Trim, 7 An)
 let _scaleNum=false;
