@@ -329,7 +329,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
 <input type="color" id="lane-color-proxy" tabindex="-1" aria-hidden="true" style="position:fixed;left:0;top:0;width:24px;height:24px;opacity:0;pointer-events:none;border:0;padding:0;z-index:-1;">
 <div class="header-shell">
 <div class="topbar">
-  <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span></div>
+  <div class="brand" id="brand-btn" role="button" tabindex="0" style="cursor:pointer;" title="Ouvrir / fermer le menu" onclick="toggleSidebar(document.querySelector('.app-body').classList.contains('sidebar-closed'))" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();this.click();}"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span></div>
   <div class="topbar-center">
   <div class="topbar-group">
     <span class="topbar-group-label">Planning</span>
