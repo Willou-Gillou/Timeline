@@ -135,6 +135,13 @@ svg text, svg tspan { text-rendering: geometricPrecision; }
   #print-root { display:block !important; }
   html, body { height:auto !important; overflow:visible !important; background:#fff !important; }
 }
+/* Boutons « Phase », « Gel » et onglets Données / Gantt : flottants dans les coins du Gantt (hors export) */
+.main { position:relative; }
+.corner-ui { position:absolute; top:6px; z-index:25; display:flex; align-items:center; gap:6px; }
+.corner-left { left:14px; }
+.corner-right { right:14px; }
+.main.no-title .view { padding-top:50px; }
+#planning-title { width:min(60%, calc(100% - 400px)); }
 /* ═══ Thème : finition visuelle ═══ */
 body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial, sans-serif; background:#f4f5f7; color:#1f2937; -webkit-font-smoothing:antialiased; }
 .app-shell { background:#f4f5f7; }
@@ -311,10 +318,6 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <button class="btn burger-btn" id="burger-btn" type="button" onclick="toggleSidebar()" title="Ouvrir / fermer le menu" aria-label="Ouvrir / fermer le menu"><span class="burger-icon" aria-hidden="true"><span></span><span></span><span></span></span></button>
   <div class="brand" title="Macro Planning"><svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true"><rect width="24" height="24" rx="6" fill="#c0392b"/><path d="M5 7.5h8M9 12h10M6.5 16.5h7" stroke="#fff" stroke-width="2.4" stroke-linecap="round"/></svg><span class="brand-name">Macro Planning</span><span class="brand-ver">v5.0</span></div>
   <div class="topbar-sep"></div>
-  <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Phase</button>
-  <button class="btn" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" style="font-weight:600;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg> Gel</button>
-
-  <div class="topbar-sep"></div>
   <div class="topbar-group">
     <span class="topbar-group-label">Planning</span>
     <button class="btn btn-icon" id="btn-undo" onclick="undoPlanning()" title="Retour : revenir incrémentalement aux dernières modifications" aria-label="Retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
@@ -339,10 +342,6 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
     <span class="topbar-group-label">Aide</span>
     <a class="btn btn-icon" href="guide-utilisateur.pdf" target="_blank" rel="noopener" title="Guide utilisateur" aria-label="Guide utilisateur" style="text-decoration:none;"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg></a>
     <button class="btn btn-icon" type="button" onclick="openVersionHistory()" title="Historique des versions" aria-label="Historique des versions"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
-  </div>
-  <div class="tab-bar">
-    <button class="tab" id="tab-d" onclick="showTab('data')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg> Données</button>
-    <button class="tab active" id="tab-t" onclick="showTab('timeline')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9"/><path d="M9 12h11"/><path d="M6 18h8"/></svg> Gantt</button>
   </div>
 </div>
 </div>
@@ -572,6 +571,17 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   </div>
   </div>
   <div class="main">
+    <div class="corner-ui corner-left">
+      <button class="btn btn-primary" onclick="addLane()" title="Ajouter une phase"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14"/><path d="M5 12h14"/></svg> Phase</button>
+      <button class="btn" onclick="addFreezeFromGantt()" title="Ajouter une période de gel" style="font-weight:600;"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg> Gel</button>
+
+    </div>
+    <div class="corner-ui corner-right">
+  <div class="tab-bar">
+        <button class="tab" id="tab-d" onclick="showTab('data')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></svg> Données</button>
+        <button class="tab active" id="tab-t" onclick="showTab('timeline')"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h9"/><path d="M9 12h11"/><path d="M6 18h8"/></svg> Gantt</button>
+      </div>
+    </div>
     <div id="planning-title-wrap">
       <input id="planning-title" type="text" value="Macro-planning projet" placeholder="Titre du planning..."/>
     </div>
@@ -609,6 +619,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Nouveau : conversion d'un export PDF MS Project en JSON (menu Conversion vers JSON).</li>
         <li>Nouveau : début de la période affichée : 1er du mois, mois − 1 ou mois − 2.</li>
         <li>Modifié : un nom d'activité qui toucherait la barre passe à la ligne, et la hauteur de la ligne s'agrandit.</li>
+        <li>Modifié : les boutons « Phase » et « Gel » et les onglets Données / Gantt quittent la barre du haut et flottent dans les coins haut gauche et haut droit de la zone du Gantt (absents des exports).</li>
         <li>Corrigé : la couleur d'une phase, d'une tâche et des périodes de gel change en direct pendant le glissement dans le sélecteur de couleur.</li>
         <li>Modifié : vue Données, pastille de couleur sur le cadre Périodes de gel et titre aligné sur celui des phases ; gels dessinés au-dessus des jours fériés.</li>
       </ul>
@@ -932,7 +943,7 @@ function setTodaylineColor(v){ todaylineColor=v; saveState(); renderTimeline(); 
 function setDefaultPaletteColor(i,v){ defaultTaskJalonPalette[i]=v; saveState(); }
 
 // ═══ OPTIONS ═════════════════════════════════════════════════
-function toggleTitle(){ document.getElementById('planning-title-wrap').style.display=document.getElementById('chk-title').checked?'block':'none'; }
+function toggleTitle(){ const on=document.getElementById('chk-title').checked; document.getElementById('planning-title-wrap').style.display=on?'block':'none'; document.querySelector('.main')?.classList.toggle('no-title',!on); }
 // ═══ JOURS FÉRIÉS FRANÇAIS (métropole) : calcul, sans donnée externe ═══
 function easterDate(y){ // algorithme de Meeus/Jones/Butcher (calendrier grégorien)
   const a=y%19,b=Math.floor(y/100),c=y%100,d=Math.floor(b/4),e=b%4,f=Math.floor((b+8)/25),g=Math.floor((b-f+1)/3),
