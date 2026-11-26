@@ -300,7 +300,7 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v4.9 &mdash; Accès sécurisé
+      v5.0 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -418,9 +418,10 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <div class="ts-block">
           <div class="ts-title first">Période affichée</div>
           <div class="fld"><div class="ts-sub">Début</div>
-            <div class="radio-group seg">
+            <div class="radio-group seg seg3">
               <label title="Début du premier mois"><input type="radio" name="tl-start" value="0" onchange="renderTimeline(); saveState()"/> 1er du mois</label>
-              <label title="Début du mois précédent"><input type="radio" name="tl-start" value="1" checked onchange="renderTimeline(); saveState()"/> Mois précédent</label>
+              <label title="Début du mois précédent"><input type="radio" name="tl-start" value="1" checked onchange="renderTimeline(); saveState()"/> Mois − 1</label>
+              <label title="Début de l'avant-dernier mois avant le planning"><input type="radio" name="tl-start" value="2" onchange="renderTimeline(); saveState()"/> Mois − 2</label>
             </div>
           </div>
           <div class="fld"><div class="ts-sub">Fin</div>
@@ -489,13 +490,15 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
           <div class="sub-options" id="task-label-sub">
             <div class="seg seg3"><label><input type="radio" name="task-label-pos" value="inside" onchange="renderTimeline(); saveState()"/> Dedans</label>
             <label><input type="radio" name="task-label-pos" value="left" checked onchange="renderTimeline(); saveState()"/> Gauche</label>
+            <label><input type="radio" name="task-label-pos" value="right" onchange="renderTimeline(); saveState()"/> Droite</label>
             <label><input type="radio" name="task-label-pos" value="bottom" onchange="renderTimeline(); saveState()"/> Dessous</label></div>
             <label><input type="checkbox" id="chk-task-dash-dot" checked onchange="renderTimeline(); saveState()"/> Trait pointillé tâches</label>
           </div>
 
           <label><input type="checkbox" id="chk-dates" checked onchange="toggleDatesOptions()"/> Dates tâches</label>
           <div class="sub-options" id="dates-sub">
-            <div class="seg"><label><input type="radio" name="dates-pos" value="right" checked onchange="renderTimeline(); saveState()"/> Droite</label>
+            <div class="seg seg3"><label><input type="radio" name="dates-pos" value="left" onchange="renderTimeline(); saveState()"/> Gauche</label>
+            <label><input type="radio" name="dates-pos" value="right" checked onchange="renderTimeline(); saveState()"/> Droite</label>
             <label><input type="radio" name="dates-pos" value="bottom" onchange="renderTimeline(); saveState()"/> Bas</label></div>
           </div>
         </div>
@@ -600,6 +603,12 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+            <div style="font-weight:700;margin:8px 0 6px;">V5.0:</div><ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Nouveau : nom de l'activité à droite de la barre, date de l'activité à gauche (Affichage &gt; Éléments).</li>
+        <li>Nouveau : début de la période affichée : 1er du mois, mois − 1 ou mois − 2.</li>
+        <li>Modifié : un nom d'activité qui toucherait la barre passe à la ligne, et la hauteur de la ligne s'agrandit.</li>
+        <li>Corrigé : la couleur d'une phase change en direct pendant le glissement dans le sélecteur de couleur.</li>
+      </ul>
             <div style="font-weight:700;margin:8px 0 6px;">V4.9:</div><ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : option « Gantt en 3D » (relief sur phases, tâches, jalons et barre de temps), en tête d'Affichage.</li>
         <li>Nouveau : échelle de temps par unité (jour à année), repères Calendrier ou Numéroté, exemple en direct.</li>
@@ -611,7 +620,6 @@ body { font-family: Inter, 'Segoe UI', system-ui, -apple-system, Roboto, 'Helvet
         <li>Modifié : menu de gauche redessiné : onglets Éléments / Tailles / Couleurs, titres rouges collants, boutons sur une ligne.</li>
         <li>Modifié : « Ligne de temps » remonte au premier niveau d'Affichage.</li>
         <li>Modifié : guide utilisateur et historique des versions regroupés dans une section « Aide » de la barre du haut.</li>
-        <li>Corrigé : la couleur d'une phase change en direct pendant le glissement dans le sélecteur de couleur.</li>
         <li>Corrigé : « Valeurs par défaut » recolore les jalons ; « Tout réinitialiser » rétablit 5 jours et mois précédent.</li>
       </ul>
       <div style="font-weight:700;margin:8px 0 6px;">V4.8:</div>
@@ -1602,7 +1610,7 @@ function renderTimeline(){
   const startOpt=+document.querySelector('input[name="tl-start"]:checked').value;
   const endOpt=_tlAutoEnd?1:+document.querySelector('input[name="tl-end"]:checked').value;
   const endChosen=+document.querySelector('input[name="tl-end"]:checked').value;
-  let minD=startOpt===0?new Date(rawMin.getFullYear(),rawMin.getMonth(),1):new Date(rawMin.getFullYear(),rawMin.getMonth()-1,1);
+  let minD=new Date(rawMin.getFullYear(),rawMin.getMonth()-Math.max(0,startOpt||0),1);
   let maxD=endOpt===2?new Date(rawMax):endOpt===0?new Date(rawMax.getFullYear(),rawMax.getMonth()+1,0):new Date(rawMax.getFullYear(),rawMax.getMonth()+2,0);
 
   const totalDays=Math.round((maxD-minD)/86400000)+1;
@@ -1683,7 +1691,65 @@ function renderTimeline(){
   const LABEL_BOTTOM_H=(showTaskLabel&&taskLabelPos==='bottom')?(taskFontSize*1.4+10):0;
   const bothBottom=(showDates&&datesPos==='bottom'&&showTaskLabel&&taskLabelPos==='bottom');
   const BOTTOM_H=bothBottom?Math.max(DATE_BOTTOM_H,LABEL_BOTTOM_H):DATE_BOTTOM_H+LABEL_BOTTOM_H;
-  function getRowH(row){ const hasJalon=row.tasks.some(t=>t.type==='J'); return (hasJalon?jalonRH:taskRH)+BOTTOM_H; }
+  // Noms d'activités : retour à la ligne automatique si le nom toucherait la barre (ou le bord du Gantt), la ligne s'agrandit alors
+  const _tCtx=document.createElement('canvas').getContext('2d');
+  const _meas=(t,font)=>{ _tCtx.font=font; return _tCtx.measureText(t).width*1.06; };
+  const TFONT='600 '+taskFontSize+'px Arial, Helvetica, sans-serif', DFONT=taskDateFontSize+'px Arial, Helvetica, sans-serif';
+  const TLH=Math.max(12,taskFontSize+2);
+  function wrapTitle(text,maxW){
+    const out=[];
+    String(text||'').split('\n').forEach(line=>{
+      const words=line.trim().split(/\s+/).filter(Boolean);
+      if(!words.length){ out.push(''); return; }
+      let cur='';
+      words.forEach(w=>{
+        const t=cur?cur+' '+w:w;
+        if(_meas(t,TFONT)<=maxW){ cur=t; return; }
+        if(cur){ out.push(cur); cur=''; }
+        let word=w; // mot seul plus large que la place disponible : coupé par caractères
+        while(_meas(word,TFONT)>maxW && word.length>1){ let k=word.length-1; while(k>1&&_meas(word.slice(0,k),TFONT)>maxW) k--; out.push(word.slice(0,k)); word=word.slice(k); }
+        cur=word;
+      });
+      out.push(cur);
+    });
+    return out;
+  }
+  const _tLayCache=new Map();
+  function taskLay(task){
+    let c=_tLayCache.get(task); if(c) return c;
+    c={lines:String(task.title||'').split('\n'), tw:0, dw:0, tf:'', labelX:0, need:0};
+    if(task.type==='T' && task.start && task.end){
+      const x1=dX(task.start), x2=dX(task.end), bw=Math.max(8,x2-x1);
+      c.tf=`${fmtLabel(parseD(task.start))} - ${fmtLabel(parseD(task.end))}`;
+      c.dw=showDates?_meas(c.tf,DFONT):0;
+      if(showTaskLabel){
+        if(taskLabelPos==='inside'){
+          if(bw>=48){ const w=wrapTitle(task.title,bw-10); if(w.length<=3) c.lines=w; } // au-delà de 3 lignes, le nom reste tel quel (barre trop étroite)
+          c.need=c.lines.length>1?(c.lines.length*TLH+6)/0.55:0;
+        } else if(taskLabelPos==='left'){
+          const dl=(showDates&&datesPos==='left')?c.dw+26:0;
+          c.labelX=LL+8;
+          c.lines=wrapTitle(task.title,Math.max(70,x1-14-dl-c.labelX));
+          c.need=c.lines.length>1?c.lines.length*TLH+8:0;
+        } else if(taskLabelPos==='right'){
+          const dr=(showDates&&datesPos==='right')?c.dw+12:0;
+          c.labelX=x1+bw+8;
+          c.lines=wrapTitle(task.title,Math.max(70,VW-6-dr-c.labelX));
+          c.need=c.lines.length>1?c.lines.length*TLH+8:0;
+        } else c.need=c.lines.length>1?c.lines.length*TLH+8:0;
+        c.tw=Math.max(0,...c.lines.map(l=>_meas(l,TFONT)));
+      }
+    }
+    _tLayCache.set(task,c); return c;
+  }
+  const _rowHCache=new Map();
+  function getRowH(row){
+    let v=_rowHCache.get(row); if(v!==undefined) return v;
+    const hasJalon=row.tasks.some(t=>t.type==='J');
+    let base=(hasJalon?jalonRH:taskRH);
+    if(showTachesMaster&&showTaskLabel) row.tasks.forEach(t=>{ if(t.type==='T') base=Math.max(base,taskLay(t).need); });
+    v=base+BOTTOM_H; _rowHCache.set(row,v); return v;
+  }
   // Hauteur d'une phase : somme de ses lignes, au minimum de quoi afficher son nom (même formule que le dessin des phases)
   // Nom de phase : retours à la ligne manuels conservés + césure automatique selon la largeur de la colonne
   const _wrapCtx=document.createElement('canvas').getContext('2d');
@@ -2091,12 +2157,13 @@ function renderTimeline(){
           [['resize-l',x1],['resize-r',x1+bw-hw]].forEach(([mode,hx])=>{ const h=el('rect',{x:hx,y:by,width:hw,height:bh,rx:4,fill:'rgba(0,0,0,0.13)',cursor:'ew-resize'}); h.style.touchAction='none'; h.addEventListener('pointerdown',e=>{e.stopPropagation();tlPointerDown(e,mode,lane.id,task.id);}); taskHeaderG.appendChild(h); });
 
           if(showTaskLabel){
-            const taskLines=String(task.title||'').split('\n');
-            const taskLineH=Math.max(12,taskFontSize+2);
+            const tLay=taskLay(task);
+            const taskLines=tLay.lines;
+            const taskLineH=TLH;
             if(taskLabelPos==='inside'){
               if(bw>24){
                 const baseY=by+bh/2-((taskLines.length-1)*taskLineH)/2+4;
-                const lEl=multiText(x1+bw/2,baseY,task.title||'',{'text-anchor':'middle','font-size':taskFontSize,'font-weight':'600',fill:'white',cursor:'text'},taskLineH,'middle');
+                const lEl=multiText(x1+bw/2,baseY,taskLines.join('\n'),{'text-anchor':'middle','font-size':taskFontSize,'font-weight':'600',fill:'white',cursor:'text'},taskLineH,'middle');
                 lEl.setAttribute('data-tt',lane.id+'-'+task.id); lEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',lEl.getBoundingClientRect());}); taskHeaderG.appendChild(lEl);
               }
             } else if(taskLabelPos==='bottom'){
@@ -2111,16 +2178,19 @@ function renderTimeline(){
               }
               // si bothBottom : géré dans le bloc datesPos==='bottom' ci-dessous
             } else {
-              const labelX=LL+8, labelY=by+bh/2-((taskLines.length-1)*taskLineH)/2+4;
-              const titleW=Math.max(...taskLines.map(line=>line.length),0)*6.5+8;
-              if(showTaskDashDot) svg.appendChild(el('line',{x1:labelX+titleW,y1:by+bh/2,x2:x1,y2:by+bh/2,stroke:'#555','stroke-width':1,'stroke-dasharray':'3,2',opacity:'0.5'}));
-              const lEl=multiText(labelX,labelY,task.title||'',{'text-anchor':'start','font-size':taskFontSize,'font-weight':'600',fill:'#333',cursor:'text'},taskLineH,'start');
+              const isRight=taskLabelPos==='right';
+              const labelX=isRight?tLay.labelX:LL+8, labelY=by+bh/2-((taskLines.length-1)*taskLineH)/2+4;
+              const titleW=tLay.tw+8;
+              const leaderEnd=(showDates&&datesPos==='left')?Math.max(labelX+titleW,x1-16-tLay.dw-8):x1;
+              if(!isRight&&showTaskDashDot&&leaderEnd>labelX+titleW) svg.appendChild(el('line',{x1:labelX+titleW,y1:by+bh/2,x2:leaderEnd,y2:by+bh/2,stroke:'#555','stroke-width':1,'stroke-dasharray':'3,2',opacity:'0.5'}));
+              const lEl=multiText(labelX,labelY,taskLines.join('\n'),{'text-anchor':'start','font-size':taskFontSize,'font-weight':'600',fill:'#333',cursor:'text'},taskLineH,'start');
               lEl.setAttribute('data-tt',lane.id+'-'+task.id); lEl.addEventListener('click',ev=>{ev.stopPropagation();openEdit({type:'task',laneId:lane.id,taskId:task.id},task.title||'',lEl.getBoundingClientRect());}); svg.appendChild(lEl);
             }
           }
 
           // Affichage date tâche si activé
           if(showDates){
+            const tLay2=taskLay(task);
             const tf=`${fmtLabel(parseD(task.start))} - ${fmtLabel(parseD(task.end))}`;
             if(datesPos==='inside'){
               if(bw>40) taskHeaderG.appendChild(multiText(x1+bw/2,by+bh-4,tf,{'text-anchor':'middle','font-size':taskDateFontSize,fill:'rgba(255,255,255,0.85)',cursor:'grab'}));
@@ -2158,8 +2228,12 @@ function renderTimeline(){
                 const dCx=Math.min(Math.max(x1+bw/2, LL+dW/2), VW-dW/2);
                 taskHeaderG.appendChild(multiText(dCx,by+bh+2+taskDateFontSize,tf,{'text-anchor':'middle','font-size':taskDateFontSize,fill:'#666'}));
               }
+            } else if(datesPos==='left'){
+              const dxEnd=Math.max(x1-16, LL+tLay2.dw+4);
+              svg.appendChild(el('text',{x:dxEnd,y:by+bh/2+4,'text-anchor':'end','font-size':taskDateFontSize,fill:'#999'},tf));
             } else {
-              svg.appendChild(el('text',{x:x1+bw+6,y:by+bh/2+4,'text-anchor':'start','font-size':taskDateFontSize,fill:'#999'},tf));
+              const dxStart=(showTaskLabel&&taskLabelPos==='right')?tLay2.labelX+tLay2.tw+12:x1+bw+6;
+              svg.appendChild(el('text',{x:dxStart,y:by+bh/2+4,'text-anchor':'start','font-size':taskDateFontSize,fill:'#999'},tf));
             }
           }
 
