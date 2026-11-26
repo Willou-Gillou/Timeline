@@ -1686,7 +1686,7 @@ function renderTimeline(){
 
   let allD=[];
   lanes.forEach(l=>l.tasks.forEach(t=>{ if(t.start)allD.push(parseD(t.start)); if(t.end)allD.push(parseD(t.end)); }));
-  if(!allD.length){ svg.setAttribute('viewBox','0 0 600 80'); svg.appendChild(el('text',{x:300,y:45,'text-anchor':'middle',fill:'#aaa','font-size':14},'Aucune tâche définie, appuyez sur + Phase ou chargez un modèle prédéfinis')); return; }
+  if(!allD.length){ svg.setAttribute('viewBox','0 0 600 80'); svg.setAttribute('preserveAspectRatio','xMidYMid meet'); svg.style.width='100%'; svg.style.height='80px'; svg.style.overflow='visible'; svg.appendChild(el('text',{x:300,y:45,'text-anchor':'middle',fill:'#aaa','font-size':14},'Aucune tâche définie, appuyez sur + Phase ou chargez un modèle prédéfinis')); return; }
 
   const showFreezes=document.getElementById('chk-freezes')?.checked !== false;
   const showHolidays=showFreezes && document.getElementById('chk-holidays')?.checked === true;
