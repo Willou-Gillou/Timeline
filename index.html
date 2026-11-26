@@ -4493,7 +4493,7 @@ function renderFreezePanel(){
     +'<div class="phase-header" id="fz-head" style="background:'+HDR+'">'
     +'<input type="color" class="sh-color" id="fz-head-color" value="'+HDR+'" oninput="liveFreezeAllColor(this.value)" onchange="liveFreezeAllColor(this.value);saveState()" title="Changer la couleur de toutes les périodes de gel"/>'
     +'<div class="lane-move-btns" aria-hidden="true"></div>'  // même encombrement que les flèches de phase : titre aligné
-    +'<div class="phase-title-wrap"><div class="phase-title-display">Périodes de gel</div></div>'
+    +'<div class="phase-title-wrap"><div class="phase-title-display" style="display:flex;align-items:center;gap:8px;"><svg class="ic" style="margin-left:-22px;" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg><span>Périodes de gel</span><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 2v20"/><path d="M2 12h20"/><path d="m5 5 14 14"/><path d="m19 5-14 14"/></svg></div></div>'
     +'<button class="btn-add-task" style="width:auto;padding:2px 7px;font-size:11px;color:rgba(255,255,255,0.85);border:1px solid rgba(255,255,255,0.4);border-radius:4px;" title="Ajouter une période de gel" onclick="event.stopPropagation();addFreeze()">＋</button>'
     +'</div>';
   if(!freezes.length){
