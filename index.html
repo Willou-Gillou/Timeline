@@ -307,7 +307,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .lib-sa-row{display:flex;gap:8px;align-items:center;margin-top:4px}
 .lib-sa-row .lib-input{flex:1;min-width:0}
 .lib-sa-err{min-height:16px;font-size:12px;margin-top:6px}
-.lib-row.sa-ro{cursor:default;opacity:.75}
+.lib-row.sa-ro{cursor:pointer}
 .lib-ov{position:fixed;inset:0;z-index:100000;background:rgba(20,24,30,.5);display:none;align-items:center;justify-content:center}
 .lib-box{background:#fff;border-radius:12px;width:min(920px,95vw);height:min(660px,88vh);display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.28);padding:0;overflow:hidden}
 .lib-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #eceef1;flex-shrink:0}
@@ -3659,7 +3659,7 @@ async function libConfirmLeave(kind,targetId){
 function libSaveCurrent(o){
   o=o||{};
   const l=libClone(), now=Date.now(), title=o.name||libTitle(), data=libCurData();
-  let e=o.asNew?null:libCurEntry(l);
+  let e=o.overwriteId?l.items.find(i=>i.id===o.overwriteId):(o.asNew?null:libCurEntry(l));
   if(o.onlyUpdate&&!e) return false;
   const created=!e;
   if(e){ e.name=libUniqueIn(title,l,e.folder,e.id); e.modified=now; e.rev=(e.rev||0)+1; e.data=data; e.hash=libFullHash(data,e.name); }
@@ -3763,12 +3763,19 @@ function libSaveAs(){
       const l=libGet(); if(fid&&!l.folders.some(f=>f.id===fid)) fid=null;
       const cnt=k=>l.items.filter(i=>(i.folder||null)===(k||null)).length;
       let side='<div class="lib-fold'+(!fid?' on':'')+'" data-f="">'+LIB_ICO_HOME+'<span class="lib-fname">Racine</span><span class="lib-n">'+cnt(null)+'</span></div>';
-      l.folders.slice().sort((x,y)=>x.name.localeCompare(y.name,'fr')).forEach(f=>{ side+='<div class="lib-fold'+(fid===f.id?' on':'')+'" data-f="'+f.id+'">'+LIB_ICO_FOLDER+'<span class="lib-fname">'+libEsc(f.name)+'</span><span class="lib-n">'+cnt(f.id)+'</span></div>'; });
+      l.folders.slice().sort((x,y)=>x.name.localeCompare(y.name,'fr')).forEach(f=>{ side+='<div class="lib-fold'+(fid===f.id?' on':'')+'" data-f="'+f.id+'">'+LIB_ICO_FOLDER+'<span class="lib-fname">'+libEsc(f.name)+'</span><span class="lib-n">'+cnt(f.id)+'</span><span class="lib-fact"><button type="button" class="sa-ren" data-r="'+f.id+'" title="Renommer le dossier">✎</button></span></div>'; });
       side+='<button type="button" class="lib-newf" id="sa-newf">+ Nouveau dossier</button>';
       $('#sa-side').innerHTML=side;
       $('#sa-ptitle').textContent='Enregistrer dans : '+(fid?libFolderName(l,fid):'Racine');
       const its=l.items.filter(i=>(i.folder||null)===(fid||null)).sort((x,y)=>x.name.localeCompare(y.name,'fr'));
-      $('#sa-list').innerHTML=its.length?its.map(i=>'<div class="lib-row sa-ro"><div class="lib-row-main"><div class="lib-name">'+libEsc(i.name)+'</div><div class="lib-sub">'+libFmt(i.modified)+'</div></div></div>').join(''):'<div class="lib-empty">Ce dossier est vide.</div>';
+      $('#sa-list').innerHTML=its.length?its.map(i=>'<div class="lib-row sa-ro'+(i.name.toLowerCase()===inp.value.trim().toLowerCase()?' sel':'')+'" data-n="'+libEsc(i.name)+'" title="Cliquer pour écraser ce planning"><div class="lib-row-main"><div class="lib-name">'+libEsc(i.name)+'</div><div class="lib-sub">'+libFmt(i.modified)+'</div></div></div>').join(''):'<div class="lib-empty">Ce dossier est vide.</div>';
+      $('#sa-list').querySelectorAll('.sa-ro').forEach(r=>r.onclick=()=>{ inp.value=r.dataset.n; $('#sa-err').textContent=''; render(); });
+      $('#sa-side').querySelectorAll('.sa-ren').forEach(b=>b.onclick=async ev=>{
+        ev.stopPropagation(); const c=libClone(), f=c.folders.find(x=>x.id===b.dataset.r); if(!f) return;
+        const n=await libAskName('Renommer le dossier','Nouveau nom',f.name); if(!n||n===f.name) return;
+        if(c.folders.some(x=>x.id!==f.id&&x.name.toLowerCase()===n.toLowerCase())){ $('#sa-err').textContent='Un dossier porte déjà ce nom.'; return; }
+        f.name=n; if(libCommit(c)){ $('#sa-err').textContent=''; render(); }
+      });
       $('#sa-side').querySelectorAll('.lib-fold').forEach(d=>d.onclick=()=>{ fid=d.dataset.f||null; $('#sa-err').textContent=''; render(); });
       $('#sa-newf').onclick=async()=>{
         const n=await libAskName('Nouveau dossier','Nom du dossier',''); if(!n) return;
@@ -3779,10 +3786,18 @@ function libSaveAs(){
     }
     const kd=ev=>{ if(ev.key==='Escape'){ ev.stopPropagation(); done(false); } else if(ev.key==='Enter'&&document.activeElement===inp){ ev.preventDefault(); ok(); } };
     const done=v=>{ document.removeEventListener('keydown',kd,true); o.remove(); res(v); };
-    function ok(){
+    async function ok(){
       const name=inp.value.trim();
       if(!name){ $('#sa-err').textContent='Le nom ne peut pas être vide.'; return; }
-      if(libGet().items.some(i=>(i.folder||null)===(fid||null)&&i.name.toLowerCase()===name.toLowerCase())){ $('#sa-err').textContent='Ce nom existe déjà dans ce dossier.'; return; }
+      const ex=libGet().items.find(i=>(i.folder||null)===(fid||null)&&i.name.toLowerCase()===name.toLowerCase());
+      if(ex){
+        const r=await libDialog('Écraser le planning ?','<p style="margin:0">Le planning « <b>'+libEsc(ex.name)+'</b> » existe déjà dans ce dossier ('+libEsc(libFmt(ex.modified))+').</p><p class="lib-warn" style="margin:10px 0 0">Son contenu actuel sera remplacé. Êtes-vous sûr de vouloir l\'écraser ?</p>',[{label:'Annuler',value:null},{label:'Oui, écraser',value:'ok',primary:true}]);
+        if(r.value!=='ok') return;
+        const t=document.getElementById('planning-title'); if(t) t.value=ex.name;
+        const saved=libSaveCurrent({overwriteId:ex.id,name:ex.name,silent:true});
+        if(saved) showToast('Macro-planning « '+ex.name+' » écrasé');
+        done(saved); return;
+      }
       const t=document.getElementById('planning-title'); if(t) t.value=name;
       const saved=libSaveCurrent({asNew:true,name,folder:fid||null,silent:true});
       if(saved) showToast('Macro-planning sauvegardé sous « '+name+' »'+(fid?' (dossier « '+libFolderName(libGet(),fid)+' »)':' (racine)'));
@@ -3791,7 +3806,7 @@ function libSaveAs(){
     document.addEventListener('keydown',kd,true);
     $('.lib-x').onclick=()=>done(false); $('#sa-cancel').onclick=()=>done(false); $('#sa-ok').onclick=ok;
     o.addEventListener('mousedown',ev=>{ if(ev.target===o) done(false); });
-    inp.addEventListener('input',()=>{ $('#sa-err').textContent=''; });
+    inp.addEventListener('input',()=>{ $('#sa-err').textContent=''; const v=inp.value.trim().toLowerCase(); $('#sa-list').querySelectorAll('.sa-ro').forEach(r=>r.classList.toggle('sel',r.dataset.n.toLowerCase()===v)); });
     document.body.appendChild(o); render(); inp.focus(); inp.select();
   });
 }
