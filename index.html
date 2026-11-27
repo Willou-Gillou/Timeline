@@ -692,6 +692,10 @@ input[type=checkbox].lib-chk::before{display:none}
     </div>
     <hr class="sidebar-sep" style="margin:12px 0;">
     <div style="display:flex;flex-direction:column;gap:6px;padding:10px 0 4px 0;">
+    <div class="radio-group" id="lib-sb-opts" style="margin-bottom:6px;">
+      <label><input type="checkbox" id="opt-lib-auto" checked onchange="libSetOpt('auto',this.checked)"/> Enregistrer automatiquement</label>
+      <label><input type="checkbox" id="opt-lib-add" checked onchange="libSetOpt('addOnOpen',this.checked)"/> Ajouter à la bibliothèque les fichiers JSON ouverts</label>
+    </div>
     <button class="btn btn-warn" style="justify-content:center;width:100%;" onclick="resetAll()" title="Efface le planning et remet tous les réglages par défaut"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Tout réinitialiser</button>
     <button class="btn btn-muted" style="justify-content:center;width:100%;margin-top:2px;" onclick="logoutApp()"><svg class="ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg> Se déconnecter</button>
 
@@ -3520,6 +3524,7 @@ function libUpdateDirty(){
   try{
     const d=libIsDirty(); const el=document.getElementById('lib-dirty'); if(el) el.style.display=d?'block':'none';
     const l=libGet();
+    if(!window._libOptsSynced){ window._libOptsSynced=true; libSyncOpts(); }
     const blank=lanes.length===0&&freezes.length===0&&!libCurEntry(l);
     if(blank) libFresh=true;
     else if(d&&l.auto&&!libCurEntry(l)&&libFresh&&!libStale){
@@ -3747,7 +3752,8 @@ function libEmptyTrash(){
   if(!confirm('Vider la corbeille ? Cette action est définitive.')) return;
   const l=libClone(); l.trash=[]; if(libCommit(l)) libRender();
 }
-function libSetOpt(k,v){ const l=libClone(); l[k]=!!v; if(libCommit(l)){ if(k==='auto') libUpdateDirty(); } }
+function libSyncOpts(){ try{ const l=libGet(), a=document.getElementById('opt-lib-auto'), b=document.getElementById('opt-lib-add'); if(a) a.checked=!!l.auto; if(b) b.checked=!!l.addOnOpen; }catch(e){} }
+function libSetOpt(k,v){ const l=libClone(); l[k]=!!v; if(libCommit(l)){ if(k==='auto') libUpdateDirty(); } libSyncOpts(); }
 
 // ── Export ──
 function libEntryFile(e){ const fn=libFolderName(libGet(),e.folder); return {format:'macroplanning-planning',version:2,mpMeta:{id:e.id,created:e.created,modified:e.modified,rev:e.rev,folder:fn},name:e.name,lanes:e.data.lanes,freezes:e.data.freezes,lid:e.data.lid,tid:e.data.tid,jalonColorIdx:e.data.jalonColorIdx}; }
@@ -4041,9 +4047,7 @@ function libRender(){
   const state='<div class="lib-state"><b>'+libEsc(libTitle())+'</b> '+(cur?(dirty?'<span class="lib-warn">· modifications non enregistrées</span>':'<span class="lib-ok">· enregistré dans « '+libEsc(where)+' »</span>'):(dirty?'<span class="lib-warn">· pas encore enregistré dans la bibliothèque</span>':'· planning vide'))+'</div>';
   const used=libUsage(), pct=Math.min(100,Math.round(used/LIB_QUOTA*100));
   const old=l.items.length&&(!l.lastExport||Date.now()-l.lastExport>30*86400000);
-  let foot='<details class="lib-foot"><summary>Options et espace utilisé ('+pct+' %)'+(old?' <span class="lib-warn">· pensez à exporter</span>':'')+'</summary>'
-    +'<div class="lib-opts"><label><input type="checkbox" '+(l.auto?'checked':'')+' onchange="libSetOpt(\'auto\',this.checked)"> Enregistrer automatiquement le planning ouvert (écrase la version enregistrée)</label>'
-    +'<label><input type="checkbox" '+(l.addOnOpen?'checked':'')+' onchange="libSetOpt(\'addOnOpen\',this.checked)"> Ajouter à la bibliothèque les fichiers JSON que j\'ouvre</label></div>'
+  let foot='<details class="lib-foot"><summary>Espace utilisé ('+pct+' %)'+(old?' <span class="lib-warn">· pensez à exporter</span>':'')+'</summary>'
     +'<div class="lib-gauge"><div class="lib-gauge-bar"><div style="width:'+pct+'%;'+(pct>=80?'background:#c0392b':'')+'"></div></div><div class="lib-sub">'+Math.round(used/1000)+' Ko utilisés sur environ 5 Mo dans ce navigateur'+(pct>=80?' — <span class="lib-warn">presque plein</span>':'')+'</div></div>'
     +'</details>';
   if(l.trash.length){
