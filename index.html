@@ -423,6 +423,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
     <span class="topbar-group-label">Planning</span>
     <button class="btn btn-icon" id="btn-undo" onclick="undoPlanning()" title="Retour : revenir incrémentalement aux dernières modifications" aria-label="Retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
     <button class="btn btn-icon" id="btn-redo" onclick="redoPlanning()" title="Annuler retour : rétablir le ou les retours effectués" aria-label="Annuler retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
+    <button class="btn btn-icon" id="btn-new" type="button" onclick="libNew()" title="Créer un nouveau macro-planning (vide)" aria-label="Créer un nouveau macro-planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg></button>
     <button class="btn btn-icon" id="btn-save" type="button" onclick="libSave()" title="Enregistrer le planning dans la bibliothèque (Ctrl+S)" aria-label="Enregistrer le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span class="lib-dirty" id="lib-dirty"></span></button>
     <label class="btn btn-icon" style="cursor:pointer;" title="Charger un planning JSON" aria-label="Charger un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
     <button class="btn btn-icon" id="btn-library" type="button" onclick="libOpenUI()" title="Bibliothèque de plannings (Ctrl+S : enregistrer)" aria-label="Bibliothèque de plannings"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg></button>
@@ -3573,6 +3574,12 @@ function libSaveNewVersion(){
 }
 // Délie le planning ouvert de la bibliothèque : le prochain enregistrement créera un nouveau fichier à la racine
 function libUnlink(){ try{ const r=localStorage.getItem(LIB_KEY); if(!r) return; const l=JSON.parse(r); if(l&&l.current){ l.current=null; localStorage.setItem(LIB_KEY,JSON.stringify(l)); _lib=null; } }catch(e){} }
+async function libNew(){
+  if(!(await libConfirmLeave())) return;
+  libApply({lanes:[],freezes:[],lid:1,tid:1,jalonColorIdx:0},LIB_DEFAULT_NAME);
+  libUnlink(); libUpdateDirty(); if(libUIOpen()) libRender();
+  showToast('Nouveau macro-planning (non enregistré)');
+}
 function libUIOpen(){ return document.getElementById('lib-overlay')?.style.display==='flex'; }
 function libFolderOptions(l,sel){ return '<option value=""'+(!sel?' selected':'')+'>Racine</option>'+l.folders.map(f=>'<option value="'+f.id+'"'+(f.id===sel?' selected':'')+'>'+libEsc(f.name)+'</option>').join(''); }
 async function libSaveAs(){
