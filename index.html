@@ -449,7 +449,6 @@ input[type=checkbox].lib-chk::before{display:none}
     <button class="btn btn-icon" id="btn-new" type="button" onclick="libNew()" title="Nouveau macro-planning (vide ou modèle)" aria-label="Créer un nouveau macro-planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg></button>
     <button class="btn btn-icon" id="btn-save" type="button" onclick="libSaveMenu(event)" title="Enregistrer (Ctrl+S)" aria-haspopup="true" aria-label="Enregistrer le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span class="lib-dirty" id="lib-dirty"></span></button>
     <button class="btn btn-icon" id="btn-open" type="button" onclick="libOpenUI()" title="Ouvrir un planning (bibliothèque)" aria-label="Ouvrir un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></button>
-    <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></button>
     <button class="btn btn-icon" id="btn-export" onclick="toggleExportMenu(event)" title="Exporter le planning (PNG, SVG, PDF)" aria-label="Exporter le planning" aria-haspopup="true" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></button>
     <button class="btn btn-icon" id="btn-png2json" type="button" onclick="toggleConvMenu(event)" title="Conversion vers JSON" aria-label="Conversion vers JSON" aria-haspopup="menu" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/></svg></button>
   </div>
@@ -3622,27 +3621,34 @@ function libSaveNewVersion(){
 }
 // Délie le planning ouvert de la bibliothèque : le prochain enregistrement créera un nouveau fichier à la racine
 function libUnlink(){ clearTimeout(_libAutoT); try{ const r=localStorage.getItem(LIB_KEY); if(!r) return; const l=JSON.parse(r); if(l&&l.current){ l.current=null; localStorage.setItem(LIB_KEY,JSON.stringify(l)); _lib=null; } }catch(e){} }
+function libModels(){ return (window.MODELS_FILES_LIST&&window.MODELS_FILES_LIST.found&&window.MODELS_FILES_LIST.files)||[]; }
+// Crée un nouveau macro-planning non lié, vide (idx<0) ou issu d'un modèle prédéfini
+async function libCreateNew(idx){
+  const mf=libModels(), empty=lanes.length===0&&freezes.length===0;
+  let state={lanes:[],freezes:[],lid:1,tid:1,jalonColorIdx:0}, name=LIB_DEFAULT_NAME, model=null;
+  if(idx>=0){
+    try{ model=JSON.parse(mf[idx].content); }catch(e){ showToast('Modèle invalide'); return false; }
+    state={lanes:model.lanes||[],freezes:model.freezes||[],lid:model.lid||1,tid:model.tid||1,jalonColorIdx:model.jalonColorIdx||0};
+    name=(model.sidebar&&model.sidebar.planningTitle)||model.name||String(mf[idx].name||'').replace(/\.json$/i,'')||LIB_DEFAULT_NAME;
+  } else if(empty&&!libCurEntry()){ showToast('Le macro-planning est déjà vide'); return false; }
+  if(!(await libConfirmLeave('new'))) return false;
+  name=libUniqueIn(name,libGet(),null);
+  libApply(state,name);
+  if(model&&model.sidebar){ try{ restoreSidebar(model.sidebar); }catch(e){} const t=document.getElementById('planning-title'); if(t) t.value=name; saveState(); }
+  libUnlink(); libFresh=!!model; libUpdateDirty(); if(libUIOpen()) libRender();
+  showToast(model?('Nouveau macro-planning depuis le modèle « '+name+' »'):('Nouveau macro-planning « '+name+' » (non enregistré)'));
+  return true;
+}
+async function libNewFromModel(idx){ if(await libCreateNew(idx)) libClose(); }
 async function libNew(){
-  const mf=(window.MODELS_FILES_LIST&&window.MODELS_FILES_LIST.found&&window.MODELS_FILES_LIST.files)||[];
+  const mf=libModels();
   let rows='<div class="lib-newch sel" data-i="-1"><b>Macro-planning vide</b><span class="lib-sub">Partir de zéro</span></div>';
   mf.forEach((f,i)=>{ rows+='<div class="lib-newch" data-i="'+i+'"><b>'+libEsc(String(f.name||'').replace(/\.json$/i,''))+'</b><span class="lib-sub">Modèle prédéfini</span></div>'; });
   const r=await libDialog('Nouveau macro-planning','<p style="margin:0 0 10px">Partir d\'un macro-planning vide ou choisir un modèle prédéfini :</p><div id="lib-newlist">'+rows+'</div>',
     [{label:'Annuler',value:null},{label:'Créer',value:'ok',primary:true}],o=>+o.querySelector('.lib-newch.sel').dataset.i,
     o=>o.querySelector('#lib-newlist').addEventListener('click',e=>{ const c=e.target.closest('.lib-newch'); if(!c) return; o.querySelectorAll('.lib-newch').forEach(x=>x.classList.remove('sel')); c.classList.add('sel'); }));
   if(r.value!=='ok') return;
-  const idx=r.data, empty=lanes.length===0&&freezes.length===0;
-  let state={lanes:[],freezes:[],lid:1,tid:1,jalonColorIdx:0}, name=LIB_DEFAULT_NAME, model=null;
-  if(idx>=0){
-    try{ model=JSON.parse(mf[idx].content); }catch(e){ showToast('Modèle invalide'); return; }
-    state={lanes:model.lanes||[],freezes:model.freezes||[],lid:model.lid||1,tid:model.tid||1,jalonColorIdx:model.jalonColorIdx||0};
-    name=(model.sidebar&&model.sidebar.planningTitle)||model.name||String(mf[idx].name||'').replace(/\.json$/i,'')||LIB_DEFAULT_NAME;
-  } else if(empty&&!libCurEntry()){ showToast('Le macro-planning est déjà vide'); return; }
-  if(!(await libConfirmLeave('new'))) return;
-  name=libUniqueIn(name,libGet(),null);
-  libApply(state,name);
-  if(model&&model.sidebar){ try{ restoreSidebar(model.sidebar); }catch(e){} const t=document.getElementById('planning-title'); if(t) t.value=name; saveState(); }
-  libUnlink(); libFresh=!!model; libUpdateDirty(); if(libUIOpen()) libRender();
-  showToast(model?('Nouveau macro-planning depuis le modèle « '+name+' »'):('Nouveau macro-planning « '+name+' » (non enregistré)'));
+  await libCreateNew(r.data);
 }
 function libUIOpen(){ return document.getElementById('lib-overlay')?.style.display==='flex'; }
 function libFolderOptions(l,sel){ return '<option value=""'+(!sel?' selected':'')+'>Racine</option>'+l.folders.map(f=>'<option value="'+f.id+'"'+(f.id===sel?' selected':'')+'>'+libEsc(f.name)+'</option>').join(''); }
@@ -3965,7 +3971,7 @@ function libSelBarHtml(){
 function libRefreshList(){
   const l=libGet(); const el=document.getElementById('lib-list'); if(el) el.innerHTML=libListHtml(l);
   const sb=document.getElementById('lib-selbar'); if(sb){ sb.innerHTML=libSelBarHtml(); sb.style.display=libSel.size?'flex':'none'; }
-  const all=document.getElementById('lib-all'); if(all){ const n=libVisible.filter(id=>libSel.has(id)).length; all.checked=n>0&&n===libVisible.length; all.indeterminate=n>0&&n<libVisible.length; all.disabled=!libVisible.length; }
+  const all=document.getElementById('lib-all'); if(all){ all.style.visibility=(libView==='__models'&&!libSearch.trim())?'hidden':'visible'; const n=libVisible.filter(id=>libSel.has(id)).length; all.checked=n>0&&n===libVisible.length; all.indeterminate=n>0&&n<libVisible.length; all.disabled=!libVisible.length; }
 }
 function libCloseMenu(){ document.getElementById('lib-menu')?.remove(); }
 function libRowMenu(ev,id){
@@ -3992,7 +3998,13 @@ function libOpenUI(){
 function libClose(){ libCloseMenu(); const o=document.getElementById('lib-overlay'); if(o) o.style.display='none'; }
 const LIB_ICO_FOLDER='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7a2 2 0 0 1 2-2h4l2 2h8a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg>';
 const LIB_ICO_HOME='<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>';
+function libModelsHtml(){
+  libVisible=[]; const mf=libModels();
+  if(!mf.length) return '<div class="lib-empty">Aucun modèle prédéfini disponible.</div>';
+  return mf.map((f,i)=>'<div class="lib-row" ondblclick="libNewFromModel('+i+')"><div class="lib-row-main"><div class="lib-name">'+libEsc(String(f.name||'').replace(/\.json$/i,''))+'</div><div class="lib-sub">Modèle prédéfini · crée un nouveau macro-planning, le modèle n\'est jamais modifié</div></div><div class="lib-row-act"><button type="button" class="lib-btn sm primary" onclick="libNewFromModel('+i+')">Utiliser ce modèle</button></div></div>').join('');
+}
 function libListHtml(l){
+  if(libView==='__models'&&!libSearch.trim()) return libModelsHtml();
   const cur=libCurEntry(l), q=libSearch.trim().toLowerCase();
   let items=l.items.slice().sort((a,c)=>(c.modified||0)-(a.modified||0));
   items=q?items.filter(e=>e.name.toLowerCase().includes(q)):items.filter(e=>(e.folder||null)===(libView||null));
@@ -4011,11 +4023,11 @@ function libListHtml(l){
 }
 function libDragStart(ev,id){ const ids=libSel.has(id)?[...libSel]:[id]; ev.dataTransfer.setData('text/plain',ids.join(',')); ev.dataTransfer.effectAllowed='move'; }
 function libSearchInput(v){ libSearch=v; libRefreshList(); libRenderTitle(libGet()); }
-function libRenderTitle(l){ const t=document.getElementById('lib-ptitle'); if(!t) return; const q=libSearch.trim(); t.textContent=q?'Résultats dans tous les dossiers':(libView?libFolderName(l,libView):'Racine'); }
+function libRenderTitle(l){ const t=document.getElementById('lib-ptitle'); if(!t) return; const q=libSearch.trim(); t.textContent=q?'Résultats dans tous les dossiers':(libView==='__models'?'Modèles prédéfinis':libView?libFolderName(l,libView):'Racine'); }
 function libRender(){
   const b=document.getElementById('lib-body'); if(!b) return;
   const l=libGet(), cur=libCurEntry(l), dirty=libIsDirty();
-  if(libView&&!l.folders.some(f=>f.id===libView)) libView=null;
+  if(libView&&libView!=='__models'&&!l.folders.some(f=>f.id===libView)) libView=null;
   [...libSel].forEach(id=>{ if(!l.items.some(i=>i.id===id)) libSel.delete(id); });
   const cnt=fid=>l.items.filter(i=>(i.folder||null)===(fid||null)).length;
   let side='<div class="lib-fold'+(!libView?' on':'')+'" onclick="libGo(null)" ondragover="event.preventDefault();this.classList.add(\'drop\')" ondragleave="this.classList.remove(\'drop\')" ondrop="libDrop(event,null)">'+LIB_ICO_HOME+'<span class="lib-fname">Racine</span><span class="lib-n">'+cnt(null)+'</span></div>';
@@ -4023,6 +4035,7 @@ function libRender(){
     side+='<div class="lib-fold'+(libView===f.id?' on':'')+'" onclick="libGo(\''+f.id+'\')" ondragover="event.preventDefault();this.classList.add(\'drop\')" ondragleave="this.classList.remove(\'drop\')" ondrop="libDrop(event,\''+f.id+'\')">'+LIB_ICO_FOLDER+'<span class="lib-fname">'+libEsc(f.name)+'</span><span class="lib-n">'+cnt(f.id)+'</span>'
       +'<span class="lib-fact"><button type="button" title="Renommer le dossier" onclick="event.stopPropagation();libRenameFolder(\''+f.id+'\')">✎</button><button type="button" title="Supprimer le dossier" onclick="event.stopPropagation();libDeleteFolder(\''+f.id+'\')">×</button></span></div>';
   });
+  side+='<div class="lib-fold'+(libView==='__models'?' on':'')+'" onclick="libGo(\'__models\')" style="margin-top:6px">'+LIB_ICO_FOLDER+'<span class="lib-fname">Modèles prédéfinis</span><span class="lib-n">'+libModels().length+'</span></div>';
   side+='<button type="button" class="lib-newf" onclick="libNewFolder()">+ Nouveau dossier</button>';
   const where=cur?libFolderName(l,cur.folder)||'Racine':null;
   const state='<div class="lib-state"><b>'+libEsc(libTitle())+'</b> '+(cur?(dirty?'<span class="lib-warn">· modifications non enregistrées</span>':'<span class="lib-ok">· enregistré dans « '+libEsc(where)+' »</span>'):(dirty?'<span class="lib-warn">· pas encore enregistré dans la bibliothèque</span>':'· planning vide'))+'</div>';
