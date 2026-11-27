@@ -242,14 +242,15 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .seg label, .dtabs button { flex:1 1 0; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; justify-content:center; min-height:28px; padding:0 6px; border:0; border-radius:7px; background:transparent; font-family:inherit; font-size:12px; font-weight:500; line-height:1.15; text-align:center; color:var(--muted); cursor:pointer; transition:background .15s, color .15s, box-shadow .15s; }
 .dtabs button { min-height:30px; font-weight:600; font-size:11px; padding:0 4px; flex:1 1 auto; text-overflow:clip; }
 .ly-hint { font-size:11px; color:var(--faint); margin:0 0 8px; }
-.ly-row { display:flex; align-items:center; gap:6px; padding:8px 10px; margin-bottom:6px; border:1px solid var(--line); border-radius:8px; background:#fff; }
-.ly-row.ly-base { border-color:#c0392b; background:#fdf3f2; }
+.ly-row { display:flex; align-items:center; gap:10px; padding:9px 10px; margin-bottom:6px; border:1px solid var(--line); border-radius:8px; background:#fff; cursor:grab; user-select:none; position:relative; }
+.ly-row:hover { border-color:#c0392b; }
+.ly-row.drag { opacity:.4; }
+.ly-row.over-t::before, .ly-row.over-b::after { content:''; position:absolute; left:0; right:0; height:3px; background:#c0392b; border-radius:2px; }
+.ly-row.over-t::before { top:-5px; } .ly-row.over-b::after { bottom:-5px; }
+.ly-grip { color:#9aa3ad; font-size:15px; letter-spacing:-3px; line-height:1; }
 .ly-txt { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
 .ly-txt b { font-size:12px; font-weight:600; color:var(--text); }
 .ly-txt span { font-size:11px; color:var(--faint); }
-.ly-btn { width:28px; height:28px; border:1px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; font-size:14px; line-height:1; color:var(--text); }
-.ly-btn:hover:not(:disabled) { background:#f3f4f6; border-color:#c0392b; color:#c0392b; }
-.ly-btn:disabled { opacity:.3; cursor:default; }
 .dtabs-wrap { position:sticky; top:calc(var(--head-h) * 2); z-index:6; background:#fff; margin:0 -16px; padding:4px 16px 8px; }
 .dtabs-wrap .dtabs { margin:0; }
 .dtabs-wrap.stuck { box-shadow:0 6px 8px -6px rgba(16,24,40,.18); }
@@ -646,7 +647,7 @@ input[type=checkbox].lib-chk::before{display:none}
         <button class="btn btn-reset" type="button" onclick="resetAfficherDefaults()"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Valeurs par défaut</button>
       </div>
       <div class="pane-hidden" id="layers-body" role="tabpanel" aria-labelledby="dtab-layers" style="margin-top:10px;">
-        <div class="ly-hint">Du premier plan (haut) à l'arrière-plan (bas). Un élément placé plus haut passe devant ceux situés plus bas.</div>
+        <div class="ly-hint">Glissez-déposez pour changer l'ordre : du premier plan (haut) à l'arrière-plan (bas). Un élément placé plus haut passe devant, et cache, ceux situés plus bas.</div>
         <div id="layers-list"></div>
         <button class="btn btn-reset" type="button" onclick="layerReset()">Valeurs par défaut</button>
       </div>
@@ -1802,41 +1803,44 @@ function computeLaneRows(lane){
 // ═══ RENDER TIMELINE ═════════════════════════════════════════
 let _tlAutoEnd=false;
 // ═══ SUPERPOSITION (ordre des calques, de l'arrière-plan vers le premier plan) ═══
-const LAYER_DEFAULT=['base','bar','hol','frz','jal','today'];
-const LAYER_LABELS={base:['Phases, tâches et jalons','Barres et losanges du Gantt'],bar:['Barre de temps','Graduations : mois, semaines, jours'],hol:['Jours fériés','Bandeau de la barre de temps et colonnes grisées'],frz:['Périodes de gel','Bandeau de la barre de temps et colonnes pleine hauteur'],jal:['Drapeaux de jalons','Drapeaux et traits au-dessus de la barre'],today:['Ligne de temps (aujourd\'hui)','Trait, barre, rond, date et flèche du jour']};
+const LAYER_DEFAULT=['pha','act','bar','frz','jal'];
+const LAYER_LABELS={bar:['Barre de temps','Fond, graduations et ligne du jour'],jal:['Jalons','Mâts, drapeaux et losanges'],pha:['Phases','Bandeaux de phase (visible en mode liste)'],act:['Activités','Barres, noms et dates'],frz:['Périodes de gel','Bandeaux, colonnes et jours fériés']};
 let layerOrder=[...LAYER_DEFAULT];
 function sanitizeLayerOrder(a){ if(!Array.isArray(a)||a.length!==LAYER_DEFAULT.length||!LAYER_DEFAULT.every(k=>a.includes(k))) return [...LAYER_DEFAULT]; return a.slice(); }
 function applyLayerOrder(svg,topAnchor){
   const ba=svg.querySelector('#tl-anchor'); if(!ba||!topAnchor) return;
-  const order=sanitizeLayerOrder(layerOrder), bi=order.indexOf('base');
+  const order=sanitizeLayerOrder(layerOrder);
   const tagged=[...svg.querySelectorAll(':scope > [data-ly]')];
-  const by=id=>tagged.filter(n=>n.getAttribute('data-ly')===id);
   let ref=ba;
   svg.querySelectorAll(':scope > [data-band]').forEach(b=>{ ref.after(b); ref=b; });
-  order.slice(0,bi).forEach(id=>by(id).forEach(n=>{ ref.after(n); ref=n; }));
-  order.slice(bi+1).forEach(id=>by(id).forEach(n=>topAnchor.before(n)));
-  // graduations de la barre : toujours juste au-dessus de la barre et des traits de jalons (texte lisible)
-  const tx=svg.querySelector(':scope > [data-ly="bartext"]');
-  const c=[...svg.querySelectorAll(':scope > [data-ly="bar"], :scope > [data-ly="jal"]')];
-  if(tx&&c.length) c[c.length-1].after(tx);
+  order.forEach(id=>tagged.filter(n=>n.getAttribute('data-ly')===id).forEach(n=>topAnchor.before(n)));
 }
-function layerMove(id,dir){ // dir=+1 : vers le premier plan, -1 : vers l'arrière-plan
-  const o=sanitizeLayerOrder(layerOrder), i=o.indexOf(id), j=i+dir; if(i<0||j<0||j>=o.length) return;
-  [o[i],o[j]]=[o[j],o[i]]; layerOrder=o; renderLayersPane(); saveState(); renderTimeline();
+function layerDrop(fromId,toId,after){ // déplace une couche avant ou après une autre (liste affichée du premier plan vers l'arrière-plan)
+  if(fromId===toId) return;
+  let shown=sanitizeLayerOrder(layerOrder).slice().reverse(); // premier plan en haut
+  shown=shown.filter(x=>x!==fromId); let i=shown.indexOf(toId); if(i<0) return;
+  shown.splice(after?i+1:i,0,fromId);
+  layerOrder=shown.reverse(); renderLayersPane(); saveState(); renderTimeline();
 }
 function layerReset(){ layerOrder=[...LAYER_DEFAULT]; renderLayersPane(); saveState(); renderTimeline(); }
+let _lyDrag=null;
 function renderLayersPane(){
   const el=document.getElementById('layers-list'); if(!el) return;
   const o=sanitizeLayerOrder(layerOrder).slice().reverse(); // premier plan en haut
-  el.innerHTML=o.map((id,k)=>'<div class="ly-row'+(id==='base'?' ly-base':'')+'"><div class="ly-txt"><b>'+LAYER_LABELS[id][0]+'</b><span>'+LAYER_LABELS[id][1]+'</span></div>'
-    +'<button type="button" class="ly-btn" title="Mettre devant" aria-label="Mettre devant" onclick="layerMove(\''+id+'\',1)"'+(k===0?' disabled':'')+'>↑</button>'
-    +'<button type="button" class="ly-btn" title="Mettre derrière" aria-label="Mettre derrière" onclick="layerMove(\''+id+'\',-1)"'+(k===o.length-1?' disabled':'')+'>↓</button></div>').join('');
+  el.innerHTML=o.map(id=>'<div class="ly-row" draggable="true" data-id="'+id+'"><span class="ly-grip" aria-hidden="true">⋮⋮</span><div class="ly-txt"><b>'+LAYER_LABELS[id][0]+'</b><span>'+LAYER_LABELS[id][1]+'</span></div></div>').join('');
+  el.querySelectorAll('.ly-row').forEach(r=>{
+    r.addEventListener('dragstart',e=>{ _lyDrag=r.dataset.id; r.classList.add('drag'); e.dataTransfer.effectAllowed='move'; try{ e.dataTransfer.setData('text/plain',_lyDrag); }catch(_){} });
+    r.addEventListener('dragend',()=>{ _lyDrag=null; el.querySelectorAll('.ly-row').forEach(x=>x.classList.remove('drag','over-t','over-b')); });
+    r.addEventListener('dragover',e=>{ if(!_lyDrag) return; e.preventDefault(); const b=r.getBoundingClientRect(), after=(e.clientY-b.top)>b.height/2; el.querySelectorAll('.ly-row').forEach(x=>x.classList.remove('over-t','over-b')); r.classList.add(after?'over-b':'over-t'); });
+    r.addEventListener('drop',e=>{ if(!_lyDrag) return; e.preventDefault(); const b=r.getBoundingClientRect(), after=(e.clientY-b.top)>b.height/2; const from=_lyDrag; _lyDrag=null; layerDrop(from,r.dataset.id,after); });
+  });
 }
 function renderTimeline(){
   if(typeof syncDropdowns==='function') syncDropdowns();
   window._colorPickerActive = false;
 
   const svg=document.getElementById('tl-svg'); svg.innerHTML='';
+  let _ly=null; const _apc=Element.prototype.appendChild; svg.appendChild=function(n){ if(_ly&&n&&n.nodeType===1&&!n.hasAttribute('data-ly')) n.setAttribute('data-ly',_ly); return _apc.call(this,n); }; // couche courante (voir l'onglet Couches)
   const _delGroups=[]; const _quickAdd=[]; const _laneBands=[]; const _taskBoxes=[];
   const NS='http://www.w3.org/2000/svg';
   const showTimeBar=true; // la barre de temps est toujours affichée
@@ -2062,7 +2066,7 @@ function renderTimeline(){
   }
   svg.appendChild(timebarBgGroup);
   const timebarGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
-  timebarGroup.setAttribute('id','timebar-group'); timebarGroup.setAttribute('data-ly','bartext');
+  timebarGroup.setAttribute('id','timebar-group'); timebarGroup.setAttribute('data-ly','bar');
   svg.appendChild(timebarGroup);
   svg.appendChild(el('g',{id:'tl-anchor'})); // repère de superposition : fond de page, puis fonds de phases, puis calques placés derrière
 
@@ -2173,7 +2177,7 @@ function renderTimeline(){
     const laneColorRect=el('rect',{x:0,y:rowY,width:listMode?VW:LL,height:listMode?PHH:laneH,fill:lc});
     const _cyTop=listMode?rowY+PHH/2:rowY+8, _cyBot=listMode?rowY+PHH/2:rowY+laneH-8;
         const phaseHeaderG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
-    svg.appendChild(phaseHeaderG);
+    _ly='pha'; svg.appendChild(phaseHeaderG); _ly=null;
     phaseHeaderG.appendChild(laneColorRect);
     if(is3D){ const w3=listMode?VW:LL, h3=listMode?PHH:laneH, nP=(r)=>{ r.style.pointerEvents='none'; phaseHeaderG.appendChild(r); };
       nP(el('rect',{x:0,y:rowY,width:w3,height:2.5,fill:'#fff','fill-opacity':0.55}));
@@ -2383,6 +2387,7 @@ function renderTimeline(){
       const rowHasOnlyJalon = row.tasks.length && row.tasks.every(t=>t.type==='J');
       if(!showJalonLines && rowHasOnlyJalon) return;
       row.tasks.forEach(task=>{
+        _ly=task.type==='J'?'jal':'act';
         const tc=task.color||'#3498db';
         if(task.type==='J'){
           const mx=dX(task.end||task.start), my=ty+getRowH(row)/2, s=jalonS;
@@ -2613,12 +2618,12 @@ function renderTimeline(){
 
         }
       });
-      svg.appendChild(el('line',{x1:LL,y1:ty+getRowH(row),x2:VW,y2:ty+getRowH(row),stroke:'transparent','stroke-width':1}));
+      _ly=null; svg.appendChild(el('line',{x1:LL,y1:ty+getRowH(row),x2:VW,y2:ty+getRowH(row),stroke:'transparent','stroke-width':1}));
     });
     svg.appendChild(el('line',{x1:0,y1:rowY+laneH,x2:VW,y2:rowY+laneH,stroke:'#ccc','stroke-width':1.5}));
     rowY+=laneH+(li<lanes.length-1?phaseGap:0);
   });
-  _dashExt.forEach(l=>svg.appendChild(l));
+  _dashExt.forEach(l=>{ l.setAttribute('data-ly','jal'); svg.appendChild(l); });
   svg.appendChild(el('line',{x1:LL,y1:MA+TH,x2:LL,y2:VH,stroke:'#ddd','stroke-width':1}));
 
   // Ligne de temps aujourd'hui
@@ -2632,11 +2637,11 @@ function renderTimeline(){
         const showCircle = document.getElementById('chk-todayline-circle')?.checked !== false;
         const showArrow = document.getElementById('chk-todayline-arrow')?.checked !== false;
 
-        if (showHLine) svg.appendChild(el('rect',{x:LL,y:MA+TH+2,width:tx-LL,height:4,fill:todaylineColor,opacity:'1','data-ly':'today'}));
-        if (showVLine) svg.appendChild(el('line',{x1:tx,y1:MA+TH+2,x2:tx,y2:VH,stroke:todaylineColor,'stroke-width':1.5,'stroke-dasharray':'4,3',opacity:'0.8','data-ly':'today'}));
+        if (showHLine) svg.appendChild(el('rect',{x:LL,y:MA+TH+2,width:tx-LL,height:4,fill:todaylineColor,opacity:'1','data-ly':'bar'}));
+        if (showVLine) svg.appendChild(el('line',{x1:tx,y1:MA+TH+2,x2:tx,y2:VH,stroke:todaylineColor,'stroke-width':1.5,'stroke-dasharray':'4,3',opacity:'0.8','data-ly':'bar'}));
 
         const lineH=4, dy=MA+TH+4, ds=8;
-        if (showCircle) todayMarker=el('circle',{cx:tx,cy:dy,r:6,fill:todaylineColor,stroke:'white','stroke-width':2,'data-ly':'today'});
+        if (showCircle) todayMarker=el('circle',{cx:tx,cy:dy,r:6,fill:todaylineColor,stroke:'white','stroke-width':2,'data-ly':'bar'});
         if (document.getElementById('chk-todayline-date')?.checked === true) {
           todayDate=el('text',{x:tx,y:dy-(showCircle?10:4),'text-anchor':'middle',fill:'#ffffff',stroke:'#1b2430','stroke-width':2.6,'paint-order':'stroke','stroke-linejoin':'round','font-size':todayFontSize,'font-weight':'bold','pointer-events':'none'},fmtDMY(today));
         }
@@ -2683,8 +2688,8 @@ function renderTimeline(){
       if(lbl && lbl.length*fzFont*0.58 < (x2-x1)-6) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:showTimeBar?'#fff':'#263238','pointer-events':'none'},lbl));
       if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // sous la barre de temps
     });
-    const holBody=document.createElementNS(NS,'g'); holBody.setAttribute('id','holiday-body-group'); holBody.setAttribute('pointer-events','none'); holBody.setAttribute('data-ly','hol');
-    const holG=document.createElementNS(NS,'g'); holG.setAttribute('id','holiday-group'); holG.setAttribute('data-ly','hol'); holG.setAttribute('pointer-events','none'); // jours fériés : sous les gels
+    const holBody=document.createElementNS(NS,'g'); holBody.setAttribute('id','holiday-body-group'); holBody.setAttribute('pointer-events','none'); holBody.setAttribute('data-ly','frz');
+    const holG=document.createElementNS(NS,'g'); holG.setAttribute('id','holiday-group'); holG.setAttribute('data-ly','frz'); holG.setAttribute('pointer-events','none'); // jours fériés : sous les gels
     _holList.forEach(h=>{
       const x1=Math.max(LL,dX(h.d)), x2=Math.min(VW,dX(h.d)+PPD);
       if(x2<=x1) return;
@@ -2725,7 +2730,7 @@ function renderTimeline(){
   if(todayDate) svg.appendChild(todayDate);
   if(todayMarker) svg.appendChild(todayMarker);
   if(todayArrow) svg.appendChild(todayArrow);
-  [todayLabel,todayDate,todayArrow].forEach(n=>{ if(n) n.setAttribute('data-ly','today'); });
+  [todayLabel,todayDate,todayArrow].forEach(n=>{ if(n) n.setAttribute('data-ly','bar'); });
   applyLayerOrder(svg,_topAnchor);
 }
 
