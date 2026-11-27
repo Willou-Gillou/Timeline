@@ -771,11 +771,16 @@ input[type=checkbox].lib-chk::before{display:none}
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
             <div style="font-weight:700;margin:8px 0 6px;">V5.1:</div><ul style="margin:0 0 10px 18px;padding:0;">
-        <li>Nouveau : bibliothèque de plannings dans le cache du navigateur (bouton Bibliothèque de la barre du haut), avec dossiers à un niveau (glisser-déposer) : enregistrer, ouvrir, renommer, dupliquer, supprimer, corbeille des 10 derniers supprimés, enregistrement automatique en option.</li>
-        <li>Nouveau : Ctrl/Cmd + S enregistre le planning dans la bibliothèque ; un point rouge sur le bouton signale les modifications non enregistrées.</li>
-        <li>Nouveau : export d'un planning ou de toute la bibliothèque ; import de plusieurs fichiers avec détection des conflits (identique, plus récent, modifié des deux côtés, même nom) et choix Remplacer / Garder les deux / Ignorer.</li>
-        <li>Les fichiers JSON enregistrent maintenant le nom du planning ; un fichier sans nom s'ouvre sous « Macro-planning projet ».</li>
-            </ul>
+        <li>Nouveau : bibliothèque de plannings dans le cache du navigateur (bouton Ouvrir la bibliothèque) : dossiers, versions, recherche, corbeille, modèles prédéfinis, export et import avec détection des conflits.</li>
+        <li>Nouveau : boutons Nouveau (planning vide ou modèle), Ouvrir la bibliothèque et Enregistrer dans la barre du haut ; Ctrl/Cmd + S enregistre, un point rouge signale les modifications non enregistrées.</li>
+        <li>Nouveau : « Enregistrer sous… » ouvre une fenêtre de type bibliothèque pour choisir ou créer le dossier, nommer le planning ou en écraser un existant (avec confirmation).</li>
+        <li>Nouveau : glisser-déposer d'un fichier JSON dans la fenêtre : planning ou bibliothèque reconnus automatiquement. « Ouvrir un fichier JSON » n'ouvre qu'un seul planning ; « Importer une bibliothèque » importe tout.</li>
+        <li>Nouveau : onglet Couches (Affichage) pour choisir par glisser-déposer quels éléments passent devant les autres.</li>
+        <li>Nouveau : section Préférences du panneau latéral : enregistrement automatique, ajout à la bibliothèque des JSON ouverts, confirmation avant suppression.</li>
+        <li>Nouveau : menu Exporter avec icônes (PNG, SVG, PDF, Copier vers presse-papier) ; Tout réinitialiser et Se déconnecter rejoignent la barre du haut.</li>
+        <li>Modifié : périodes de gel d'une semaine par défaut, placées sur des créneaux différents ; impossibles dans un planning vide ; titre visible au survol de la bande.</li>
+        <li>Modifié : vue Gantt par défaut ; titre Affichage et Échelle de temps déroulent le panneau ; les JSON enregistrent le nom du planning.</li>
+      </ul>
             <div style="font-weight:700;margin:8px 0 6px;">V5.0:</div><ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : nom de l'activité à droite de la barre, date de l'activité à gauche (Affichage &gt; Éléments).</li>
         <li>Nouveau : raccourcis sur le Gantt : Ctrl/Cmd + C copie l'image du planning (avec message temporisé), Ctrl/Cmd + Z revient en arrière, Maj + Ctrl/Cmd + Z revient en avant.</li>
