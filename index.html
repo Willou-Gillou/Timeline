@@ -5004,7 +5004,13 @@ function fzPopDate(id,k,v){
   const a=document.getElementById('fz-start'), b=document.getElementById('fz-end'), d=document.getElementById('fz-dur');
   if(a) a.value=f.start; if(b) b.value=f.end; if(d) d.textContent='Durée : '+dur(f.start,f.end);
 }
+function freezeBlockedIfEmpty(){
+  if(lanes.length>0) return false;
+  libDialog('Période de gel',"<p style=\"margin:0\">Une période de gel ne peut pas être ajoutée dans un planning vide.</p>",[{label:'OK',value:'ok',primary:true}]);
+  return true;
+}
 function addFreezeFromGantt(){
+  if(freezeBlockedIfEmpty()) return;
   { const c=document.getElementById('chk-freezes'); if(c&&!c.checked){ c.checked=true; toggleFreezesOptions(); } }
   addFreeze();
   showToast('Période de gel ajoutée : cliquez dessus dans la barre de temps pour la modifier.');
@@ -5235,6 +5241,7 @@ function sanitizeFreezes(arr){
 }
 function nextFreezeId(){ return freezes.reduce((m,f)=>Math.max(m,+f.id||0),0)+1; }
 function addFreeze(preset){
+  if(freezeBlockedIfEmpty()) return;
   let base=null;
   lanes.forEach(l=>(l.tasks||[]).forEach(t=>{ if(validISO(t.start)){ const d=parseD(t.start); if(!base||d<base) base=d; } }));
   const st=base||new Date(); const en=addDays(st,13);
