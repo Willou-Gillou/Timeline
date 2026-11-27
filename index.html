@@ -5246,7 +5246,7 @@ function addFreeze(preset){
   lanes.forEach(l=>(l.tasks||[]).forEach(t=>{ if(validISO(t.start)){ const d=parseD(t.start); if(!base||d<base) base=d; } }));
   // un nouveau gel démarre le lendemain de la fin du dernier gel existant (pas de superposition)
   let last=null; freezes.forEach(f=>{ if(validISO(f.end)){ const d=parseD(f.end); if(!last||d>last) last=d; } });
-  const st=last?addDays(last,1):(base||new Date()); const en=addDays(st,13);
+  const st=last?addDays(last,1):(base||new Date()); const en=addDays(st,6);
   freezes.push(Object.assign({ id:nextFreezeId(), title:'Gel', start:fmt(st), end:fmt(en), color:FREEZE_DEFAULT_COLOR, opacity:FREEZE_DEFAULT_OPACITY, full:false }, preset||{}));
   renderFreezePanel(); afterFreezeChange();
 }
