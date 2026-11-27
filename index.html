@@ -293,7 +293,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .lib-head h2{margin:0;font-size:16px;color:#2c3e50}
 .lib-x{border:none;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:#777;padding:0 4px}
 #lib-body{display:flex;flex-direction:column;flex:1;min-height:0}
-.lib-bar{display:flex;justify-content:space-between;gap:8px;padding:12px 20px 6px;flex-shrink:0;flex-wrap:wrap}
+.lib-bar{display:flex;justify-content:flex-start;gap:8px;padding:12px 20px 6px;flex-shrink:0;flex-wrap:wrap}
 .lib-bar-l,.lib-bar-r{display:flex;gap:8px}
 .lib-state{padding:0 20px 10px;font-size:12px;color:#555;flex-shrink:0;border-bottom:1px solid #eceef1}
 .lib-ok{color:#1e7a37}
@@ -3951,8 +3951,8 @@ function libRender(){
     foot+='<div style="text-align:right;margin-top:6px"><button type="button" class="lib-btn sm danger" onclick="libEmptyTrash()">Vider la corbeille</button></div></details>';
   }
   const openDet=[...b.querySelectorAll('details.lib-foot')].map(d=>d.open);
-  b.innerHTML='<div class="lib-bar"><div class="lib-bar-l"><button type="button" class="lib-btn primary" onclick="libSave()">'+(cur?'Enregistrer':'Enregistrer le planning')+'</button><button type="button" class="lib-btn" onclick="libSaveAs()">Enregistrer sous…</button></div>'
-    +'<div class="lib-bar-r"><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Importer…</button><button type="button" class="lib-btn" onclick="promptSaveJSON()" title="Télécharger le planning actuel en fichier JSON">Exporter le planning actuel…</button><button type="button" class="lib-btn" onclick="libExportAll()">Tout exporter</button></div>'
+  b.innerHTML='<div class="lib-bar">'
+    +'<div class="lib-bar-r"><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Importer…</button><button type="button" class="lib-btn" onclick="libExportAll()">Tout exporter</button></div>'
     +'<input type="file" id="lib-import-input" accept=".json,application/json" multiple hidden onchange="libImportFromInput(event)"></div>'+state
     +'<div class="lib-main"><div class="lib-side">'+side+'</div><div class="lib-pane"><div class="lib-pane-h"><input type="checkbox" id="lib-all" class="lib-chk" onchange="libSelAll(this.checked)" title="Tout sélectionner" aria-label="Tout sélectionner"><div id="lib-ptitle" class="lib-ptitle"></div><input type="search" class="lib-search" placeholder="Rechercher un planning…" value="'+libEsc(libSearch)+'" oninput="libSearchInput(this.value)"></div><div id="lib-selbar" class="lib-selbar" style="display:none"></div><div id="lib-list" class="lib-list">'+libListHtml(l)+'</div></div></div>'+foot;
   libRenderTitle(l); libRefreshList();
