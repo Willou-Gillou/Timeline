@@ -232,7 +232,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .sidebar input[type=checkbox]:focus-visible { outline:none; box-shadow:0 0 0 2px #fff, 0 0 0 4px rgba(192,57,43,.35); }
 /* Lignes d'options */
 #afficher-body { display:flex; flex-direction:column; gap:0; }
-#afficher-body :not(.seg) > label, #afficher-body > label { display:flex; flex-direction:row-reverse; justify-content:space-between; align-items:center; gap:12px; min-height:34px; padding:0 2px 0 0; font-size:12px; font-weight:500; color:var(--text); cursor:pointer; }
+#lib-sb-opts > label, #afficher-body :not(.seg) > label, #afficher-body > label { display:flex; flex-direction:row-reverse; justify-content:space-between; align-items:center; gap:12px; min-height:34px; padding:0 2px 0 0; font-size:12px; font-weight:500; color:var(--text); cursor:pointer; }
 .sub-options { display:flex; flex-direction:column; gap:0; margin:0 0 8px 6px; padding:2px 0 2px 14px; border-left:1px solid var(--edge); background:none; }
 .sub-options label, #afficher-body .sub-options :not(.seg) > label { min-height:32px; font-size:12px; font-weight:400; color:var(--muted); }
 .sub-options .sub-options { margin:0 0 4px 0; padding:0; border-left:0; }
@@ -567,7 +567,7 @@ input[type=checkbox].lib-chk::before{display:none}
     </div>
     
     <div class="sec">
-      <div class="sec-head c-display"><h3>Affichage</h3></div>
+      <div class="sec-head c-display" onclick="toggleSidebarScroll()" title="Cliquer : aller à « Affichage » / revenir en haut" style="cursor:pointer;"><h3>Affichage</h3></div>
       <div class="sec-body" id="display-body">
       <div class="dtabs-wrap"><div class="dtabs" role="tablist" aria-label="Affichage">
         <button type="button" role="tab" id="dtab-elements" aria-selected="true" aria-controls="afficher-body" onclick="showDisplayTab('elements')">Éléments</button>
@@ -696,7 +696,7 @@ input[type=checkbox].lib-chk::before{display:none}
     <div class="sec">
       <div class="sec-head c-lib"><h3>Enregistrement</h3></div>
       <div class="sec-body" id="lib-sb-body">
-        <div class="radio-group" id="lib-sb-opts">
+        <div class="radio-group" id="lib-sb-opts" style="gap:0">
           <label><input type="checkbox" id="opt-lib-auto" checked onchange="libSetOpt('auto',this.checked)"/> Enregistrer automatiquement</label>
           <label><input type="checkbox" id="opt-lib-add" checked onchange="libSetOpt('addOnOpen',this.checked)"/> Ajouter à la bibliothèque les fichiers JSON ouverts</label>
         </div>
