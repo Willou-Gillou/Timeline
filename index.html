@@ -1802,21 +1802,23 @@ function computeLaneRows(lane){
 // ═══ RENDER TIMELINE ═════════════════════════════════════════
 let _tlAutoEnd=false;
 // ═══ SUPERPOSITION (ordre des calques, de l'arrière-plan vers le premier plan) ═══
-const LAYER_DEFAULT=['base','hol','frz','today'];
-const LAYER_LABELS={base:['Phases, tâches et jalons','Barres, jalons et leurs textes'],hol:['Jours fériés','Bandeau de la barre de temps et colonnes grisées'],frz:['Périodes de gel','Bandeau de la barre de temps et colonnes pleine hauteur'],today:['Ligne « aujourd\'hui »','Trait, barre et rond du jour']};
+const LAYER_DEFAULT=['base','bar','hol','frz','jal','today'];
+const LAYER_LABELS={base:['Phases, tâches et jalons','Barres et losanges du Gantt'],bar:['Barre de temps','Graduations : mois, semaines, jours'],hol:['Jours fériés','Bandeau de la barre de temps et colonnes grisées'],frz:['Périodes de gel','Bandeau de la barre de temps et colonnes pleine hauteur'],jal:['Drapeaux de jalons','Drapeaux et traits au-dessus de la barre'],today:['Ligne de temps (aujourd\'hui)','Trait, barre, rond, date et flèche du jour']};
 let layerOrder=[...LAYER_DEFAULT];
 function sanitizeLayerOrder(a){ if(!Array.isArray(a)||a.length!==LAYER_DEFAULT.length||!LAYER_DEFAULT.every(k=>a.includes(k))) return [...LAYER_DEFAULT]; return a.slice(); }
 function applyLayerOrder(svg,topAnchor){
   const ba=svg.querySelector('#tl-anchor'); if(!ba||!topAnchor) return;
   const order=sanitizeLayerOrder(layerOrder), bi=order.indexOf('base');
-  const nodes=id=>[...svg.querySelectorAll(':scope > [data-ly="'+id+'"]')];
+  const tagged=[...svg.querySelectorAll(':scope > [data-ly]')];
+  const by=id=>tagged.filter(n=>n.getAttribute('data-ly')===id);
   let ref=ba;
   svg.querySelectorAll(':scope > [data-band]').forEach(b=>{ ref.after(b); ref=b; });
-  order.slice(0,bi).forEach(id=>nodes(id).forEach(n=>{ ref.after(n); ref=n; }));
-  order.slice(bi+1).forEach(id=>nodes(id).forEach(n=>topAnchor.before(n)));
-  // bandeaux de la barre de temps (gels, jours fériés) : toujours devant la barre, mais dans l'ordre des couches
-  let hr=topAnchor;
-  order.forEach(id=>{ const n=svg.querySelector(':scope > [data-lyh="'+id+'"]'); if(n){ hr.after(n); hr=n; } });
+  order.slice(0,bi).forEach(id=>by(id).forEach(n=>{ ref.after(n); ref=n; }));
+  order.slice(bi+1).forEach(id=>by(id).forEach(n=>topAnchor.before(n)));
+  // graduations de la barre : toujours juste au-dessus de la barre et des traits de jalons (texte lisible)
+  const tx=svg.querySelector(':scope > [data-ly="bartext"]');
+  const c=[...svg.querySelectorAll(':scope > [data-ly="bar"], :scope > [data-ly="jal"]')];
+  if(tx&&c.length) c[c.length-1].after(tx);
 }
 function layerMove(id,dir){ // dir=+1 : vers le premier plan, -1 : vers l'arrière-plan
   const o=sanitizeLayerOrder(layerOrder), i=o.indexOf(id), j=i+dir; if(i<0||j<0||j>=o.length) return;
@@ -2053,14 +2055,14 @@ function renderTimeline(){
   if(MA>0) svg.appendChild(el('rect',{x:0,y:0,width:VW,height:MA,fill:'#f0f0f0'}));
 
 
-  const timebarBgGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
+  const timebarBgGroup=document.createElementNS('http://www.w3.org/2000/svg','g'); timebarBgGroup.setAttribute('data-ly','bar');
   if(showTimeBar) timebarBgGroup.appendChild(el('rect',{x:0,y:MA,width:VW,height:TH,fill:timebarColor}));
   if(showTimeBar&&is3D){ // relief : ombre portée sous la barre, reflet, biseau clair en haut et sombre en bas (le texte reste net, au-dessus)
     [{y:MA+TH,h:5,f:'rgba(0,0,0,0.16)'},{y:MA,h:TH,f:'url(#g3d)'},{y:MA,h:2,f:'rgba(255,255,255,0.4)'},{y:MA+TH-2,h:2,f:'rgba(0,0,0,0.35)'}].forEach(o=>{ const r=el('rect',{x:0,y:o.y,width:VW,height:o.h,fill:o.f}); r.style.pointerEvents='none'; timebarBgGroup.appendChild(r); });
   }
   svg.appendChild(timebarBgGroup);
   const timebarGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
-  timebarGroup.setAttribute('id','timebar-group');
+  timebarGroup.setAttribute('id','timebar-group'); timebarGroup.setAttribute('data-ly','bartext');
   svg.appendChild(timebarGroup);
   svg.appendChild(el('g',{id:'tl-anchor'})); // repère de superposition : fond de page, puis fonds de phases, puis calques placés derrière
 
@@ -2098,7 +2100,7 @@ function renderTimeline(){
 
 
   // Labels jalons — 2ème passe : drapeaux (différés)
-  const flagGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
+  const flagGroup=document.createElementNS('http://www.w3.org/2000/svg','g'); flagGroup.setAttribute('data-ly','jal');
   allMilestones.forEach(m=>{
     const labelY=m.labelTopY;
     const lw=m.lw, lh=m.lh;
@@ -2656,8 +2658,8 @@ function renderTimeline(){
   svg.appendChild(timebarBgGroup);
   if (showJalonsMaster && showJalonsFlags) {
     allMilestones.forEach(m=>{
-      svg.appendChild(el('line',{x1:m.x,y1:m.labelTopY,x2:m.x,y2:MA,stroke:m.color,'stroke-width':lineW,opacity:'0.9'}));
-      svg.appendChild(el('line',{x1:m.x,y1:MA,x2:m.x,y2:MA+TH,stroke:m.color,'stroke-width':lineW,opacity:'0.9'}));
+      svg.appendChild(el('line',{x1:m.x,y1:m.labelTopY,x2:m.x,y2:MA,stroke:m.color,'stroke-width':lineW,opacity:'0.9','data-ly':'jal'}));
+      svg.appendChild(el('line',{x1:m.x,y1:MA,x2:m.x,y2:MA+TH,stroke:m.color,'stroke-width':lineW,opacity:'0.9','data-ly':'jal'}));
     });
     svg.appendChild(flagGroup);
   }
@@ -2665,7 +2667,7 @@ function renderTimeline(){
   const _topAnchor=el('g',{id:'tl-anchor-top'}); svg.appendChild(_topAnchor); // calques placés devant les phases/tâches
   if(FZ>0){
     const fzY=MA+TH0; // bandeau de gel : bas de la barre de temps
-    const fzG=document.createElementNS(NS,'g'); fzG.setAttribute('id','freeze-row-group'); fzG.setAttribute('data-lyh','frz');
+    const fzG=document.createElementNS(NS,'g'); fzG.setAttribute('id','freeze-row-group'); fzG.setAttribute('data-ly','frz');
     const fzOver=document.createElementNS(NS,'g'); fzOver.setAttribute('id','freeze-overlay-group'); fzOver.setAttribute('pointer-events','none'); fzOver.setAttribute('data-ly','frz');
     _fzList.forEach(f=>{
       const x1=Math.max(LL,dX(f.start)), x2=Math.min(VW,dX(f.end)+PPD);
@@ -2682,7 +2684,7 @@ function renderTimeline(){
       if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // sous la barre de temps
     });
     const holBody=document.createElementNS(NS,'g'); holBody.setAttribute('id','holiday-body-group'); holBody.setAttribute('pointer-events','none'); holBody.setAttribute('data-ly','hol');
-    const holG=document.createElementNS(NS,'g'); holG.setAttribute('id','holiday-group'); holG.setAttribute('data-lyh','hol'); holG.setAttribute('pointer-events','none'); // jours fériés : sous les gels
+    const holG=document.createElementNS(NS,'g'); holG.setAttribute('id','holiday-group'); holG.setAttribute('data-ly','hol'); holG.setAttribute('pointer-events','none'); // jours fériés : sous les gels
     _holList.forEach(h=>{
       const x1=Math.max(LL,dX(h.d)), x2=Math.min(VW,dX(h.d)+PPD);
       if(x2<=x1) return;
@@ -2723,6 +2725,7 @@ function renderTimeline(){
   if(todayDate) svg.appendChild(todayDate);
   if(todayMarker) svg.appendChild(todayMarker);
   if(todayArrow) svg.appendChild(todayArrow);
+  [todayLabel,todayDate,todayArrow].forEach(n=>{ if(n) n.setAttribute('data-ly','today'); });
   applyLayerOrder(svg,_topAnchor);
 }
 
