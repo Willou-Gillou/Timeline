@@ -212,7 +212,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .sec { display:contents; }
 .sec-head, .sec-body { flex:none; }
 .sec-head.c-scale { --band:linear-gradient(135deg,#d6503f 0%,#b5352a 100%); --band-shadow:rgba(150,40,28,.45); z-index:9; }
-.sec-head.c-lib { --band:linear-gradient(135deg,#7a2019 0%,#5a1712 100%); --band-shadow:rgba(70,15,10,.5); top:calc(var(--head-h) * 2); bottom:0; z-index:7; cursor:pointer; }
+.sec-head.c-lib { --band:linear-gradient(135deg,#7a2019 0%,#5a1712 100%); --band-shadow:rgba(70,15,10,.5); top:calc(var(--head-h) * 2); bottom:0; z-index:7; }
 .sec-head.c-display { --band:linear-gradient(135deg,#9c2e24 0%,#741f19 100%); --band-shadow:rgba(90,20,15,.5); top:var(--head-h); z-index:8; }
 .sec-head h3 { margin:0; color:#fff; font-size:14px; font-weight:700; letter-spacing:.01em; text-transform:none; }
 .sec-body { padding:14px 0 16px; }
@@ -694,7 +694,7 @@ input[type=checkbox].lib-chk::before{display:none}
       </div>
     </div>
     <div class="sec">
-      <div class="sec-head c-lib" onclick="toggleSidebarSave()" title="Cliquer : afficher les options d'enregistrement / revenir à « Affichage »"><h3>Enregistrement</h3></div>
+      <div class="sec-head c-lib"><h3>Enregistrement</h3></div>
       <div class="sec-body" id="lib-sb-body">
         <div class="radio-group" id="lib-sb-opts" style="gap:0">
           <label><input type="checkbox" id="opt-lib-auto" checked onchange="libSetOpt('auto',this.checked)"/> Enregistrer automatiquement</label>
