@@ -286,6 +286,10 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 @media (prefers-reduced-motion:reduce) { .seg label, .dtabs button, .sbtn, .sidebar .btn, .step button { transition:none; } }
 /* Bibliothèque de plannings (v5.1) */
 #btn-save{position:relative}
+.lib-savemenu{position:fixed;z-index:99990;background:#fff;border:1px solid #dfe3e8;border-radius:8px;box-shadow:0 6px 24px rgba(0,0,0,.18);min-width:230px;padding:4px;font-size:13px}
+.lib-savemenu .lsm-info{font-style:italic;color:#6b7480;padding:8px 10px;border-bottom:1px solid #eceef1;margin-bottom:4px}
+.lib-savemenu button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:6px;padding:8px 10px;font:inherit;font-style:normal;color:#1f2933;cursor:pointer}
+.lib-savemenu button:hover{background:#f1f3f6}
 .lib-dirty{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#c0392b;border:1.5px solid #fff;display:none;pointer-events:none}
 .lib-ov{position:fixed;inset:0;z-index:100000;background:rgba(20,24,30,.5);display:none;align-items:center;justify-content:center}
 .lib-box{background:#fff;border-radius:12px;width:min(920px,95vw);height:min(660px,88vh);display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.28);padding:0;overflow:hidden}
@@ -440,8 +444,7 @@ input[type=checkbox].lib-chk::before{display:none}
     <button class="btn btn-icon" id="btn-undo" onclick="undoPlanning()" title="Retour : revenir incrémentalement aux dernières modifications" aria-label="Retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
     <button class="btn btn-icon" id="btn-redo" onclick="redoPlanning()" title="Annuler retour : rétablir le ou les retours effectués" aria-label="Annuler retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
     <button class="btn btn-icon" id="btn-new" type="button" onclick="libNew()" title="Créer un nouveau macro-planning (vide)" aria-label="Créer un nouveau macro-planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg></button>
-    <button class="btn btn-icon" id="btn-save" type="button" onclick="libSave()" title="Enregistrer le planning dans la bibliothèque (Ctrl+S)" aria-label="Enregistrer le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span class="lib-dirty" id="lib-dirty"></span></button>
-    <button class="btn btn-icon" id="btn-saveas" type="button" onclick="libSaveAs()" title="Enregistrer sous… (nouvelle version, sans écraser l'autre)" aria-label="Enregistrer sous"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg></button>
+    <button class="btn btn-icon" id="btn-save" type="button" onclick="libSaveMenu(event)" title="Enregistrer (Ctrl+S)" aria-haspopup="true" aria-label="Enregistrer le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span class="lib-dirty" id="lib-dirty"></span></button>
     <button class="btn btn-icon" id="btn-open" type="button" onclick="libOpenUI()" title="Ouvrir un planning (bibliothèque)" aria-label="Ouvrir un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></button>
     <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></button>
     <button class="btn btn-icon" id="btn-clipboard" type="button" onclick="copyPlanningToClipboard()" title="Copier l'image du planning dans le presse-papier" aria-label="Copier dans le presse-papier"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button>
@@ -3589,12 +3592,23 @@ async function libSave(){
   if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return false; }
   if(!e) return libSaveCurrent();
   if(!libIsDirty()){ showToast('Aucune modification à enregistrer'); return true; }
-  const fn=libFolderName(l,e.folder);
-  const r=await libDialog('Enregistrer le planning','<p style="margin:0">« <b>'+libEsc(e.name)+'</b> » existe déjà dans la bibliothèque ('+(fn?'dossier « '+libEsc(fn)+' »':'racine')+').</p><p class="lib-sub" style="margin-top:8px">Écraser remplace la version enregistrée. Créer une nouvelle version la conserve et ajoute le planning actuel comme nouveau fichier.</p>',
-    [{label:'Annuler',value:null},{label:'Écraser',value:'over'},{label:'Créer une nouvelle version',value:'new',primary:true}]);
-  if(r.value==='over') return libSaveCurrent();
-  if(r.value==='new') return libSaveNewVersion();
-  return false;
+  return libSaveCurrent();
+}
+function libSaveMenuClose(){ const m=document.getElementById('lib-savemenu'); if(m) m.remove(); document.removeEventListener('mousedown',libSaveMenuOut,true); }
+function libSaveMenuOut(ev){ const m=document.getElementById('lib-savemenu'); if(m&&!m.contains(ev.target)&&!ev.target.closest('#btn-save')) libSaveMenuClose(); }
+function libSaveMenu(ev){
+  if(ev) ev.stopPropagation();
+  if(document.getElementById('lib-savemenu')){ libSaveMenuClose(); return; }
+  if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return; }
+  const l=libGet(), btn=document.getElementById('btn-save'), r=btn.getBoundingClientRect();
+  const m=document.createElement('div'); m.id='lib-savemenu'; m.className='lib-savemenu';
+  m.style.top=(r.bottom+6)+'px'; m.style.left=Math.max(8,Math.min(r.left,innerWidth-250))+'px';
+  m.innerHTML='<div class="lsm-info">Sauvegardes automatiques '+(l.auto?'activées':'désactivées')+'</div>'
+    +(l.auto?'':'<button type="button" data-a="save">Enregistrer</button>')
+    +'<button type="button" data-a="new">Enregistrer une nouvelle version</button>';
+  m.addEventListener('click',e=>{ const b=e.target.closest('button'); if(!b) return; libSaveMenuClose(); if(b.dataset.a==='save') libSave(); else libSaveAs(); });
+  document.body.appendChild(m);
+  document.addEventListener('mousedown',libSaveMenuOut,true);
 }
 function libSaveNewVersion(){
   const e=libCurEntry(); if(!e) return libSaveCurrent();
