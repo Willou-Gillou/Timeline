@@ -4891,6 +4891,7 @@ function closeMemoryDiagnostic(){
   if(el) el.style.display='none';
 }
 function startApp() {
+  try{ window._libOptsSynced=true; libSyncOpts(); }catch(e){}
   const loaded = loadState();
   if (!loaded) {
     lanes = [];
