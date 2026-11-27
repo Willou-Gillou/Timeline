@@ -284,6 +284,61 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .step button:focus-visible { outline:2px solid #c0392b88; outline-offset:1px; }
 .step span { min-width:32px; text-align:center; font-size:12px; font-weight:600; color:var(--ink); font-variant-numeric:tabular-nums; }
 @media (prefers-reduced-motion:reduce) { .seg label, .dtabs button, .sbtn, .sidebar .btn, .step button { transition:none; } }
+/* Bibliothèque de plannings (v5.1) */
+#btn-library{position:relative}
+.lib-dirty{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#c0392b;border:1.5px solid #fff;display:none;pointer-events:none}
+.lib-ov{position:fixed;inset:0;z-index:100000;background:rgba(0,0,0,.45);display:none;align-items:center;justify-content:center}
+.lib-box{background:#fff;border-radius:10px;width:min(760px,94vw);max-height:88vh;overflow:auto;box-shadow:0 8px 32px rgba(0,0,0,.25);padding:18px 22px 20px}
+.lib-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.lib-head h2{margin:0;font-size:17px;color:#2c3e50}
+.lib-x{border:none;background:transparent;font-size:24px;line-height:1;cursor:pointer;color:#777;padding:0 4px}
+.lib-actions{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.lib-btn{padding:7px 14px;border-radius:5px;border:1px solid #ccc;cursor:pointer;font-size:12px;background:#f5f5f5;font-weight:600;color:#555;font-family:inherit}
+.lib-btn:hover{background:#ececec}
+.lib-btn.sm{padding:4px 9px;font-size:11px}
+.lib-btn.primary{background:#c0392b;border-color:#c0392b;color:#fff}
+.lib-btn.primary:hover{background:#a93226}
+.lib-btn.danger{color:#c0392b;border-color:#e3b5b0;background:#fff}
+.lib-state{font-size:12px;color:#555;margin-bottom:10px}
+.lib-warn{color:#c0392b;font-weight:600}
+.lib-list{border:1px solid #e5e7eb;border-radius:8px;max-height:38vh;overflow:auto}
+.lib-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 12px;border-bottom:1px solid #eef0f2}
+.lib-row:last-child{border-bottom:none}
+.lib-row.cur{background:#fff6f5}
+.lib-row-main{min-width:0}
+.lib-name{font-weight:700;font-size:13px;color:#2c3e50;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.lib-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#c0392b;margin-right:7px}
+.lib-sub{font-size:11px;color:#777;margin-top:2px}
+.lib-row-act{display:flex;gap:5px;flex-shrink:0;flex-wrap:wrap;justify-content:flex-end}
+.lib-empty{padding:22px;text-align:center;color:#888;font-size:12px}
+.lib-opts{display:flex;flex-direction:column;gap:5px;margin:12px 0 4px;font-size:12px;color:#444}
+.lib-gauge{margin-top:10px}
+.lib-gauge-bar{height:6px;background:#e8eaed;border-radius:3px;overflow:hidden}
+.lib-gauge-bar div{height:100%;background:#7f8c8d}
+.lib-note{margin-top:8px;line-height:1.45}
+.lib-trash{margin-top:12px;font-size:12px}
+.lib-trash summary{cursor:pointer;font-weight:600;color:#555}
+.lib-dlg-ov{position:fixed;inset:0;z-index:100001;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center}
+.lib-dlg{background:#fff;border-radius:10px;padding:20px 22px;width:min(640px,94vw);max-height:86vh;display:flex;flex-direction:column;box-shadow:0 8px 32px rgba(0,0,0,.25);font-size:13px;color:#333}
+.lib-dlg h3{margin:0 0 12px;font-size:15px;color:#2c3e50}
+.lib-dlg-body{overflow:auto;min-height:0}
+.lib-dlg-btns{display:flex;justify-content:flex-end;gap:10px;margin-top:16px}
+.lib-lbl{display:block;font-size:12px;color:#666;margin-bottom:6px}
+.lib-input{width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ccc;border-radius:5px;font-size:13px;outline:none}
+.lib-input:focus{border-color:#c0392b}
+.lib-imp-list{border:1px solid #e5e7eb;border-radius:8px;max-height:44vh;overflow:auto}
+.lib-imp-row{padding:8px 12px;border-bottom:1px solid #eef0f2;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:8px}
+.lib-imp-row:last-child{border-bottom:none}
+.lib-imp-act{display:flex;gap:6px;align-items:center}
+.lib-sel{padding:4px 6px;font-size:12px;border:1px solid #ccc;border-radius:5px;background:#fff}
+.lib-imp-cmp{flex-basis:100%;background:#f7f8fa;border-radius:6px;padding:8px 10px;font-size:11px;color:#555}
+.lib-cmp{border-collapse:collapse;margin-bottom:6px}
+.lib-cmp th,.lib-cmp td{padding:2px 14px 2px 0;text-align:left;font-size:11px}
+.lib-quick{margin:0 0 8px;font-size:12px}
+.lib-tag{display:inline-block;font-size:10px;font-weight:700;padding:1px 7px;border-radius:9px;margin-left:6px;background:#eef0f2;color:#555}
+.lib-tag-new{background:#e3f4e7;color:#1e7a37}
+.lib-tag-newer-file,.lib-tag-newer-lib{background:#fdf0d5;color:#8a5a00}
+.lib-tag-both,.lib-tag-same-name{background:#fbe0dd;color:#a93226}
 </style>
 </head>
 <body>
@@ -322,7 +377,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
       Accéder
     </button>
     <p style="color:#5a5957; font-size:10px; margin:16px 0 0 0;">
-      v5.0 &mdash; Accès sécurisé
+      v5.1 &mdash; Accès sécurisé
     </p>
   </div>
 </div>
@@ -338,6 +393,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
     <button class="btn btn-icon" id="btn-redo" onclick="redoPlanning()" title="Annuler retour : rétablir le ou les retours effectués" aria-label="Annuler retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
     <button class="btn btn-icon" onclick="promptSaveJSON()" title="Sauvegarder le planning en JSON" aria-label="Sauvegarder le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg></button>
     <label class="btn btn-icon" style="cursor:pointer;" title="Charger un planning JSON" aria-label="Charger un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg><input type="file" accept=".json" style="display:none" onchange="importJSON(event)"></label>
+    <button class="btn btn-icon" id="btn-library" type="button" onclick="libOpenUI()" title="Bibliothèque de plannings (Ctrl+S : enregistrer)" aria-label="Bibliothèque de plannings"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"/><polyline points="2 17 12 22 22 17"/><polyline points="2 12 12 17 22 12"/></svg><span class="lib-dirty" id="lib-dirty"></span></button>
     <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></button>
     <button class="btn btn-icon" id="btn-clipboard" type="button" onclick="copyPlanningToClipboard()" title="Copier l'image du planning dans le presse-papier" aria-label="Copier dans le presse-papier"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button>
     <button class="btn btn-icon" id="btn-export" onclick="toggleExportMenu(event)" title="Exporter le planning (PNG, SVG, PDF)" aria-label="Exporter le planning" aria-haspopup="true" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m17 8-5-5-5 5"/><path d="M12 3v12"/></svg></button>
@@ -358,7 +414,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
     <button class="btn btn-icon" type="button" onclick="openVersionHistory()" title="Historique des versions" aria-label="Historique des versions"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></button>
   </div>
   </div>
-  <div class="topbar-right"><span class="brand-ver">v5.0</span></div>
+  <div class="topbar-right"><span class="brand-ver">v5.1</span></div>
 </div>
 </div>
 <div id="drag-tip"></div>
@@ -631,6 +687,12 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
   <div class="modal-box" style="max-width:760px;max-height:80vh;overflow-y:auto;overflow-x:hidden;">
     <h3 style="margin-bottom:10px;text-align:left;">Historique versions</h3>
     <div style="font-size:13px;line-height:1.5;color:#222;text-align:left;white-space:normal;">
+            <div style="font-weight:700;margin:8px 0 6px;">V5.1:</div><ul style="margin:0 0 10px 18px;padding:0;">
+        <li>Nouveau : bibliothèque de plannings dans le cache du navigateur (bouton Bibliothèque de la barre du haut) : enregistrer, ouvrir, renommer, dupliquer, supprimer, corbeille des 10 derniers supprimés, enregistrement automatique en option.</li>
+        <li>Nouveau : Ctrl/Cmd + S enregistre le planning dans la bibliothèque ; un point rouge sur le bouton signale les modifications non enregistrées.</li>
+        <li>Nouveau : export d'un planning ou de toute la bibliothèque ; import de plusieurs fichiers avec détection des conflits (identique, plus récent, modifié des deux côtés, même nom) et choix Remplacer / Garder les deux / Ignorer.</li>
+        <li>Les fichiers JSON enregistrent maintenant le nom du planning ; un fichier sans nom s'ouvre sous « Macro-planning projet ».</li>
+            </ul>
             <div style="font-weight:700;margin:8px 0 6px;">V5.0:</div><ul style="margin:0 0 10px 18px;padding:0;">
         <li>Nouveau : nom de l'activité à droite de la barre, date de l'activité à gauche (Affichage &gt; Éléments).</li>
         <li>Nouveau : raccourcis sur le Gantt : Ctrl/Cmd + C copie l'image du planning (avec message temporisé), Ctrl/Cmd + Z revient en arrière, Maj + Ctrl/Cmd + Z revient en avant.</li>
@@ -2938,6 +3000,7 @@ function saveState() {
   }
   historyCurrentRaw = JSON.stringify(getPlanningSnapshot());
   updateHistoryButtons();
+  if (typeof libUpdateDirty === 'function') libUpdateDirty();
 }
 saveState._orig = function(){
   const prevSuspend = historySuspend;
@@ -3334,7 +3397,9 @@ function exportJSON(customFileName) {
   saveState();
   const _full = JSON.parse(localStorage.getItem(MP_PLANNING_KEY) || '{}');
   // Export planning uniquement (sans réglages sidebar)
-  const state = { lanes: _full.lanes || [], freezes: _full.freezes || [], lid: _full.lid || lid, tid: _full.tid || tid, jalonColorIdx: _full.jalonColorIdx || jalonColorIdx };
+  const _ce = libCurEntry();
+  const state = { format:'macroplanning-planning', version:2, name: libTitle(), lanes: _full.lanes || [], freezes: _full.freezes || [], lid: _full.lid || lid, tid: _full.tid || tid, jalonColorIdx: _full.jalonColorIdx || jalonColorIdx };
+  if (_ce) state.mpMeta = { id:_ce.id, created:_ce.created, modified:_ce.modified, rev:_ce.rev };
   const content = JSON.stringify(state, null, 2);
   const defaultName = customFileName || ('planning_' + new Date().toISOString().slice(0, 10) + '.json');
 
@@ -3350,6 +3415,352 @@ function exportJSON(customFileName) {
     showToast('Fichier téléchargé dans votre dossier par défaut.');
   }
 }
+
+// ═══ BIBLIOTHÈQUE DE PLANNINGS (v5.1) ═══════════════════════
+// Plannings enregistrés dans le cache du navigateur (localStorage), réutilisables, exportables et importables avec gestion des conflits.
+const LIB_KEY='test_mp_library_v1', LIB_TRASH_MAX=10, LIB_QUOTA=5000000, LIB_DEFAULT_NAME='Macro-planning projet';
+let _lib=null, libStale=false, _libAutoT=0;
+function libEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function libDefault(){ return {v:1,items:[],trash:[],current:null,auto:false,addOnOpen:true,lastExport:0}; }
+function libGet(){
+  if(_lib) return _lib;
+  let l=null; try{ l=JSON.parse(localStorage.getItem(LIB_KEY)||'null'); }catch(e){}
+  if(!l||!Array.isArray(l.items)) l=libDefault();
+  if(!Array.isArray(l.trash)) l.trash=[];
+  if(l.addOnOpen===undefined) l.addOnOpen=true;
+  _lib=l; return l;
+}
+function libClone(){ return JSON.parse(JSON.stringify(libGet())); }
+function libCommit(l){
+  if(libStale){ alert('La bibliothèque a été modifiée dans un autre onglet. Rechargez la page avant de continuer, pour ne rien écraser.'); return false; }
+  try{ localStorage.setItem(LIB_KEY,JSON.stringify(l)); _lib=l; return true; }
+  catch(e){ alert("Espace de stockage insuffisant : rien n'a été enregistré. Exportez puis supprimez des plannings, ou videz la corbeille."); return false; }
+}
+function libFnv(s){ let h=0x811c9dc5; for(let i=0;i<s.length;i++){ h^=s.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0; } return h.toString(16); }
+function libContentHash(d){ return libFnv(JSON.stringify([d.lanes||[],d.freezes||[]])); }
+function libFullHash(d,name){ return libFnv(JSON.stringify([d.lanes||[],d.freezes||[],name||''])); }
+function libTitle(){ return (document.getElementById('planning-title')?.value||'').trim()||LIB_DEFAULT_NAME; }
+function libCurData(){ return JSON.parse(JSON.stringify({lanes,freezes,lid,tid,jalonColorIdx})); }
+function libCount(d){ let t=0; (d.lanes||[]).forEach(l=>{ t+=(l.tasks||[]).length; }); return {p:(d.lanes||[]).length,t}; }
+function libNewId(){ return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,7); }
+function libUnique(name,items,skipId){
+  const names=new Set(items.filter(i=>i.id!==skipId).map(i=>i.name.toLowerCase()));
+  if(!names.has(name.toLowerCase())) return name;
+  let n=2; while(names.has((name+' ('+n+')').toLowerCase())) n++;
+  return name+' ('+n+')';
+}
+function libCurEntry(l){ l=l||libGet(); return l.current ? (l.items.find(i=>i.id===l.current)||null) : null; }
+function libIsDirty(){
+  const l=libGet(), e=libCurEntry(l);
+  if(!e) return lanes.length>0||freezes.length>0;
+  return libFullHash({lanes,freezes},libTitle())!==e.hash;
+}
+function libUpdateDirty(){
+  try{
+    const d=libIsDirty(); const el=document.getElementById('lib-dirty'); if(el) el.style.display=d?'block':'none';
+    const l=libGet();
+    if(d&&l.auto&&libCurEntry(l)&&!libStale){ clearTimeout(_libAutoT); _libAutoT=setTimeout(()=>{ if(libIsDirty()) libSaveCurrent({silent:true}); },800); }
+  }catch(e){}
+}
+function libFmt(ms){ if(!ms) return '—'; try{ return new Date(ms).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}); }catch(e){ return new Date(ms).toISOString(); } }
+function libUsage(){ let n=0; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); n+=k.length+(localStorage.getItem(k)||'').length; } }catch(e){} return n; }
+
+// ── Boîte de dialogue générique (promesse) ──
+function libDialog(title,html,buttons,collect){
+  return new Promise(res=>{
+    const o=document.createElement('div'); o.className='lib-dlg-ov';
+    o.innerHTML='<div class="lib-dlg" role="dialog" aria-modal="true"><h3>'+libEsc(title)+'</h3><div class="lib-dlg-body">'+html+'</div><div class="lib-dlg-btns"></div></div>';
+    const bt=o.querySelector('.lib-dlg-btns');
+    const kd=e=>{ if(e.key==='Escape'){ e.stopPropagation(); done({value:null}); } };
+    const done=v=>{ document.removeEventListener('keydown',kd,true); o.remove(); res(v); };
+    document.addEventListener('keydown',kd,true);
+    buttons.forEach(b=>{
+      const x=document.createElement('button'); x.type='button'; x.textContent=b.label; x.className='lib-btn'+(b.primary?' primary':'');
+      x.onclick=()=>done({value:b.value,data:(collect&&b.value!==null)?collect(o):null});
+      bt.appendChild(x);
+    });
+    document.body.appendChild(o);
+    (bt.querySelector('.primary')||bt.lastChild)?.focus();
+  });
+}
+async function libAskName(title,label,def){
+  const r=await libDialog(title,'<label class="lib-lbl">'+libEsc(label)+'</label><input type="text" class="lib-input" id="lib-name-in" value="'+libEsc(def)+'" maxlength="120">',[{label:'Annuler',value:null},{label:'Valider',value:'ok',primary:true}],o=>o.querySelector('#lib-name-in').value.trim());
+  if(r.value!=='ok'||!r.data) return null; return r.data;
+}
+async function libConfirmLeave(targetId){
+  const l=libGet();
+  if(!libIsDirty()) return true;
+  const r=await libDialog('Modifications non enregistrées','<p>Le planning actuel a des modifications qui ne sont pas enregistrées dans la bibliothèque.</p>',[{label:'Annuler',value:null},{label:'Ne pas enregistrer',value:'no'},{label:'Enregistrer',value:'save',primary:true}]);
+  if(r.value==='save') return libSaveCurrent({silent:true});
+  return r.value==='no';
+}
+
+// ── Enregistrer / ouvrir ──
+function libSaveCurrent(o){
+  o=o||{};
+  const l=libClone(), now=Date.now(), title=o.name||libTitle(), data=libCurData();
+  let e=o.asNew?null:libCurEntry(l);
+  if(e){ e.name=libUnique(title,l.items,e.id); e.modified=now; e.rev=(e.rev||0)+1; e.data=data; e.hash=libFullHash(data,e.name); }
+  else { e={id:libNewId(),name:libUnique(title,l.items),created:now,modified:now,rev:1,data}; e.hash=libFullHash(data,e.name); l.items.push(e); }
+  l.current=e.id;
+  if(!libCommit(l)) return false;
+  const t=document.getElementById('planning-title'); if(t&&t.value.trim()!==e.name){ t.value=e.name; saveState(); }
+  libUpdateDirty();
+  if(!o.silent) showToast('Planning « '+e.name+' » enregistré dans la bibliothèque');
+  if(document.getElementById('lib-overlay')?.style.display==='flex') libRender();
+  return true;
+}
+async function libSaveAs(){
+  const name=await libAskName('Enregistrer sous…','Nom du nouveau planning',libTitle());
+  if(!name) return;
+  const t=document.getElementById('planning-title'); if(t) t.value=name;
+  libSaveCurrent({asNew:true,name,silent:false});
+}
+function libApply(d,name){
+  const c=JSON.parse(JSON.stringify(d));
+  lanes=c.lanes||[]; freezes=sanitizeFreezes(c.freezes); lid=c.lid||1; tid=c.tid||1; jalonColorIdx=c.jalonColorIdx||0;
+  const t=document.getElementById('planning-title'); if(t) t.value=name||LIB_DEFAULT_NAME;
+  renderData();
+  requestAnimationFrame(()=>requestAnimationFrame(()=>renderTimeline()));
+  updateT0Display();
+  saveState();
+}
+async function libOpen(id){
+  const e=libGet().items.find(i=>i.id===id); if(!e) return;
+  if(!(await libConfirmLeave(id))) return;
+  libApply(e.data,e.name);
+  const l=libClone(); l.current=e.id; libCommit(l);
+  libUpdateDirty(); libRender();
+  showToast('Planning « '+e.name+' » ouvert');
+  libClose();
+}
+async function libRename(id){
+  const l=libClone(), e=l.items.find(i=>i.id===id); if(!e) return;
+  const name=await libAskName('Renommer le planning','Nouveau nom',e.name); if(!name||name===e.name) return;
+  if(l.items.some(i=>i.id!==id&&i.name.toLowerCase()===name.toLowerCase())){ alert('Un autre planning porte déjà ce nom.'); return; }
+  e.name=name; e.modified=Date.now(); e.rev=(e.rev||0)+1; e.hash=libFullHash(e.data,e.name);
+  if(!libCommit(l)) return;
+  if(l.current===id){ const t=document.getElementById('planning-title'); if(t){ t.value=name; saveState(); } }
+  libUpdateDirty(); libRender();
+}
+function libDuplicate(id){
+  const l=libClone(), e=l.items.find(i=>i.id===id); if(!e) return;
+  const now=Date.now(), c=JSON.parse(JSON.stringify(e));
+  c.id=libNewId(); c.name=libUnique(e.name+' (copie)',l.items); c.created=now; c.modified=now; c.rev=1; c.hash=libFullHash(c.data,c.name);
+  l.items.push(c);
+  if(libCommit(l)){ libRender(); showToast('Planning dupliqué : « '+c.name+' »'); }
+}
+function libTrashPush(l,e){ const c=JSON.parse(JSON.stringify(e)); c.deletedAt=Date.now(); l.trash.unshift(c); l.trash=l.trash.slice(0,LIB_TRASH_MAX); }
+function libDelete(id){
+  const l=libClone(), e=l.items.find(i=>i.id===id); if(!e) return;
+  if(!confirm('Supprimer « '+e.name+' » de la bibliothèque ?\nIl sera conservé dans la corbeille (10 derniers éléments).')) return;
+  libTrashPush(l,e); l.items=l.items.filter(i=>i.id!==id); if(l.current===id) l.current=null;
+  if(libCommit(l)){ libUpdateDirty(); libRender(); }
+}
+function libRestore(idx){
+  const l=libClone(), e=l.trash[idx]; if(!e) return;
+  l.trash.splice(idx,1); delete e.deletedAt;
+  if(l.items.some(i=>i.id===e.id)) e.id=libNewId();
+  e.name=libUnique(e.name,l.items); e.hash=libFullHash(e.data,e.name); l.items.push(e);
+  if(libCommit(l)){ libRender(); showToast('Planning restauré : « '+e.name+' »'); }
+}
+function libEmptyTrash(){
+  if(!confirm('Vider la corbeille ? Cette action est définitive.')) return;
+  const l=libClone(); l.trash=[]; if(libCommit(l)) libRender();
+}
+function libSetOpt(k,v){ const l=libClone(); l[k]=!!v; if(libCommit(l)){ if(k==='auto') libUpdateDirty(); } }
+
+// ── Export ──
+function libEntryFile(e){ return {format:'macroplanning-planning',version:2,mpMeta:{id:e.id,created:e.created,modified:e.modified,rev:e.rev},name:e.name,lanes:e.data.lanes,freezes:e.data.freezes,lid:e.data.lid,tid:e.data.tid,jalonColorIdx:e.data.jalonColorIdx}; }
+function libDownload(fileName,obj){
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:'application/json'});
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fileName;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(a.href);
+}
+function libSafeName(n){ return (n||'planning').replace(/[^a-zA-Z0-9_\-]+/g,'_').replace(/^_+|_+$/g,'')||'planning'; }
+function libExportOne(id){ const e=libGet().items.find(i=>i.id===id); if(!e) return; libDownload(libSafeName(e.name)+'.json',libEntryFile(e)); showToast('Planning exporté'); }
+function libExportAll(){
+  const l=libGet(); if(!l.items.length){ alert('La bibliothèque est vide.'); return; }
+  libDownload('bibliotheque_'+new Date().toISOString().slice(0,10)+'.json',{format:'macroplanning-library',version:1,exported:Date.now(),items:l.items.map(e=>({id:e.id,name:e.name,created:e.created,modified:e.modified,rev:e.rev,data:e.data}))});
+  const c=libClone(); c.lastExport=Date.now(); libCommit(c); libRender(); showToast('Bibliothèque exportée ('+l.items.length+' planning'+(l.items.length>1?'s':'')+')');
+}
+
+// ── Import : lecture, classification, conflits ──
+function libParse(text){
+  const o=JSON.parse(text); const out=[];
+  const norm=(x,meta,name)=>{
+    if(!x||typeof x!=='object') throw new Error('structure inattendue');
+    const ls=x.lanes===undefined?[]:x.lanes;
+    if(!Array.isArray(ls)) throw new Error('liste de phases invalide');
+    ls.forEach(l=>{ if(!l||typeof l!=='object'||!Array.isArray(l.tasks)) throw new Error('phase invalide'); });
+    return {id:(meta&&meta.id)||null,name:(typeof name==='string'&&name.trim())||LIB_DEFAULT_NAME,created:(meta&&meta.created)||0,modified:(meta&&meta.modified)||0,rev:(meta&&meta.rev)||0,
+      data:{lanes:ls,freezes:sanitizeFreezes(x.freezes),lid:x.lid||1,tid:x.tid||1,jalonColorIdx:x.jalonColorIdx||0}};
+  };
+  if(o&&o.format==='macroplanning-library'){
+    if(!Array.isArray(o.items)) throw new Error('bibliothèque invalide');
+    o.items.forEach(it=>out.push(norm(it.data,it,it.name)));
+  } else out.push(norm(o,o.mpMeta,o.name||(o.sidebar&&o.sidebar.planningTitle)));
+  return out;
+}
+const LIB_STATUS={new:'Nouveau',identical:'Identique','newer-file':'Fichier plus récent','newer-lib':'Bibliothèque plus récente',both:'Modifié des deux côtés','same-name':'Même nom, contenu différent'};
+function libClassify(item,items){
+  const ch=libContentHash(item.data);
+  let ex=item.id?items.find(i=>i.id===item.id):null;
+  if(ex){
+    if(libContentHash(ex.data)===ch&&ex.name===item.name) return {status:'identical',ex};
+    const nf=(item.rev||0)>(ex.rev||0)&&(item.modified||0)>(ex.modified||0), nl=(item.rev||0)<(ex.rev||0)&&(item.modified||0)<(ex.modified||0);
+    return {status:nf?'newer-file':nl?'newer-lib':'both',ex};
+  }
+  ex=items.find(i=>i.name.toLowerCase()===item.name.toLowerCase());
+  if(ex){ return {status:libContentHash(ex.data)===ch?'identical':'same-name',ex}; }
+  return {status:'new',ex:null};
+}
+function libDefaultAction(s){ return {new:'add',identical:'skip','newer-file':'replace','newer-lib':'skip',both:'both','same-name':'both'}[s]; }
+function libCompareHtml(item,ex){
+  const a=libCount(item.data), b=libCount(ex.data);
+  const na=new Set((item.data.lanes||[]).map(l=>(l.name||l.title||'')+'')), nb=new Set((ex.data.lanes||[]).map(l=>(l.name||l.title||'')+''));
+  const onlyA=[...na].filter(x=>!nb.has(x)), onlyB=[...nb].filter(x=>!na.has(x));
+  const list=(t,arr)=>arr.length?'<div><b>'+t+' :</b> '+arr.map(libEsc).join(', ')+'</div>':'';
+  return '<table class="lib-cmp"><tr><th></th><th>Fichier</th><th>Bibliothèque</th></tr>'
+   +'<tr><td>Modifié</td><td>'+libFmt(item.modified)+'</td><td>'+libFmt(ex.modified)+'</td></tr>'
+   +'<tr><td>Révision</td><td>'+(item.rev||'—')+'</td><td>'+(ex.rev||'—')+'</td></tr>'
+   +'<tr><td>Phases</td><td>'+a.p+'</td><td>'+b.p+'</td></tr><tr><td>Tâches</td><td>'+a.t+'</td><td>'+b.t+'</td></tr></table>'
+   +list('Phases seulement dans le fichier',onlyA)+list('Phases seulement dans la bibliothèque',onlyB);
+}
+function libApplyPlan(plan,l){
+  const now=Date.now(); const res={added:0,replaced:0,kept:0,skipped:0,ids:[]};
+  plan.forEach(p=>{
+    const it=p.item;
+    if(p.action==='skip'){ res.skipped++; res.ids.push(p.ex?p.ex.id:null); return; }
+    if(p.action==='replace'&&p.ex){
+      const ex=l.items.find(i=>i.id===p.ex.id); libTrashPush(l,ex);
+      ex.data=JSON.parse(JSON.stringify(it.data)); ex.name=libUnique(it.name,l.items,ex.id); ex.modified=it.modified||now;
+      ex.rev=Math.max(ex.rev||0,it.rev||0)+1; ex.hash=libFullHash(ex.data,ex.name); res.replaced++; res.ids.push(ex.id); return;
+    }
+    const idFree=it.id&&!l.items.some(i=>i.id===it.id)&&p.action==='add';
+    const e={id:idFree?it.id:libNewId(),name:libUnique(it.name,l.items),created:it.created||now,modified:it.modified||now,rev:it.rev||1,data:JSON.parse(JSON.stringify(it.data))};
+    e.hash=libFullHash(e.data,e.name); l.items.push(e);
+    if(p.action==='both') res.kept++; else res.added++;
+    res.ids.push(e.id);
+  });
+  l.trash=l.trash.slice(0,LIB_TRASH_MAX);
+  return res;
+}
+// items : plannings normalisés. opts.openFirst : ouvrir le premier planning obtenu.
+async function libImportItems(items,opts){
+  opts=opts||{};
+  if(!items.length){ alert('Aucun planning trouvé dans ce fichier.'); return false; }
+  const base=libGet().items;
+  const plan=items.map(it=>{ const c=libClassify(it,base); return {item:it,status:c.status,ex:c.ex,action:libDefaultAction(c.status)}; });
+  const conflicts=plan.filter(p=>p.status!=='new'&&p.status!=='identical').length;
+  if(conflicts>0||items.length>1){
+    let rows='';
+    plan.forEach((p,i)=>{
+      const c=libCount(p.item.data), canCmp=!!p.ex&&p.status!=='identical';
+      const opts2=p.status==='new'?[['add','Ajouter'],['skip','Ignorer']]:p.status==='identical'?[['skip','Ignorer (identique)']]:[['replace','Remplacer'],['both','Garder les deux'],['skip','Ignorer']];
+      rows+='<div class="lib-imp-row" data-i="'+i+'"><div class="lib-imp-main"><div><b>'+libEsc(p.item.name)+'</b> <span class="lib-tag lib-tag-'+p.status+'">'+LIB_STATUS[p.status]+'</span></div>'
+        +'<div class="lib-sub">'+c.p+' phase'+(c.p>1?'s':'')+' · '+c.t+' tâche'+(c.t>1?'s':'')+(p.item.modified?' · modifié le '+libFmt(p.item.modified):'')+'</div></div>'
+        +'<div class="lib-imp-act">'+(canCmp?'<button type="button" class="lib-btn sm" data-cmp="'+i+'">Comparer</button>':'')
+        +'<select class="lib-sel" data-sel="'+i+'">'+opts2.map(o=>'<option value="'+o[0]+'"'+(o[0]===p.action?' selected':'')+'>'+o[1]+'</option>').join('')+'</select></div>'
+        +(canCmp?'<div class="lib-imp-cmp" id="lib-cmp-'+i+'" style="display:none">'+libCompareHtml(p.item,p.ex)+'</div>':'')+'</div>';
+    });
+    const quick=conflicts>0?'<div class="lib-quick">Pour tous les conflits : <button type="button" class="lib-btn sm" data-q="both">Garder les deux</button> <button type="button" class="lib-btn sm" data-q="recent">Garder le plus récent</button></div>':'';
+    const html='<p class="lib-sub" style="margin-top:0">'+items.length+' planning'+(items.length>1?'s':'')+' à importer'+(conflicts?', dont '+conflicts+' en conflit':'')+'. Rien n\'est modifié avant de valider.</p>'+quick+'<div class="lib-imp-list">'+rows+'</div>';
+    const bindDlg=()=>{
+      const o=document.querySelector('.lib-dlg-ov:last-of-type'); if(!o) return;
+      o.addEventListener('click',ev=>{
+        const b=ev.target.closest('button'); if(!b) return;
+        if(b.dataset.cmp!==undefined){ const d=o.querySelector('#lib-cmp-'+b.dataset.cmp); d.style.display=d.style.display==='none'?'block':'none'; }
+        if(b.dataset.q){
+          plan.forEach((p,i)=>{ if(p.status==='new'||p.status==='identical') return; const s=o.querySelector('[data-sel="'+i+'"]');
+            if(b.dataset.q==='both') s.value='both'; else s.value=(p.item.modified||0)>(p.ex.modified||0)?'replace':'skip'; });
+        }
+      });
+    };
+    const pr=libDialog('Importer des plannings',html,[{label:'Annuler',value:null},{label:'Importer',value:'ok',primary:true}],o=>plan.map((p,i)=>o.querySelector('[data-sel="'+i+'"]').value));
+    bindDlg();
+    const r=await pr; if(r.value!=='ok') return false;
+    plan.forEach((p,i)=>{ p.action=r.data[i]; });
+  }
+  const l=libClone(); const res=libApplyPlan(plan,l);
+  if(res.added+res.replaced+res.kept>0&&!libCommit(l)) return false;
+  const parts=[]; if(res.added) parts.push(res.added+' ajouté'+(res.added>1?'s':'')); if(res.kept) parts.push(res.kept+' conservé'+(res.kept>1?'s':'')+' en double'); if(res.replaced) parts.push(res.replaced+' remplacé'+(res.replaced>1?'s':'')); if(res.skipped) parts.push(res.skipped+' ignoré'+(res.skipped>1?'s':''));
+  showToast('Import : '+(parts.join(', ')||'rien à faire'));
+  if(l.current&&res.ids.includes(l.current)&&res.replaced&&!opts.openFirst) showToast('Le planning ouvert a été remplacé dans la bibliothèque : rouvrez-le pour voir la version importée.');
+  if(document.getElementById('lib-overlay')?.style.display==='flex') libRender();
+  if(opts.openFirst&&res.ids[0]){ await libOpen(res.ids[0]); }
+  return true;
+}
+async function libReadFiles(files){
+  const items=[]; const errs=[];
+  for(const f of files){
+    try{ const txt=await f.text(); libParse(txt).forEach(i=>items.push(i)); }
+    catch(e){ errs.push(f.name+' : '+e.message); }
+  }
+  if(errs.length){ alert('Import annulé, fichier invalide :\n'+errs.join('\n')); return null; }
+  return items;
+}
+async function libImportFromInput(ev){
+  const files=[...ev.target.files]; ev.target.value=''; if(!files.length) return;
+  const items=await libReadFiles(files); if(!items) return;
+  await libImportItems(items,{openFirst:false});
+}
+
+// ── Fenêtre Bibliothèque ──
+function libOpenUI(){
+  let o=document.getElementById('lib-overlay');
+  if(!o){
+    o=document.createElement('div'); o.id='lib-overlay'; o.className='lib-ov';
+    o.innerHTML='<div class="lib-box" role="dialog" aria-modal="true" aria-label="Bibliothèque de plannings"><div class="lib-head"><h2>Bibliothèque de plannings</h2><button type="button" class="lib-x" onclick="libClose()" aria-label="Fermer">×</button></div><div id="lib-body"></div></div>';
+    o.addEventListener('mousedown',e=>{ if(e.target===o) libClose(); });
+    document.body.appendChild(o);
+  }
+  o.style.display='flex'; libRender();
+}
+function libClose(){ const o=document.getElementById('lib-overlay'); if(o) o.style.display='none'; }
+function libRender(){
+  const b=document.getElementById('lib-body'); if(!b) return;
+  const l=libGet(), cur=libCurEntry(l), dirty=libIsDirty();
+  const items=l.items.slice().sort((a,c)=>(c.modified||0)-(a.modified||0));
+  let h='<div class="lib-actions">'
+    +'<button type="button" class="lib-btn primary" onclick="libSaveCurrent()">'+(cur?'Enregistrer':'Enregistrer le planning actuel')+'</button>'
+    +'<button type="button" class="lib-btn" onclick="libSaveAs()">Enregistrer sous…</button>'
+    +'<button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Importer…</button>'
+    +'<button type="button" class="lib-btn" onclick="libExportAll()">Tout exporter</button>'
+    +'<input type="file" id="lib-import-input" accept=".json,application/json" multiple hidden onchange="libImportFromInput(event)"></div>';
+  h+='<div class="lib-state">Planning actuel : <b>'+libEsc(libTitle())+'</b> — '+(cur?(dirty?'<span class="lib-warn">modifications non enregistrées</span>':'enregistré'):(dirty?'<span class="lib-warn">pas encore enregistré dans la bibliothèque</span>':'vide'))+'</div>';
+  h+='<div class="lib-list">';
+  if(!items.length) h+='<div class="lib-empty">Aucun planning enregistré. Cliquez sur « Enregistrer le planning actuel » pour commencer.</div>';
+  items.forEach(e=>{
+    const c=libCount(e.data), isCur=cur&&cur.id===e.id;
+    h+='<div class="lib-row'+(isCur?' cur':'')+'"><div class="lib-row-main"><div class="lib-name">'+(isCur?'<span class="lib-dot" title="Planning ouvert"></span>':'')+libEsc(e.name)+'</div>'
+      +'<div class="lib-sub">Modifié le '+libFmt(e.modified)+' · '+c.p+' phase'+(c.p>1?'s':'')+' · '+c.t+' tâche'+(c.t>1?'s':'')+' · rév. '+(e.rev||1)+'</div></div>'
+      +'<div class="lib-row-act"><button type="button" class="lib-btn sm primary" onclick="libOpen(\''+e.id+'\')">Ouvrir</button>'
+      +'<button type="button" class="lib-btn sm" onclick="libRename(\''+e.id+'\')">Renommer</button>'
+      +'<button type="button" class="lib-btn sm" onclick="libDuplicate(\''+e.id+'\')">Dupliquer</button>'
+      +'<button type="button" class="lib-btn sm" onclick="libExportOne(\''+e.id+'\')">Exporter</button>'
+      +'<button type="button" class="lib-btn sm danger" onclick="libDelete(\''+e.id+'\')">Supprimer</button></div></div>';
+  });
+  h+='</div>';
+  h+='<div class="lib-opts"><label><input type="checkbox" '+(l.auto?'checked':'')+' onchange="libSetOpt(\'auto\',this.checked)"> Enregistrer automatiquement le planning ouvert dans la bibliothèque</label>'
+    +'<label><input type="checkbox" '+(l.addOnOpen?'checked':'')+' onchange="libSetOpt(\'addOnOpen\',this.checked)"> Ajouter à la bibliothèque les fichiers ouverts avec « Charger un planning »</label></div>';
+  const used=libUsage(), pct=Math.min(100,Math.round(used/LIB_QUOTA*100));
+  h+='<div class="lib-gauge"><div class="lib-gauge-bar"><div style="width:'+pct+'%;'+(pct>=80?'background:#c0392b':'')+'"></div></div><div class="lib-sub">Espace du navigateur utilisé : '+Math.round(used/1000)+' Ko sur environ 5 Mo ('+pct+' %)'+(pct>=80?' — <span class="lib-warn">presque plein, exportez et supprimez des plannings</span>':'')+'</div></div>';
+  const old=l.items.length&&(!l.lastExport||Date.now()-l.lastExport>30*86400000);
+  h+='<div class="lib-sub lib-note">Ces plannings sont stockés dans ce navigateur : un effacement des données ou la navigation privée les supprime. '+(old?'<span class="lib-warn">'+(l.lastExport?'Dernier export il y a plus de 30 jours.':'Vous n\'avez encore jamais exporté la bibliothèque.')+'</span> ':'')+'Pensez à utiliser « Tout exporter ».</div>';
+  if(l.trash.length){
+    h+='<details class="lib-trash"><summary>Corbeille ('+l.trash.length+')</summary>';
+    l.trash.forEach((e,i)=>{ h+='<div class="lib-row"><div class="lib-row-main"><div class="lib-name">'+libEsc(e.name)+'</div><div class="lib-sub">Supprimé le '+libFmt(e.deletedAt)+'</div></div><div class="lib-row-act"><button type="button" class="lib-btn sm" onclick="libRestore('+i+')">Restaurer</button></div></div>'; });
+    h+='<div style="text-align:right;margin-top:6px"><button type="button" class="lib-btn sm danger" onclick="libEmptyTrash()">Vider la corbeille</button></div></details>';
+  }
+  const keep=b.querySelector('.lib-trash')?.open; b.innerHTML=h; if(keep){ const d=b.querySelector('.lib-trash'); if(d) d.open=true; }
+}
+// Ctrl/Cmd+S : enregistrer dans la bibliothèque ; Échap : fermer la fenêtre
+document.addEventListener('keydown',function(e){
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==='s'){ e.preventDefault(); if(appReady) libSaveCurrent(); return; }
+  if(e.key==='Escape'&&document.getElementById('lib-overlay')?.style.display==='flex'&&!document.querySelector('.lib-dlg-ov')) libClose();
+});
+window.addEventListener('storage',function(e){ if(e.key===LIB_KEY){ libStale=true; _lib=null; showToast('La bibliothèque a été modifiée dans un autre onglet : rechargez cette page.'); } });
 
 // ═══ EXPORT / IMPORT RÉGLAGES ═══════════════════════════════
 async function promptSaveSettingsJSON() {
@@ -3451,38 +3862,20 @@ async function importSettingsJSON(event) {
 }
 
 // ═══ OUVRIR SAUVEGARDE ════════════════════════════════════════
-function importJSON(event) {
-  const file = event.target.files[0];
-  if (!file) return;
-  if (lanes.length > 0) {
-    if (!confirm('Importer ce fichier remplacera le planning actuel. Continuer ?')) {
-      event.target.value = '';
-      return;
-    }
-  }
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const state = JSON.parse(e.target.result);
-      // Import planning uniquement — les réglages sidebar sont préservés
-      const planningOnly = { lanes: state.lanes || [], freezes: sanitizeFreezes(state.freezes), lid: state.lid || 1, tid: state.tid || 1, jalonColorIdx: state.jalonColorIdx || 0 };
-      localStorage.setItem(MP_PLANNING_KEY, JSON.stringify(planningOnly));
-      lanes = planningOnly.lanes;
-      lid   = planningOnly.lid;
-      tid   = planningOnly.tid;
-      jalonColorIdx = planningOnly.jalonColorIdx;
-      freezes = planningOnly.freezes;
-      renderData();
-      requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ renderTimeline(); }); });
-      updateT0Display();
-      saveState();
-      showToast('Planning importé (réglages conservés)');
-    } catch(err) {
-      alert('Fichier JSON invalide : ' + err.message);
-    }
-  };
-  reader.readAsText(file);
+async function importJSON(event) {
+  const files = [...event.target.files];
   event.target.value = '';
+  if (!files.length) return;
+  const items = await libReadFiles(files);
+  if (!items) return;
+  if (libGet().addOnOpen) { await libImportItems(items, { openFirst: true }); return; }
+  // Sans bibliothèque : le fichier remplace le planning actuel (réglages conservés)
+  if (!(await libConfirmLeave())) return;
+  const it = items[0];
+  libApply(it.data, it.name);
+  const l = libClone(); l.current = null; libCommit(l);
+  libUpdateDirty();
+  showToast('Planning importé (réglages conservés)');
 }
 
 
