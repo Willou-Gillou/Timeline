@@ -699,6 +699,7 @@ input[type=checkbox].lib-chk::before{display:none}
         <div class="radio-group" id="lib-sb-opts" style="gap:0">
           <label><input type="checkbox" id="opt-lib-auto" checked onchange="libSetOpt('auto',this.checked)"/> Enregistrer automatiquement</label>
           <label><input type="checkbox" id="opt-lib-add" checked onchange="libSetOpt('addOnOpen',this.checked)"/> Ajouter à la bibliothèque les fichiers JSON ouverts</label>
+          <label><input type="checkbox" id="opt-confirm-del" checked onchange="setConfirmDel(this.checked)"/> Demander confirmation avant suppression</label>
         </div>
       </div>
     </div>
@@ -3728,7 +3729,7 @@ function libDuplicate(id){
 function libTrashPush(l,e){ const c=JSON.parse(JSON.stringify(e)); c.deletedAt=Date.now(); l.trash.unshift(c); l.trash=l.trash.slice(0,LIB_TRASH_MAX); }
 function libDelete(id){
   const l=libClone(), e=l.items.find(i=>i.id===id); if(!e) return;
-  if(!confirm('Supprimer « '+e.name+' » de la bibliothèque ?\nIl sera conservé dans la corbeille (10 derniers éléments).')) return;
+  if(!askDel('Supprimer « '+e.name+' » de la bibliothèque ?\nIl sera conservé dans la corbeille (10 derniers éléments).')) return;
   clearTimeout(_libAutoT);
   const wasCur=l.current===id;
   libTrashPush(l,e); l.items=l.items.filter(i=>i.id!==id); if(l.current===id) l.current=null;
@@ -3754,15 +3755,19 @@ function libRestoreKeys(keys){
 }
 function libPurgeKeys(keys){
   const l=libClone(); const all=!keys; const n=all?l.trash.length:l.trash.filter(e=>keys.includes(libTK(e))).length; if(!n) return;
-  if(!confirm('Supprimer définitivement '+(all?'tous les plannings de la corbeille':n+' planning'+(n>1?'s':''))+' ('+n+') ?\nCette action est irréversible.')) return;
+  if(!askDel('Supprimer définitivement '+(all?'tous les plannings de la corbeille':n+' planning'+(n>1?'s':''))+' ('+n+') ?\nCette action est irréversible.')) return;
   l.trash=all?[]:l.trash.filter(e=>!keys.includes(libTK(e)));
   if(libCommit(l)){ libTrashSel.clear(); libRender(); showToast(n+' planning'+(n>1?'s supprimés':' supprimé')+' définitivement'); }
 }
 function libEmptyTrash(){
-  if(!confirm('Vider la corbeille ? Cette action est définitive.')) return;
+  if(!askDel('Vider la corbeille ? Cette action est définitive.')) return;
   const l=libClone(); l.trash=[]; if(libCommit(l)) libRender();
 }
-function libSyncOpts(){ try{ const l=libGet(), a=document.getElementById('opt-lib-auto'), b=document.getElementById('opt-lib-add'); if(a) a.checked=!!l.auto; if(b) b.checked=!!l.addOnOpen; }catch(e){} }
+const CONFIRM_DEL_KEY='test_mp_confirm_delete';
+function confirmDelOn(){ try{ return localStorage.getItem(CONFIRM_DEL_KEY)!=='0'; }catch(e){ return true; } }
+function setConfirmDel(v){ try{ localStorage.setItem(CONFIRM_DEL_KEY,v?'1':'0'); }catch(e){} }
+function askDel(msg){ return !confirmDelOn() || confirm(msg); }
+function libSyncOpts(){ try{ const c=document.getElementById('opt-confirm-del'); if(c) c.checked=confirmDelOn(); }catch(e){} try{ const l=libGet(), a=document.getElementById('opt-lib-auto'), b=document.getElementById('opt-lib-add'); if(a) a.checked=!!l.auto; if(b) b.checked=!!l.addOnOpen; }catch(e){} }
 function libSetOpt(k,v){ const l=libClone(); l[k]=!!v; if(libCommit(l)){ if(k==='auto') libUpdateDirty(); } libSyncOpts(); }
 
 // ── Export ──
@@ -3930,7 +3935,7 @@ async function libRenameFolder(id){
 function libDeleteFolder(id){
   const l=libClone(), f=l.folders.find(x=>x.id===id); if(!f) return;
   const n=l.items.filter(i=>i.folder===id).length;
-  if(!confirm('Supprimer le dossier « '+f.name+' » ?'+(n?'\nLes '+n+' planning'+(n>1?'s':'')+' qu\'il contient seront déplacés à la racine.':''))) return;
+  if(!askDel('Supprimer le dossier « '+f.name+' » ?'+(n?'\nLes '+n+' planning'+(n>1?'s':'')+' qu\'il contient seront déplacés à la racine.':''))) return;
   l.items.filter(i=>i.folder===id).forEach(i=>libRelocate(l,i,null));
   l.folders=l.folders.filter(x=>x.id!==id);
   if(libCommit(l)){ if(libView===id) libView=null; libRender(); libUpdateDirty(); }
@@ -3960,7 +3965,7 @@ async function libMoveManyDialog(){
 function libDeleteMany(){
   const ids=[...libSel]; if(!ids.length) return;
   const l=libClone(); const es=l.items.filter(i=>ids.includes(i.id)); if(!es.length) return;
-  if(!confirm('Supprimer '+es.length+' planning'+(es.length>1?'s':'')+' de la bibliothèque ?\nIls seront conservés dans la corbeille (10 derniers éléments).')) return;
+  if(!askDel('Supprimer '+es.length+' planning'+(es.length>1?'s':'')+' de la bibliothèque ?\nIls seront conservés dans la corbeille (10 derniers éléments).')) return;
   clearTimeout(_libAutoT);
   const wasCur=es.some(e=>e.id===l.current);
   es.forEach(e=>libTrashPush(l,e)); l.items=l.items.filter(i=>!ids.includes(i.id)); if(wasCur) l.current=null;
@@ -4662,7 +4667,7 @@ async function renderLocalDirs() {
       btnDel.innerHTML = '×';
       btnDel.title = 'Supprimer ce raccourci';
       btnDel.onclick = async () => {
-        if(confirm('Supprimer le raccourci vers ' + dName + ' ?')) {
+        if(askDel('Supprimer le raccourci vers ' + dName + ' ?')) {
           await removeLocalDir(dName);
           renderLocalDirs();
         }
