@@ -302,6 +302,12 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .lib-savemenu button{display:block;width:100%;text-align:left;background:none;border:0;border-radius:6px;padding:8px 10px;font:inherit;font-style:normal;color:#1f2933;cursor:pointer}
 .lib-savemenu button:hover{background:#f1f3f6}
 .lib-dirty{position:absolute;top:3px;right:3px;width:8px;height:8px;border-radius:50%;background:#c0392b;border:1.5px solid #fff;display:none;pointer-events:none}
+.lib-sa{height:min(560px,88vh);width:min(820px,95vw)}
+.lib-sa-foot{border-top:1px solid #eceef1;padding:12px 20px 10px;flex-shrink:0}
+.lib-sa-row{display:flex;gap:8px;align-items:center;margin-top:4px}
+.lib-sa-row .lib-input{flex:1;min-width:0}
+.lib-sa-err{min-height:16px;font-size:12px;margin-top:6px}
+.lib-row.sa-ro{cursor:default;opacity:.75}
 .lib-ov{position:fixed;inset:0;z-index:100000;background:rgba(20,24,30,.5);display:none;align-items:center;justify-content:center}
 .lib-box{background:#fff;border-radius:12px;width:min(920px,95vw);height:min(660px,88vh);display:flex;flex-direction:column;box-shadow:0 12px 40px rgba(0,0,0,.28);padding:0;overflow:hidden}
 .lib-head{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid #eceef1;flex-shrink:0}
@@ -3740,24 +3746,54 @@ function libNextVersionName(base){
   let n=2; while(l.items.some(i=>(i.folder||null)===(fid||null)&&i.name.toLowerCase()===(b+' v'+n).toLowerCase())) n++;
   return b+' v'+n;
 }
-async function libSaveAs(){
-  if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return false; }
-  const l=libGet(), e=libCurEntry(l);
-  let fid=e?e.folder:null; if(fid&&!l.folders.some(f=>f.id===fid)) fid=null;
-  let name=e?libNextVersionName():libTitle(), err='';
-  for(;;){
-    const r=await libDialog('Enregistrer sous…','<label class="lib-lbl">'+(e?'Nom de la nouvelle version (la version actuelle est conservée)':'Nom du macro-planning')+'</label><input type="text" class="lib-input" id="lib-name-in" value="'+libEsc(name)+'" maxlength="120">'+(err?'<p class="lib-warn" style="margin:8px 0 0">'+libEsc(err)+'</p>':'')+'<label class="lib-lbl" style="margin-top:12px">Dossier de destination</label><select class="lib-input" id="lib-folder-in">'+libFolderOptions(l,fid)+'</select>',
-      [{label:'Annuler',value:null},{label:'Enregistrer',value:'ok',primary:true}],o=>({name:o.querySelector('#lib-name-in').value.trim(),folder:o.querySelector('#lib-folder-in').value||null}));
-    if(r.value!=='ok') return false;
-    name=r.data.name; fid=r.data.folder;
-    if(!name){ err='Le nom ne peut pas être vide.'; name=libNextVersionName(); continue; }
-    if(libGet().items.some(i=>(i.folder||null)===(fid||null)&&i.name.toLowerCase()===name.toLowerCase())){ err='Ce nom existe déjà dans ce dossier.'; continue; }
-    break;
-  }
-  const t=document.getElementById('planning-title'); if(t) t.value=name;
-  const ok=libSaveCurrent({asNew:true,name,folder:fid||null,silent:true});
-  if(ok) showToast('Macro-planning sauvegardé sous « '+name+' »'+(fid?' (dossier « '+libFolderName(libGet(),fid)+' »)':' (racine)'));
-  return ok;
+function libSaveAs(){
+  if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return Promise.resolve(false); }
+  return new Promise(res=>{
+    const e=libCurEntry(libGet());
+    let fid=e?e.folder:null; if(fid&&!libGet().folders.some(f=>f.id===fid)) fid=null;
+    const o=document.createElement('div'); o.className='lib-ov'; o.style.display='flex'; o.style.zIndex=100001;
+    o.innerHTML='<div class="lib-box lib-sa" role="dialog" aria-modal="true" aria-label="Enregistrer sous"><div class="lib-head"><h2>Enregistrer sous…</h2><button type="button" class="lib-x" aria-label="Fermer">×</button></div>'
+      +'<div class="lib-main"><div class="lib-side" id="sa-side"></div><div class="lib-pane"><div class="lib-pane-h"><span class="lib-ptitle" id="sa-ptitle"></span></div><div class="lib-list" id="sa-list"></div></div></div>'
+      +'<div class="lib-sa-foot"><label class="lib-lbl" for="sa-name">'+(e?'Nom de la nouvelle version (la version actuelle est conservée)':'Nom du macro-planning')+'</label>'
+      +'<div class="lib-sa-row"><input type="text" class="lib-input" id="sa-name" maxlength="120"><button type="button" class="lib-btn" id="sa-cancel">Annuler</button><button type="button" class="lib-btn primary" id="sa-ok">Enregistrer</button></div>'
+      +'<div class="lib-warn lib-sa-err" id="sa-err"></div></div></div>';
+    const $=q=>o.querySelector(q), inp=$('#sa-name');
+    inp.value=e?libNextVersionName():libTitle();
+    function render(){
+      const l=libGet(); if(fid&&!l.folders.some(f=>f.id===fid)) fid=null;
+      const cnt=k=>l.items.filter(i=>(i.folder||null)===(k||null)).length;
+      let side='<div class="lib-fold'+(!fid?' on':'')+'" data-f="">'+LIB_ICO_HOME+'<span class="lib-fname">Racine</span><span class="lib-n">'+cnt(null)+'</span></div>';
+      l.folders.slice().sort((x,y)=>x.name.localeCompare(y.name,'fr')).forEach(f=>{ side+='<div class="lib-fold'+(fid===f.id?' on':'')+'" data-f="'+f.id+'">'+LIB_ICO_FOLDER+'<span class="lib-fname">'+libEsc(f.name)+'</span><span class="lib-n">'+cnt(f.id)+'</span></div>'; });
+      side+='<button type="button" class="lib-newf" id="sa-newf">+ Nouveau dossier</button>';
+      $('#sa-side').innerHTML=side;
+      $('#sa-ptitle').textContent='Enregistrer dans : '+(fid?libFolderName(l,fid):'Racine');
+      const its=l.items.filter(i=>(i.folder||null)===(fid||null)).sort((x,y)=>x.name.localeCompare(y.name,'fr'));
+      $('#sa-list').innerHTML=its.length?its.map(i=>'<div class="lib-row sa-ro"><div class="lib-row-main"><div class="lib-name">'+libEsc(i.name)+'</div><div class="lib-sub">'+libFmt(i.modified)+'</div></div></div>').join(''):'<div class="lib-empty">Ce dossier est vide.</div>';
+      $('#sa-side').querySelectorAll('.lib-fold').forEach(d=>d.onclick=()=>{ fid=d.dataset.f||null; $('#sa-err').textContent=''; render(); });
+      $('#sa-newf').onclick=async()=>{
+        const n=await libAskName('Nouveau dossier','Nom du dossier',''); if(!n) return;
+        const c=libClone(); if(libFolderByName(c,n)){ $('#sa-err').textContent='Un dossier porte déjà ce nom.'; return; }
+        const f={id:'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name:n}; c.folders.push(f);
+        if(libCommit(c)){ fid=f.id; $('#sa-err').textContent=''; render(); }
+      };
+    }
+    const kd=ev=>{ if(ev.key==='Escape'){ ev.stopPropagation(); done(false); } else if(ev.key==='Enter'&&document.activeElement===inp){ ev.preventDefault(); ok(); } };
+    const done=v=>{ document.removeEventListener('keydown',kd,true); o.remove(); res(v); };
+    function ok(){
+      const name=inp.value.trim();
+      if(!name){ $('#sa-err').textContent='Le nom ne peut pas être vide.'; return; }
+      if(libGet().items.some(i=>(i.folder||null)===(fid||null)&&i.name.toLowerCase()===name.toLowerCase())){ $('#sa-err').textContent='Ce nom existe déjà dans ce dossier.'; return; }
+      const t=document.getElementById('planning-title'); if(t) t.value=name;
+      const saved=libSaveCurrent({asNew:true,name,folder:fid||null,silent:true});
+      if(saved) showToast('Macro-planning sauvegardé sous « '+name+' »'+(fid?' (dossier « '+libFolderName(libGet(),fid)+' »)':' (racine)'));
+      done(saved);
+    }
+    document.addEventListener('keydown',kd,true);
+    $('.lib-x').onclick=()=>done(false); $('#sa-cancel').onclick=()=>done(false); $('#sa-ok').onclick=ok;
+    o.addEventListener('mousedown',ev=>{ if(ev.target===o) done(false); });
+    inp.addEventListener('input',()=>{ $('#sa-err').textContent=''; });
+    document.body.appendChild(o); render(); inp.focus(); inp.select();
+  });
 }
 function libApply(d,name){
   libFresh=false;
