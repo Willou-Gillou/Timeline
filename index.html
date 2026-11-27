@@ -315,15 +315,21 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .lib-newf{margin-top:8px;border:1px dashed #c4c9d0;background:transparent;border-radius:7px;padding:7px;font-size:12px;color:#666;cursor:pointer;font-family:inherit}
 .lib-newf:hover{border-color:#c0392b;color:#c0392b}
 .lib-pane{flex:1;min-width:0;display:flex;flex-direction:column}
-.lib-pane-h{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 16px;flex-shrink:0}
+.lib-pane-h{display:flex;align-items:center;gap:10px;padding:10px 16px 10px 28px;flex-shrink:0}
 .lib-ptitle{font-size:14px;font-weight:700;color:#2c3e50;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+input[type=checkbox].lib-chk{-webkit-appearance:auto;appearance:auto;width:16px;height:16px;border-radius:3px;background:transparent;accent-color:#c0392b;cursor:pointer;flex-shrink:0;margin:0}
+input[type=checkbox].lib-chk::before{display:none}
+.lib-pane-h .lib-ptitle{flex:1;min-width:0}
+.lib-row.sel{background:#fff1ef;border-color:#e6a8a1}
+.lib-selbar{display:flex;align-items:center;gap:8px;margin:0 16px 8px;padding:7px 10px;background:#f3f4f6;border:1px solid #e0e3e8;border-radius:8px;flex-shrink:0}
+.lib-selcount{font-size:12px;font-weight:700;color:#c0392b;margin-right:auto}
 .lib-search{width:210px;padding:6px 10px;border:1px solid #d5d9df;border-radius:6px;font-size:12px;outline:none;font-family:inherit}
 .lib-search:focus{border-color:#c0392b}
 .lib-list{flex:1;overflow:auto;padding:0 16px 10px}
 .lib-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid #e8eaee;border-radius:8px;margin-bottom:6px;background:#fff;cursor:grab}
 .lib-row:hover{border-color:#cfd4da;box-shadow:0 1px 4px rgba(0,0,0,.06)}
 .lib-row.cur{background:#fff6f5;border-color:#efc3be}
-.lib-row-main{min-width:0}
+.lib-row-main{min-width:0;flex:1}
 .lib-name{font-weight:700;font-size:13px;color:#2c3e50;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lib-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#c0392b;margin-right:7px}
 .lib-fchip{margin-left:8px;font-size:10px;font-weight:600;background:#eef0f2;color:#666;border-radius:9px;padding:1px 7px}
@@ -3791,7 +3797,8 @@ async function libImportFromInput(ev){
 }
 
 // ── Dossiers (1 niveau) ──
-let libView=null, libSearch='';
+let libView=null, libSearch='', libSel=new Set(), libLast=null, libVisible=[];
+function libGo(fid){ libView=fid||null; libSearch=''; libSel.clear(); libLast=null; libRender(); }
 function libRelocate(l,e,fid){
   const before=e.name; e.folder=fid||null; e.name=libUniqueIn(e.name,l,e.folder,e.id);
   if(e.name!==before){ e.hash=libFullHash(e.data,e.name); if(l.current===e.id){ const t=document.getElementById('planning-title'); if(t){ t.value=e.name; setTimeout(()=>saveState(),0); } } }
@@ -3800,7 +3807,7 @@ async function libNewFolder(){
   const name=await libAskName('Nouveau dossier','Nom du dossier',''); if(!name) return;
   const l=libClone(); if(libFolderByName(l,name)){ alert('Un dossier porte déjà ce nom.'); return; }
   const f={id:'f'+Date.now().toString(36)+Math.random().toString(36).slice(2,5),name}; l.folders.push(f);
-  if(libCommit(l)){ libView=f.id; libSearch=''; libRender(); }
+  if(libCommit(l)){ libGo(f.id); }
 }
 async function libRenameFolder(id){
   const l=libClone(), f=l.folders.find(x=>x.id===id); if(!f) return;
@@ -3826,7 +3833,49 @@ async function libMoveDialog(id){
   const r=await libDialog('Déplacer « '+e.name+' »','<label class="lib-lbl">Dossier de destination</label><select class="lib-sel wide" id="lib-fold-in">'+libFolderOptions(l,e.folder)+'</select>',[{label:'Annuler',value:null},{label:'Déplacer',value:'ok',primary:true}],o=>o.querySelector('#lib-fold-in').value||null);
   if(r.value==='ok') libMoveTo(id,r.data);
 }
-function libDrop(ev,fid){ ev.preventDefault(); ev.currentTarget.classList.remove('drop'); const id=ev.dataTransfer.getData('text/plain'); if(id) libMoveTo(id,fid||null); }
+function libDrop(ev,fid){ ev.preventDefault(); ev.currentTarget.classList.remove('drop'); const ids=(ev.dataTransfer.getData('text/plain')||'').split(',').filter(Boolean); if(ids.length) libMoveMany(ids,fid||null); }
+function libMoveMany(ids,fid){
+  const l=libClone(); let n=0;
+  ids.forEach(id=>{ const e=l.items.find(i=>i.id===id); if(e&&(e.folder||null)!==(fid||null)){ libRelocate(l,e,fid); n++; } });
+  if(!n) return;
+  if(libCommit(l)){ libSel.clear(); libRender(); showToast(n+' planning'+(n>1?'s':'')+' déplacé'+(n>1?'s':'')+' vers « '+(libFolderName(l,fid)||'Racine')+' »'); }
+}
+async function libMoveManyDialog(){
+  const ids=[...libSel]; if(!ids.length) return; const l=libGet();
+  const r=await libDialog('Déplacer '+ids.length+' planning'+(ids.length>1?'s':''),'<label class="lib-lbl">Dossier de destination</label><select class="lib-sel wide" id="lib-fold-in">'+libFolderOptions(l,libView)+'</select>',[{label:'Annuler',value:null},{label:'Déplacer',value:'ok',primary:true}],o=>o.querySelector('#lib-fold-in').value||null);
+  if(r.value==='ok') libMoveMany(ids,r.data);
+}
+function libDeleteMany(){
+  const ids=[...libSel]; if(!ids.length) return;
+  const l=libClone(); const es=l.items.filter(i=>ids.includes(i.id)); if(!es.length) return;
+  if(!confirm('Supprimer '+es.length+' planning'+(es.length>1?'s':'')+' de la bibliothèque ?\nIls seront conservés dans la corbeille (10 derniers éléments).')) return;
+  const wasCur=es.some(e=>e.id===l.current);
+  es.forEach(e=>libTrashPush(l,e)); l.items=l.items.filter(i=>!ids.includes(i.id)); if(wasCur) l.current=null;
+  if(libCommit(l)){ libSel.clear(); libUpdateDirty(); libRender(); showToast(es.length+' planning'+(es.length>1?'s supprimés':' supprimé')+(wasCur?'. Le planning ouvert n\'est plus lié à la bibliothèque.':' (corbeille)')); }
+}
+function libExportMany(){
+  const l=libGet(), es=l.items.filter(i=>libSel.has(i.id)); if(!es.length) return;
+  const names=new Set(); es.forEach(e=>{ const f=libFolderName(l,e.folder); if(f) names.add(f); });
+  libDownload('bibliotheque_selection_'+new Date().toISOString().slice(0,10)+'.json',{format:'macroplanning-library',version:2,exported:Date.now(),folders:[...names],items:es.map(e=>({id:e.id,name:e.name,folder:libFolderName(l,e.folder),created:e.created,modified:e.modified,rev:e.rev,data:e.data}))});
+  showToast(es.length+' planning'+(es.length>1?'s exportés':' exporté'));
+}
+function libToggleSel(id,ev){
+  if(ev&&ev.shiftKey&&libLast&&libVisible.includes(libLast)&&libVisible.includes(id)){
+    const a=libVisible.indexOf(libLast), b=libVisible.indexOf(id); libVisible.slice(Math.min(a,b),Math.max(a,b)+1).forEach(x=>libSel.add(x));
+  } else if(libSel.has(id)) libSel.delete(id); else libSel.add(id);
+  libLast=id; libRefreshList();
+}
+function libRowClick(ev,id){ if(ev.target.closest('button,input')) return; if(ev.ctrlKey||ev.metaKey||ev.shiftKey){ libToggleSel(id,ev); } }
+function libSelAll(on){ libVisible.forEach(id=>{ if(on) libSel.add(id); else libSel.delete(id); }); libRefreshList(); }
+function libSelBarHtml(){
+  const n=libSel.size; if(!n) return '';
+  return '<span class="lib-selcount">'+n+' sélectionné'+(n>1?'s':'')+'</span><button type="button" class="lib-btn sm" onclick="libMoveManyDialog()">Déplacer vers…</button><button type="button" class="lib-btn sm" onclick="libExportMany()">Exporter</button><button type="button" class="lib-btn sm danger" onclick="libDeleteMany()">Supprimer</button><button type="button" class="lib-btn sm" onclick="libSel.clear();libRefreshList()">Désélectionner</button>';
+}
+function libRefreshList(){
+  const l=libGet(); const el=document.getElementById('lib-list'); if(el) el.innerHTML=libListHtml(l);
+  const sb=document.getElementById('lib-selbar'); if(sb){ sb.innerHTML=libSelBarHtml(); sb.style.display=libSel.size?'flex':'none'; }
+  const all=document.getElementById('lib-all'); if(all){ const n=libVisible.filter(id=>libSel.has(id)).length; all.checked=n>0&&n===libVisible.length; all.indeterminate=n>0&&n<libVisible.length; all.disabled=!libVisible.length; }
+}
 function libCloseMenu(){ document.getElementById('lib-menu')?.remove(); }
 function libRowMenu(ev,id){
   ev.stopPropagation(); libCloseMenu();
@@ -3856,26 +3905,31 @@ function libListHtml(l){
   const cur=libCurEntry(l), q=libSearch.trim().toLowerCase();
   let items=l.items.slice().sort((a,c)=>(c.modified||0)-(a.modified||0));
   items=q?items.filter(e=>e.name.toLowerCase().includes(q)):items.filter(e=>(e.folder||null)===(libView||null));
+  libVisible=items.map(e=>e.id);
   if(!items.length) return '<div class="lib-empty">'+(q?'Aucun planning ne correspond à « '+libEsc(libSearch)+' ».':(libView?'Ce dossier est vide. Glissez un planning dessus ou utilisez « Déplacer vers… ».':'Aucun planning à la racine. Cliquez sur « Enregistrer » pour commencer.'))+'</div>';
   return items.map(e=>{
     const c=libCount(e.data), isCur=cur&&cur.id===e.id, fn=libFolderName(l,e.folder);
-    return '<div class="lib-row'+(isCur?' cur':'')+'" draggable="true" ondragstart="event.dataTransfer.setData(\'text/plain\',\''+e.id+'\');event.dataTransfer.effectAllowed=\'move\'" ondblclick="libOpen(\''+e.id+'\')">'
+    const sel=libSel.has(e.id);
+    return '<div class="lib-row'+(isCur?' cur':'')+(sel?' sel':'')+'" draggable="true" ondragstart="libDragStart(event,\''+e.id+'\')" onclick="libRowClick(event,\''+e.id+'\')" ondblclick="if(!event.target.closest(\'button,input\'))libOpen(\''+e.id+'\')">'
+      +'<input type="checkbox" class="lib-chk" '+(sel?'checked ':'')+'onclick="event.stopPropagation();libToggleSel(\''+e.id+'\',event)" aria-label="Sélectionner">'
       +'<div class="lib-row-main"><div class="lib-name">'+(isCur?'<span class="lib-dot" title="Planning ouvert"></span>':'')+libEsc(e.name)+(q&&fn?'<span class="lib-fchip">'+libEsc(fn)+'</span>':'')+'</div>'
       +'<div class="lib-sub">'+libFmt(e.modified)+' · '+c.p+' phase'+(c.p>1?'s':'')+' · '+c.t+' tâche'+(c.t>1?'s':'')+' · rév. '+(e.rev||1)+'</div></div>'
       +'<div class="lib-row-act"><button type="button" class="lib-btn sm primary" onclick="libOpen(\''+e.id+'\')">Ouvrir</button>'
       +'<button type="button" class="lib-btn sm icon" onclick="libRowMenu(event,\''+e.id+'\')" aria-label="Plus d\'actions" title="Plus d\'actions">⋯</button></div></div>';
   }).join('');
 }
-function libSearchInput(v){ libSearch=v; const l=libGet(); const el=document.getElementById('lib-list'); if(el) el.innerHTML=libListHtml(l); libRenderTitle(l); }
+function libDragStart(ev,id){ const ids=libSel.has(id)?[...libSel]:[id]; ev.dataTransfer.setData('text/plain',ids.join(',')); ev.dataTransfer.effectAllowed='move'; }
+function libSearchInput(v){ libSearch=v; libRefreshList(); libRenderTitle(libGet()); }
 function libRenderTitle(l){ const t=document.getElementById('lib-ptitle'); if(!t) return; const q=libSearch.trim(); t.textContent=q?'Résultats dans tous les dossiers':(libView?libFolderName(l,libView):'Racine'); }
 function libRender(){
   const b=document.getElementById('lib-body'); if(!b) return;
   const l=libGet(), cur=libCurEntry(l), dirty=libIsDirty();
   if(libView&&!l.folders.some(f=>f.id===libView)) libView=null;
+  [...libSel].forEach(id=>{ if(!l.items.some(i=>i.id===id)) libSel.delete(id); });
   const cnt=fid=>l.items.filter(i=>(i.folder||null)===(fid||null)).length;
-  let side='<div class="lib-fold'+(!libView?' on':'')+'" onclick="libView=null;libSearch=\'\';libRender()" ondragover="event.preventDefault();this.classList.add(\'drop\')" ondragleave="this.classList.remove(\'drop\')" ondrop="libDrop(event,null)">'+LIB_ICO_HOME+'<span class="lib-fname">Racine</span><span class="lib-n">'+cnt(null)+'</span></div>';
+  let side='<div class="lib-fold'+(!libView?' on':'')+'" onclick="libGo(null)" ondragover="event.preventDefault();this.classList.add(\'drop\')" ondragleave="this.classList.remove(\'drop\')" ondrop="libDrop(event,null)">'+LIB_ICO_HOME+'<span class="lib-fname">Racine</span><span class="lib-n">'+cnt(null)+'</span></div>';
   l.folders.slice().sort((a,c)=>a.name.localeCompare(c.name,'fr')).forEach(f=>{
-    side+='<div class="lib-fold'+(libView===f.id?' on':'')+'" onclick="libView=\''+f.id+'\';libSearch=\'\';libRender()" ondragover="event.preventDefault();this.classList.add(\'drop\')" ondragleave="this.classList.remove(\'drop\')" ondrop="libDrop(event,\''+f.id+'\')">'+LIB_ICO_FOLDER+'<span class="lib-fname">'+libEsc(f.name)+'</span><span class="lib-n">'+cnt(f.id)+'</span>'
+    side+='<div class="lib-fold'+(libView===f.id?' on':'')+'" onclick="libGo(\''+f.id+'\')" ondragover="event.preventDefault();this.classList.add(\'drop\')" ondragleave="this.classList.remove(\'drop\')" ondrop="libDrop(event,\''+f.id+'\')">'+LIB_ICO_FOLDER+'<span class="lib-fname">'+libEsc(f.name)+'</span><span class="lib-n">'+cnt(f.id)+'</span>'
       +'<span class="lib-fact"><button type="button" title="Renommer le dossier" onclick="event.stopPropagation();libRenameFolder(\''+f.id+'\')">✎</button><button type="button" title="Supprimer le dossier" onclick="event.stopPropagation();libDeleteFolder(\''+f.id+'\')">×</button></span></div>';
   });
   side+='<button type="button" class="lib-newf" onclick="libNewFolder()">+ Nouveau dossier</button>';
@@ -3897,8 +3951,8 @@ function libRender(){
   b.innerHTML='<div class="lib-bar"><div class="lib-bar-l"><button type="button" class="lib-btn primary" onclick="libSave()">'+(cur?'Enregistrer':'Enregistrer le planning')+'</button><button type="button" class="lib-btn" onclick="libSaveAs()">Enregistrer sous…</button></div>'
     +'<div class="lib-bar-r"><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Importer…</button><button type="button" class="lib-btn" onclick="promptSaveJSON()" title="Télécharger le planning actuel en fichier JSON">Exporter le planning actuel…</button><button type="button" class="lib-btn" onclick="libExportAll()">Tout exporter</button></div>'
     +'<input type="file" id="lib-import-input" accept=".json,application/json" multiple hidden onchange="libImportFromInput(event)"></div>'+state
-    +'<div class="lib-main"><div class="lib-side">'+side+'</div><div class="lib-pane"><div class="lib-pane-h"><div id="lib-ptitle" class="lib-ptitle"></div><input type="search" class="lib-search" placeholder="Rechercher un planning…" value="'+libEsc(libSearch)+'" oninput="libSearchInput(this.value)"></div><div id="lib-list" class="lib-list">'+libListHtml(l)+'</div></div></div>'+foot;
-  libRenderTitle(l);
+    +'<div class="lib-main"><div class="lib-side">'+side+'</div><div class="lib-pane"><div class="lib-pane-h"><input type="checkbox" id="lib-all" class="lib-chk" onchange="libSelAll(this.checked)" title="Tout sélectionner" aria-label="Tout sélectionner"><div id="lib-ptitle" class="lib-ptitle"></div><input type="search" class="lib-search" placeholder="Rechercher un planning…" value="'+libEsc(libSearch)+'" oninput="libSearchInput(this.value)"></div><div id="lib-selbar" class="lib-selbar" style="display:none"></div><div id="lib-list" class="lib-list">'+libListHtml(l)+'</div></div></div>'+foot;
+  libRenderTitle(l); libRefreshList();
   b.querySelectorAll('details.lib-foot').forEach((d,i)=>{ if(openDet[i]) d.open=true; });
 }
 // Ctrl/Cmd+S : enregistrer dans la bibliothèque ; Échap : fermer la fenêtre
