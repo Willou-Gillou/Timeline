@@ -3527,7 +3527,7 @@ async function libConfirmLeave(targetId){
   const l=libGet();
   if(!libIsDirty()) return true;
   const r=await libDialog('Modifications non enregistrées','<p>Le planning actuel a des modifications qui ne sont pas enregistrées dans la bibliothèque.</p>',[{label:'Annuler',value:null},{label:'Ne pas enregistrer',value:'no'},{label:'Enregistrer',value:'save',primary:true}]);
-  if(r.value==='save') return libSaveCurrent({silent:true});
+  if(r.value==='save') return libSave();
   return r.value==='no';
 }
 
@@ -3538,7 +3538,7 @@ function libSaveCurrent(o){
   let e=o.asNew?null:libCurEntry(l);
   if(e){ e.name=libUniqueIn(title,l,e.folder,e.id); e.modified=now; e.rev=(e.rev||0)+1; e.data=data; e.hash=libFullHash(data,e.name); }
   else {
-    let fid=o.folder!==undefined?o.folder:(libUIOpen()?libView:null); if(fid&&!l.folders.some(f=>f.id===fid)) fid=null;
+    let fid=o.folder!==undefined?o.folder:null; if(fid&&!l.folders.some(f=>f.id===fid)) fid=null;
     e={id:libNewId(),name:libUniqueIn(title,l,fid),folder:fid||null,created:now,modified:now,rev:1,data}; e.hash=libFullHash(data,e.name); l.items.push(e);
   }
   l.current=e.id;
@@ -3548,6 +3548,26 @@ function libSaveCurrent(o){
   if(!o.silent) showToast('Planning « '+e.name+' » enregistré dans la bibliothèque');
   if(libUIOpen()) libRender();
   return true;
+}
+async function libSave(){
+  const l=libGet(), e=libCurEntry(l);
+  if(!e) return libSaveCurrent();
+  if(!libIsDirty()){ showToast('Aucune modification à enregistrer'); return true; }
+  const fn=libFolderName(l,e.folder);
+  const r=await libDialog('Enregistrer le planning','<p style="margin:0">« <b>'+libEsc(e.name)+'</b> » existe déjà dans la bibliothèque ('+(fn?'dossier « '+libEsc(fn)+' »':'racine')+').</p><p class="lib-sub" style="margin-top:8px">Écraser remplace la version enregistrée. Créer une nouvelle version la conserve et ajoute le planning actuel comme nouveau fichier.</p>',
+    [{label:'Annuler',value:null},{label:'Écraser',value:'over'},{label:'Créer une nouvelle version',value:'new',primary:true}]);
+  if(r.value==='over') return libSaveCurrent();
+  if(r.value==='new') return libSaveNewVersion();
+  return false;
+}
+function libSaveNewVersion(){
+  const l=libGet(), e=libCurEntry(l); if(!e) return libSaveCurrent();
+  const base=libTitle().replace(/\s*\(v\d+\)\s*$/i,'')||LIB_DEFAULT_NAME;
+  let n=2; while(l.items.some(i=>(i.folder||null)===(e.folder||null)&&i.name.toLowerCase()===(base+' (v'+n+')').toLowerCase())) n++;
+  const name=base+' (v'+n+')';
+  const ok=libSaveCurrent({asNew:true,name,folder:e.folder||null,silent:true});
+  if(ok) showToast('Nouvelle version enregistrée : « '+name+' »');
+  return ok;
 }
 function libUIOpen(){ return document.getElementById('lib-overlay')?.style.display==='flex'; }
 function libFolderOptions(l,sel){ return '<option value=""'+(!sel?' selected':'')+'>Racine</option>'+l.folders.map(f=>'<option value="'+f.id+'"'+(f.id===sel?' selected':'')+'>'+libEsc(f.name)+'</option>').join(''); }
@@ -3598,8 +3618,9 @@ function libTrashPush(l,e){ const c=JSON.parse(JSON.stringify(e)); c.deletedAt=D
 function libDelete(id){
   const l=libClone(), e=l.items.find(i=>i.id===id); if(!e) return;
   if(!confirm('Supprimer « '+e.name+' » de la bibliothèque ?\nIl sera conservé dans la corbeille (10 derniers éléments).')) return;
+  const wasCur=l.current===id;
   libTrashPush(l,e); l.items=l.items.filter(i=>i.id!==id); if(l.current===id) l.current=null;
-  if(libCommit(l)){ libUpdateDirty(); libRender(); }
+  if(libCommit(l)){ libUpdateDirty(); libRender(); showToast(wasCur?'Planning supprimé. Le planning ouvert n\'est plus lié à la bibliothèque : le prochain enregistrement créera un nouveau fichier à la racine.':'Planning supprimé (corbeille)'); }
 }
 function libRestore(idx){
   const l=libClone(), e=l.trash[idx]; if(!e) return;
@@ -3849,7 +3870,7 @@ function libRender(){
   const used=libUsage(), pct=Math.min(100,Math.round(used/LIB_QUOTA*100));
   const old=l.items.length&&(!l.lastExport||Date.now()-l.lastExport>30*86400000);
   let foot='<details class="lib-foot"><summary>Options et espace utilisé ('+pct+' %)'+(old?' <span class="lib-warn">· pensez à exporter</span>':'')+'</summary>'
-    +'<div class="lib-opts"><label><input type="checkbox" '+(l.auto?'checked':'')+' onchange="libSetOpt(\'auto\',this.checked)"> Enregistrer automatiquement le planning ouvert</label>'
+    +'<div class="lib-opts"><label><input type="checkbox" '+(l.auto?'checked':'')+' onchange="libSetOpt(\'auto\',this.checked)"> Enregistrer automatiquement le planning ouvert (écrase la version enregistrée)</label>'
     +'<label><input type="checkbox" '+(l.addOnOpen?'checked':'')+' onchange="libSetOpt(\'addOnOpen\',this.checked)"> Ajouter à la bibliothèque les fichiers ouverts avec « Charger un planning »</label></div>'
     +'<div class="lib-gauge"><div class="lib-gauge-bar"><div style="width:'+pct+'%;'+(pct>=80?'background:#c0392b':'')+'"></div></div><div class="lib-sub">'+Math.round(used/1000)+' Ko utilisés sur environ 5 Mo dans ce navigateur'+(pct>=80?' — <span class="lib-warn">presque plein</span>':'')+'</div></div>'
     +'<div class="lib-sub lib-note">Les plannings sont stockés dans ce navigateur : un effacement des données ou la navigation privée les supprime. '+(old?'<span class="lib-warn">'+(l.lastExport?'Dernier export il y a plus de 30 jours. ':'Bibliothèque jamais exportée. ')+'</span>':'')+'Utilisez « Tout exporter » pour en garder une copie.</div></details>';
@@ -3859,7 +3880,7 @@ function libRender(){
     foot+='<div style="text-align:right;margin-top:6px"><button type="button" class="lib-btn sm danger" onclick="libEmptyTrash()">Vider la corbeille</button></div></details>';
   }
   const openDet=[...b.querySelectorAll('details.lib-foot')].map(d=>d.open);
-  b.innerHTML='<div class="lib-bar"><div class="lib-bar-l"><button type="button" class="lib-btn primary" onclick="libSaveCurrent()">'+(cur?'Enregistrer':'Enregistrer le planning')+'</button><button type="button" class="lib-btn" onclick="libSaveAs()">Enregistrer sous…</button></div>'
+  b.innerHTML='<div class="lib-bar"><div class="lib-bar-l"><button type="button" class="lib-btn primary" onclick="libSave()">'+(cur?'Enregistrer':'Enregistrer le planning')+'</button><button type="button" class="lib-btn" onclick="libSaveAs()">Enregistrer sous…</button></div>'
     +'<div class="lib-bar-r"><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Importer…</button><button type="button" class="lib-btn" onclick="libExportAll()">Tout exporter</button></div>'
     +'<input type="file" id="lib-import-input" accept=".json,application/json" multiple hidden onchange="libImportFromInput(event)"></div>'+state
     +'<div class="lib-main"><div class="lib-side">'+side+'</div><div class="lib-pane"><div class="lib-pane-h"><div id="lib-ptitle" class="lib-ptitle"></div><input type="search" class="lib-search" placeholder="Rechercher un planning…" value="'+libEsc(libSearch)+'" oninput="libSearchInput(this.value)"></div><div id="lib-list" class="lib-list">'+libListHtml(l)+'</div></div></div>'+foot;
@@ -3868,7 +3889,7 @@ function libRender(){
 }
 // Ctrl/Cmd+S : enregistrer dans la bibliothèque ; Échap : fermer la fenêtre
 document.addEventListener('keydown',function(e){
-  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==='s'){ e.preventDefault(); if(appReady) libSaveCurrent(); return; }
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==='s'){ e.preventDefault(); if(appReady) libSave(); return; }
   if(e.key==='Escape'&&document.getElementById('lib-overlay')?.style.display==='flex'&&!document.querySelector('.lib-dlg-ov')) libClose();
 });
 window.addEventListener('storage',function(e){ if(e.key===LIB_KEY){ libStale=true; _lib=null; showToast('La bibliothèque a été modifiée dans un autre onglet : rechargez cette page.'); } });
