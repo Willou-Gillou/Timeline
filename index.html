@@ -1132,15 +1132,18 @@ function frHolidaysBetween(d1,d2){
 function fmtDMY(d){ return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+'/'+d.getFullYear(); }
 function showHolidayTip(ev){
   let tip=document.getElementById('holiday-tip');
-  const svg=document.getElementById('tl-svg'), hits=window._tlHol||[];
-  if(!svg||!hits.length||ev.buttons){ if(tip) tip.style.display='none'; return; }
+  const svg=document.getElementById('tl-svg'), hits=window._tlHol||[], fz=window._tlFrz||[];
+  if(!svg||(!hits.length&&!fz.length)||ev.buttons){ if(tip) tip.style.display='none'; return; }
   const r=svg.getBoundingClientRect(); if(!r.width){ return; }
   const x=(ev.clientX-r.left)*((tlVBw||r.width)/r.width), tol=3;
   const h=hits.find(k=>x>=k.x1-tol&&x<=k.x2+tol);
-  if(!h){ if(tip) tip.style.display='none'; return; }
-  if(!tip){ tip=document.createElement('div'); tip.id='holiday-tip'; tip.style.cssText='position:fixed;z-index:10050;pointer-events:none;background:#263238;color:#fff;font:600 12px/1.3 system-ui,sans-serif;padding:6px 9px;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.28);white-space:nowrap;'; document.body.appendChild(tip); }
-  const dt=h.date.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  tip.innerHTML=''; const b=document.createElement('div'); b.textContent=h.name; const d=document.createElement('div'); d.textContent=dt; d.style.cssText='font-weight:400;opacity:.85;font-size:11px;'; tip.appendChild(b); tip.appendChild(d);
+  const fl=fz.filter(k=>x>=k.x1-tol&&x<=k.x2+tol);
+  if(!h&&!fl.length){ if(tip) tip.style.display='none'; return; }
+  if(!tip){ tip=document.createElement('div'); tip.id='holiday-tip'; tip.style.cssText='position:fixed;z-index:10050;pointer-events:none;background:#263238;color:#fff;font:600 12px/1.3 system-ui,sans-serif;padding:6px 9px;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.3);max-width:260px;'; document.body.appendChild(tip); }
+  tip.innerHTML='';
+  const add=(t,sub)=>{ const b=document.createElement('div'); b.textContent=t; tip.appendChild(b); const d=document.createElement('div'); d.textContent=sub; d.style.cssText='font-weight:400;opacity:.85;font-size:11px;margin-bottom:3px;'; tip.appendChild(d); };
+  fl.forEach(f=>add(f.title,'Gel : '+f.start.split('-').reverse().join('/')+' → '+f.end.split('-').reverse().join('/')));
+  if(h) add(h.name,h.date.toLocaleDateString('fr-FR',{weekday:'long',day:'numeric',month:'long',year:'numeric'}));
   tip.style.display='block';
   tip.style.left=Math.min(window.innerWidth-tip.offsetWidth-8,ev.clientX+14)+'px';
   tip.style.top=(ev.clientY+16)+'px';
@@ -1885,6 +1888,7 @@ function renderTimeline(){
   const LL=(showLaneCol&&!listMode)?laneColW:0, TH0=showTimeBar?52:0, RH=taskRH;
   const _fzList=showFreezes?freezes.filter(f=>validISO(f.start)&&validISO(f.end)):[];
   const _holList=showHolidays?frHolidaysBetween(minD,maxD):[];
+  const _frzHit=[]; window._tlFrz=_frzHit; // zones survolables des gels pleine hauteur
   const _holHit=[]; window._tlHol=_holHit; // zones survolables des jours fériés (infobulle immédiate)
   const fzFont=Math.max(7,Math.round(taskFontSize*0.72)); // police réduite pour les périodes de gel
   const FZ=(_fzList.length||_holList.length)?fzFont+8:0; // bandeau des gels, en bas de la barre de temps
@@ -2686,6 +2690,7 @@ function renderTimeline(){
       [['resize-l',x1],['resize-r',x2-hw]].forEach(([m,hx])=>{ const hd=el('rect',{x:hx,y:fzY+2,width:hw,height:FZ-4,fill:'#ffffff','fill-opacity':0.001}); hd.style.cursor='ew-resize'; hd.addEventListener('pointerdown',ev=>fzPointerDown(ev,m,f.id)); fzG.appendChild(hd); });
       const lbl=(f.title||'').trim();
       if(lbl && lbl.length*fzFont*0.58 < (x2-x1)-6) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:showTimeBar?'#fff':'#263238','pointer-events':'none'},lbl));
+      if(f.full) _frzHit.push({x1,x2,title:(f.title||'Gel'),start:f.start,end:f.end});
       if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // sous la barre de temps
     });
     const holBody=document.createElementNS(NS,'g'); holBody.setAttribute('id','holiday-body-group'); holBody.setAttribute('pointer-events','none'); holBody.setAttribute('data-ly','frz');
@@ -5314,7 +5319,7 @@ function addFreeze(preset){
   // un nouveau gel démarre le lendemain de la fin du dernier gel existant (pas de superposition)
   let last=null; freezes.forEach(f=>{ if(validISO(f.end)){ const d=parseD(f.end); if(!last||d>last) last=d; } });
   const st=last?addDays(last,1):(base||new Date()); const en=addDays(st,6);
-  freezes.push(Object.assign({ id:nextFreezeId(), title:'Gel', start:fmt(st), end:fmt(en), color:FREEZE_DEFAULT_COLOR, opacity:FREEZE_DEFAULT_OPACITY, full:false }, preset||{}));
+  freezes.push(Object.assign({ id:nextFreezeId(), title:'Gel', start:fmt(st), end:fmt(en), color:FREEZE_DEFAULT_COLOR, opacity:FREEZE_DEFAULT_OPACITY, full:true }, preset||{}));
   renderFreezePanel(); afterFreezeChange();
 }
 function delFreeze(id){ freezes=freezes.filter(f=>f.id!==id); renderFreezePanel(); afterFreezeChange(); }
