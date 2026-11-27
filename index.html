@@ -240,7 +240,16 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .seg, .dtabs { display:flex; gap:2px; padding:2px; margin:4px 0 6px; background:var(--fill-2); border-radius:9px; }
 .radio-group.seg { flex-direction:row; gap:2px; }
 .seg label, .dtabs button { flex:1 1 0; min-width:0; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; display:flex; align-items:center; justify-content:center; min-height:28px; padding:0 6px; border:0; border-radius:7px; background:transparent; font-family:inherit; font-size:12px; font-weight:500; line-height:1.15; text-align:center; color:var(--muted); cursor:pointer; transition:background .15s, color .15s, box-shadow .15s; }
-.dtabs button { min-height:30px; font-weight:600; }
+.dtabs button { min-height:30px; font-weight:600; font-size:11px; padding:0 4px; flex:1 1 auto; text-overflow:clip; }
+.ly-hint { font-size:11px; color:var(--faint); margin:0 0 8px; }
+.ly-row { display:flex; align-items:center; gap:6px; padding:8px 10px; margin-bottom:6px; border:1px solid var(--line); border-radius:8px; background:#fff; }
+.ly-row.ly-base { border-color:#c0392b; background:#fdf3f2; }
+.ly-txt { flex:1; min-width:0; display:flex; flex-direction:column; gap:1px; }
+.ly-txt b { font-size:12px; font-weight:600; color:var(--text); }
+.ly-txt span { font-size:11px; color:var(--faint); }
+.ly-btn { width:28px; height:28px; border:1px solid var(--line); border-radius:6px; background:#fff; cursor:pointer; font-size:14px; line-height:1; color:var(--text); }
+.ly-btn:hover:not(:disabled) { background:#f3f4f6; border-color:#c0392b; color:#c0392b; }
+.ly-btn:disabled { opacity:.3; cursor:default; }
 .dtabs-wrap { position:sticky; top:calc(var(--head-h) * 2); z-index:6; background:#fff; margin:0 -16px; padding:4px 16px 8px; }
 .dtabs-wrap .dtabs { margin:0; }
 .dtabs-wrap.stuck { box-shadow:0 6px 8px -6px rgba(16,24,40,.18); }
@@ -573,6 +582,7 @@ input[type=checkbox].lib-chk::before{display:none}
         <button type="button" role="tab" id="dtab-elements" aria-selected="true" aria-controls="afficher-body" onclick="showDisplayTab('elements')">Éléments</button>
         <button type="button" role="tab" id="dtab-sizes" aria-selected="false" aria-controls="sizes-body" onclick="showDisplayTab('sizes')">Tailles</button>
         <button type="button" role="tab" id="dtab-colors" aria-selected="false" aria-controls="palette-body" onclick="showDisplayTab('colors')">Couleurs</button>
+        <button type="button" role="tab" id="dtab-layers" aria-selected="false" aria-controls="layers-body" onclick="showDisplayTab('layers')">Superposition</button>
       </div></div>
       <div class="radio-group" id="afficher-body" role="tabpanel" aria-labelledby="dtab-elements" style="margin-top:10px;">
         <label><input type="checkbox" id="chk-3d" onchange="renderTimeline(); saveState()"/> Gantt en 3D</label>
@@ -634,6 +644,11 @@ input[type=checkbox].lib-chk::before{display:none}
         </div>
 
         <button class="btn btn-reset" type="button" onclick="resetAfficherDefaults()"><svg class="ic" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 4v5h5"/></svg> Valeurs par défaut</button>
+      </div>
+      <div class="pane-hidden" id="layers-body" role="tabpanel" aria-labelledby="dtab-layers" style="margin-top:10px;">
+        <div class="ly-hint">Du premier plan (haut) à l'arrière-plan (bas). Un élément placé plus haut passe devant ceux situés plus bas.</div>
+        <div id="layers-list"></div>
+        <button class="btn btn-reset" type="button" onclick="layerReset()">Valeurs par défaut</button>
       </div>
       <div class="pane-hidden" id="sizes-body" role="tabpanel" aria-labelledby="dtab-sizes" style="display:flex;flex-direction:column;gap:7px;margin-top:10px;">
         <div class="grp">Global</div>
@@ -1786,6 +1801,32 @@ function computeLaneRows(lane){
 
 // ═══ RENDER TIMELINE ═════════════════════════════════════════
 let _tlAutoEnd=false;
+// ═══ SUPERPOSITION (ordre des calques, de l'arrière-plan vers le premier plan) ═══
+const LAYER_DEFAULT=['base','hol','frz','today'];
+const LAYER_LABELS={base:['Phases, tâches et jalons','Barres, jalons et leurs textes'],hol:['Jours fériés','Colonnes grisées sur toute la hauteur'],frz:['Périodes de gel','Colonnes de gel sur toute la hauteur'],today:['Ligne « aujourd\'hui »','Trait, barre et rond du jour']};
+let layerOrder=[...LAYER_DEFAULT];
+function sanitizeLayerOrder(a){ if(!Array.isArray(a)||a.length!==LAYER_DEFAULT.length||!LAYER_DEFAULT.every(k=>a.includes(k))) return [...LAYER_DEFAULT]; return a.slice(); }
+function applyLayerOrder(svg,topAnchor){
+  const ba=svg.querySelector('#tl-anchor'); if(!ba||!topAnchor) return;
+  const order=sanitizeLayerOrder(layerOrder), bi=order.indexOf('base');
+  const nodes=id=>[...svg.querySelectorAll(':scope > [data-ly="'+id+'"]')];
+  let ref=ba;
+  svg.querySelectorAll(':scope > [data-band]').forEach(b=>{ ref.after(b); ref=b; });
+  order.slice(0,bi).forEach(id=>nodes(id).forEach(n=>{ ref.after(n); ref=n; }));
+  order.slice(bi+1).forEach(id=>nodes(id).forEach(n=>topAnchor.before(n)));
+}
+function layerMove(id,dir){ // dir=+1 : vers le premier plan, -1 : vers l'arrière-plan
+  const o=sanitizeLayerOrder(layerOrder), i=o.indexOf(id), j=i+dir; if(i<0||j<0||j>=o.length) return;
+  [o[i],o[j]]=[o[j],o[i]]; layerOrder=o; renderLayersPane(); saveState(); renderTimeline();
+}
+function layerReset(){ layerOrder=[...LAYER_DEFAULT]; renderLayersPane(); saveState(); renderTimeline(); }
+function renderLayersPane(){
+  const el=document.getElementById('layers-list'); if(!el) return;
+  const o=sanitizeLayerOrder(layerOrder).slice().reverse(); // premier plan en haut
+  el.innerHTML=o.map((id,k)=>'<div class="ly-row'+(id==='base'?' ly-base':'')+'"><div class="ly-txt"><b>'+LAYER_LABELS[id][0]+'</b><span>'+LAYER_LABELS[id][1]+'</span></div>'
+    +'<button type="button" class="ly-btn" title="Mettre devant" aria-label="Mettre devant" onclick="layerMove(\''+id+'\',1)"'+(k===0?' disabled':'')+'>↑</button>'
+    +'<button type="button" class="ly-btn" title="Mettre derrière" aria-label="Mettre derrière" onclick="layerMove(\''+id+'\',-1)"'+(k===o.length-1?' disabled':'')+'>↓</button></div>').join('');
+}
 function renderTimeline(){
   if(typeof syncDropdowns==='function') syncDropdowns();
   window._colorPickerActive = false;
@@ -2018,6 +2059,7 @@ function renderTimeline(){
   const timebarGroup=document.createElementNS('http://www.w3.org/2000/svg','g');
   timebarGroup.setAttribute('id','timebar-group');
   svg.appendChild(timebarGroup);
+  svg.appendChild(el('g',{id:'tl-anchor'})); // repère de superposition : fond de page, puis fonds de phases, puis calques placés derrière
 
   // Graduations
   if(showTimeBar){
@@ -2122,7 +2164,7 @@ function renderTimeline(){
     if (rows.length === 0) return; // Ignore completely if no rows
     const laneH=laneHeightOf(lane);
     const lc=lane.color||'#2c3e50';
-    svg.appendChild(el('rect',{x:LL,y:rowY,width:VW-LL,height:laneH,fill:li%2===0?'#fff':'#f8f8f8'}));
+    svg.appendChild(el('rect',{x:LL,y:rowY,width:VW-LL,height:laneH,fill:li%2===0?'#fff':'#f8f8f8','data-band':'1'}));
     const laneColorRect=el('rect',{x:0,y:rowY,width:listMode?VW:LL,height:listMode?PHH:laneH,fill:lc});
     const _cyTop=listMode?rowY+PHH/2:rowY+8, _cyBot=listMode?rowY+PHH/2:rowY+laneH-8;
         const phaseHeaderG = document.createElementNS('http://www.w3.org/2000/svg', 'g');
@@ -2585,11 +2627,11 @@ function renderTimeline(){
         const showCircle = document.getElementById('chk-todayline-circle')?.checked !== false;
         const showArrow = document.getElementById('chk-todayline-arrow')?.checked !== false;
 
-        if (showHLine) svg.appendChild(el('rect',{x:LL,y:MA+TH+2,width:tx-LL,height:4,fill:todaylineColor,opacity:'1'}));
-        if (showVLine) svg.appendChild(el('line',{x1:tx,y1:MA+TH+2,x2:tx,y2:VH,stroke:todaylineColor,'stroke-width':1.5,'stroke-dasharray':'4,3',opacity:'0.8'}));
+        if (showHLine) svg.appendChild(el('rect',{x:LL,y:MA+TH+2,width:tx-LL,height:4,fill:todaylineColor,opacity:'1','data-ly':'today'}));
+        if (showVLine) svg.appendChild(el('line',{x1:tx,y1:MA+TH+2,x2:tx,y2:VH,stroke:todaylineColor,'stroke-width':1.5,'stroke-dasharray':'4,3',opacity:'0.8','data-ly':'today'}));
 
         const lineH=4, dy=MA+TH+4, ds=8;
-        if (showCircle) todayMarker=el('circle',{cx:tx,cy:dy,r:6,fill:todaylineColor,stroke:'white','stroke-width':2});
+        if (showCircle) todayMarker=el('circle',{cx:tx,cy:dy,r:6,fill:todaylineColor,stroke:'white','stroke-width':2,'data-ly':'today'});
         if (document.getElementById('chk-todayline-date')?.checked === true) {
           todayDate=el('text',{x:tx,y:dy-(showCircle?10:4),'text-anchor':'middle',fill:'#ffffff',stroke:'#1b2430','stroke-width':2.6,'paint-order':'stroke','stroke-linejoin':'round','font-size':todayFontSize,'font-weight':'bold','pointer-events':'none'},fmtDMY(today));
         }
@@ -2617,10 +2659,11 @@ function renderTimeline(){
     svg.appendChild(flagGroup);
   }
   svg.appendChild(timebarGroup);
+  const _topAnchor=el('g',{id:'tl-anchor-top'}); svg.appendChild(_topAnchor); // calques placés devant les phases/tâches
   if(FZ>0){
     const fzY=MA+TH0; // bandeau de gel : bas de la barre de temps
     const fzG=document.createElementNS(NS,'g'); fzG.setAttribute('id','freeze-row-group');
-    const fzOver=document.createElementNS(NS,'g'); fzOver.setAttribute('id','freeze-overlay-group'); fzOver.setAttribute('pointer-events','none');
+    const fzOver=document.createElementNS(NS,'g'); fzOver.setAttribute('id','freeze-overlay-group'); fzOver.setAttribute('pointer-events','none'); fzOver.setAttribute('data-ly','frz');
     _fzList.forEach(f=>{
       const x1=Math.max(LL,dX(f.start)), x2=Math.min(VW,dX(f.end)+PPD);
       if(x2<=x1) return;
@@ -2635,6 +2678,7 @@ function renderTimeline(){
       if(lbl && lbl.length*fzFont*0.58 < (x2-x1)-6) fzG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:showTimeBar?'#fff':'#263238','pointer-events':'none'},lbl));
       if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // sous la barre de temps
     });
+    const holBody=document.createElementNS(NS,'g'); holBody.setAttribute('id','holiday-body-group'); holBody.setAttribute('pointer-events','none'); holBody.setAttribute('data-ly','hol');
     const holG=document.createElementNS(NS,'g'); holG.setAttribute('id','holiday-group'); holG.setAttribute('pointer-events','none'); // jours fériés : sous les gels
     _holList.forEach(h=>{
       const x1=Math.max(LL,dX(h.d)), x2=Math.min(VW,dX(h.d)+PPD);
@@ -2642,9 +2686,10 @@ function renderTimeline(){
       const band=el('rect',{x:x1,y:fzY+2,width:x2-x1,height:FZ-4,rx:2,fill:'#78909c','fill-opacity':0.85,stroke:'#546e7a','stroke-width':1});
       _holHit.push({x1,x2,name:h.name,date:h.d});
       holG.appendChild(band);
-      holG.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:'#78909c','fill-opacity':0.28})); // sur toute la hauteur
+      holBody.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:'#78909c','fill-opacity':0.28})); // sur toute la hauteur
       if(h.name.length*fzFont*0.58 < (x2-x1)-4) holG.appendChild(el('text',{x:(x1+x2)/2,y:fzY+FZ/2+fzFont*0.35,'text-anchor':'middle','font-size':fzFont,'font-weight':'bold',fill:'#fff','pointer-events':'none'},h.name));
     });
+    if(holBody.childNodes.length) svg.appendChild(holBody);
     svg.appendChild(holG); // jours fériés en dessous, gels par-dessus
     svg.appendChild(fzG);
     if(fzOver.childNodes.length) svg.appendChild(fzOver);
@@ -2675,6 +2720,7 @@ function renderTimeline(){
   if(todayDate) svg.appendChild(todayDate);
   if(todayMarker) svg.appendChild(todayMarker);
   if(todayArrow) svg.appendChild(todayArrow);
+  applyLayerOrder(svg,_topAnchor);
 }
 
 
@@ -2754,6 +2800,7 @@ function resetDefaults() {
   const r1=document.querySelector('input[name="dates-pos"][value="right"]'); if(r1) r1.checked=true;
   const r2=document.querySelector('input[name="task-label-pos"][value="left"]'); if(r2) r2.checked=true;
   if(typeof showDisplayTab==='function') showDisplayTab('elements');
+  layerOrder=[...LAYER_DEFAULT]; renderLayersPane();
   timebarColor='#0b0f14'; todaylineColor='#e74c3c'; defaultTaskJalonPalette=[...DEFAULT_TASK_JALON_PALETTE]; syncPaletteInputs();
   defaultJalonColorsMode='lane'; const rLane=document.querySelector('input[name="default-jalon-colors-mode"][value="lane"]'); if(rLane) rLane.checked=true;
   toggleTitle();
@@ -3029,6 +3076,7 @@ function saveState() {
     showJalonLines: document.getElementById('chk-jalon-lines')?.checked,
     showDashDot: document.getElementById('chk-dash-dot')?.checked,
     timebarColor,
+    layerOrder,
     todaylineColor,
     defaultJalonColorsMode,
     defaultTaskJalonPalette,
@@ -3106,6 +3154,7 @@ saveState._orig = function(){
       showJalonLines: document.getElementById('chk-jalon-lines')?.checked,
       showDashDot: document.getElementById('chk-dash-dot')?.checked,
       timebarColor,
+      layerOrder,
       todaylineColor,
       defaultJalonColorsMode,
       defaultTaskJalonPalette,
@@ -3239,6 +3288,7 @@ function restoreSidebar(s) {
   toggleTaskLabelOptions();
   updateDayStepVisibility();
   timebarColor = s.timebarColor || '#0b0f14';
+  layerOrder = sanitizeLayerOrder(s.layerOrder);
   todaylineColor = s.todaylineColor || '#e74c3c';
   defaultJalonColorsMode = (s.defaultJalonColorsMode === 'lane' || s.defaultJalonColorsMode === 'different') ? s.defaultJalonColorsMode : 'lane';
   defaultTaskJalonPalette = Array.isArray(s.defaultTaskJalonPalette) && s.defaultTaskJalonPalette.length ? s.defaultTaskJalonPalette.slice(0,11) : [...DEFAULT_TASK_JALON_PALETTE];
@@ -4283,8 +4333,9 @@ function quickTaskToLane(laneId,taskId){
 
 // ═══ AFFICHAGE : ONGLETS ET MENUS DÉROULANTS ══════════════════
 function showDisplayTab(tab){
-  if(tab!=='sizes'&&tab!=='colors') tab='elements';
-  const panes={elements:'afficher-body',sizes:'sizes-body',colors:'palette-body'}, tabs={elements:'dtab-elements',sizes:'dtab-sizes',colors:'dtab-colors'};
+  if(tab!=='sizes'&&tab!=='colors'&&tab!=='layers') tab='elements';
+  if(tab==='layers') renderLayersPane();
+  const panes={elements:'afficher-body',sizes:'sizes-body',colors:'palette-body',layers:'layers-body'}, tabs={elements:'dtab-elements',sizes:'dtab-sizes',colors:'dtab-colors',layers:'dtab-layers'};
   Object.keys(panes).forEach(k=>{
     document.getElementById(panes[k])?.classList.toggle('pane-hidden',k!==tab);
     document.getElementById(tabs[k])?.setAttribute('aria-selected',String(k===tab));
