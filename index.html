@@ -3558,8 +3558,10 @@ function libSaveCurrent(o){
   if(libUIOpen()) libRender();
   return true;
 }
+function libIsBlank(){ return lanes.length===0&&freezes.length===0&&!libCurEntry(); }
 async function libSave(){
   const l=libGet(), e=libCurEntry(l);
+  if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return false; }
   if(!e) return libSaveCurrent();
   if(!libIsDirty()){ showToast('Aucune modification à enregistrer'); return true; }
   const fn=libFolderName(l,e.folder);
@@ -3592,6 +3594,7 @@ async function libNew(){
 function libUIOpen(){ return document.getElementById('lib-overlay')?.style.display==='flex'; }
 function libFolderOptions(l,sel){ return '<option value=""'+(!sel?' selected':'')+'>Racine</option>'+l.folders.map(f=>'<option value="'+f.id+'"'+(f.id===sel?' selected':'')+'>'+libEsc(f.name)+'</option>').join(''); }
 async function libSaveAs(){
+  if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return; }
   const l=libGet();
   const r=await libDialog('Enregistrer sous…','<label class="lib-lbl">Nom du nouveau planning</label><input type="text" class="lib-input" id="lib-name-in" value="'+libEsc(libTitle())+'" maxlength="120">'
     +(l.folders.length?'<label class="lib-lbl" style="margin-top:10px">Dossier</label><select class="lib-sel wide" id="lib-fold-in">'+libFolderOptions(l,libUIOpen()?libView:null)+'</select>':''),
