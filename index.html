@@ -4261,7 +4261,16 @@ async function importSettingsJSON(event) {
 async function importJSON(event) {
   const files = [...event.target.files];
   event.target.value = '';
+  return openJSONFiles(files);
+}
+// Ouvre un fichier JSON (menu « Ouvrir un fichier JSON… » ou glisser-déposer) : planning seul ou bibliothèque
+async function openJSONFiles(files) {
   if (!files.length) return;
+  if (files.length > 1) { // plusieurs fichiers déposés : tous sont importés dans la bibliothèque, sans rien ouvrir
+    const many = await libReadFiles(files);
+    if (many) await libImportItems(many, { openFirst: false });
+    return;
+  }
   const items = await libReadFiles([files[0]]);
   if (!items) return;
   if (items.isLibrary) { // « Ouvrir » n'ouvre qu'un seul macro-planning : une bibliothèque n'est jamais ouverte
@@ -4280,6 +4289,23 @@ async function importJSON(event) {
   showToast('Planning importé (réglages conservés)');
 }
 
+
+// Glisser-déposer d'un fichier JSON n'importe où dans l'application
+(function(){
+  let depth=0, ov=null;
+  const hasFiles=e=>e.dataTransfer&&[...(e.dataTransfer.types||[])].includes('Files');
+  const show=()=>{ if(ov) return; ov=document.createElement('div'); ov.style.cssText='position:fixed;inset:0;z-index:100050;background:rgba(192,57,43,.12);border:3px dashed #c0392b;display:flex;align-items:center;justify-content:center;pointer-events:none;font:600 18px system-ui,sans-serif;color:#c0392b;'; ov.textContent='Déposez un fichier JSON (macro-planning ou bibliothèque)'; document.body.appendChild(ov); };
+  const hide=()=>{ depth=0; if(ov){ ov.remove(); ov=null; } };
+  window.addEventListener('dragenter',e=>{ if(!hasFiles(e)) return; e.preventDefault(); depth++; show(); });
+  window.addEventListener('dragover',e=>{ if(!hasFiles(e)) return; e.preventDefault(); e.dataTransfer.dropEffect='copy'; });
+  window.addEventListener('dragleave',e=>{ if(!hasFiles(e)) return; depth=Math.max(0,depth-1); if(!depth) hide(); });
+  window.addEventListener('drop',e=>{ if(!hasFiles(e)) return; e.preventDefault(); hide();
+    if(typeof appReady!=='undefined'&&!appReady) return;
+    const files=[...e.dataTransfer.files].filter(f=>/\.json$/i.test(f.name)||f.type==='application/json');
+    if(!files.length){ showToast('Seuls les fichiers JSON sont acceptés'); return; }
+    openJSONFiles(files);
+  });
+})();
 
 // ═══ SAISIE RAPIDE (façon mindmap) dans la vue Données ═══════
 function focusDataField(id, selectAll){
