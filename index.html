@@ -4211,7 +4211,7 @@ function libRender(){
 }
 // Ctrl/Cmd+S : enregistrer dans la bibliothèque ; Échap : fermer la fenêtre
 document.addEventListener('keydown',function(e){
-  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==='s'){ e.preventDefault(); if(appReady) libSave(); return; }
+  if((e.ctrlKey||e.metaKey)&&!e.shiftKey&&!e.altKey&&e.key.toLowerCase()==='s'){ e.preventDefault(); if(appReady){ if(libGet().auto) showToast('Enregistrement automatique activé : Ctrl + S inutile'); else libSave(); } return; }
   if(e.key==='Escape'&&document.getElementById('lib-overlay')?.style.display==='flex'&&!document.querySelector('.lib-dlg-ov')) libClose();
 });
 window.addEventListener('storage',function(e){ if(e.key===LIB_KEY){ libStale=true; _lib=null; showToast('La bibliothèque a été modifiée dans un autre onglet : rechargez cette page.'); } });
