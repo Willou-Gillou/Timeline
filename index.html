@@ -297,6 +297,7 @@ body.no-sb-anim .sidebar, body.no-sb-anim .main { transition:none !important; }
 .lib-bar-l,.lib-bar-r{display:flex;gap:8px}
 .lib-state{padding:0 20px 10px;font-size:12px;color:#555;flex-shrink:0;border-bottom:1px solid #eceef1}
 .lib-ok{color:#1e7a37}
+.lib-alert{margin:0;padding:8px 20px;background:#fdecea;color:#c0392b;font-size:12px;font-weight:700;border-bottom:1px solid #f3c6c1;flex-shrink:0}
 .lib-warn{color:#c0392b;font-weight:600}
 .lib-main{display:flex;flex:1;min-height:0}
 .lib-side{width:210px;flex-shrink:0;background:#f6f7f9;border-right:1px solid #eceef1;padding:10px 8px;overflow:auto;display:flex;flex-direction:column;gap:2px}
@@ -323,7 +324,8 @@ input[type=checkbox].lib-chk::before{display:none}
 .lib-row.sel{background:#fff1ef;border-color:#e6a8a1}
 .lib-selbar{display:flex;align-items:center;gap:8px;margin:0 16px 8px;padding:7px 10px;background:#f3f4f6;border:1px solid #e0e3e8;border-radius:8px;flex-shrink:0}
 .lib-selcount{font-size:12px;font-weight:700;color:#c0392b;margin-right:auto}
-.lib-search{width:210px;padding:6px 10px;border:1px solid #d5d9df;border-radius:6px;font-size:12px;outline:none;font-family:inherit}
+.lib-search-row{padding:10px 16px 0;flex-shrink:0}
+.lib-search{width:100%;box-sizing:border-box;padding:6px 10px;border:1px solid #d5d9df;border-radius:6px;font-size:12px;outline:none;font-family:inherit}
 .lib-search:focus{border-color:#c0392b}
 .lib-list{flex:1;overflow:auto;padding:0 16px 10px}
 .lib-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 12px;border:1px solid #e8eaee;border-radius:8px;margin-bottom:6px;background:#fff;cursor:grab}
@@ -3941,9 +3943,9 @@ function libRender(){
   const old=l.items.length&&(!l.lastExport||Date.now()-l.lastExport>30*86400000);
   let foot='<details class="lib-foot"><summary>Options et espace utilisé ('+pct+' %)'+(old?' <span class="lib-warn">· pensez à exporter</span>':'')+'</summary>'
     +'<div class="lib-opts"><label><input type="checkbox" '+(l.auto?'checked':'')+' onchange="libSetOpt(\'auto\',this.checked)"> Enregistrer automatiquement le planning ouvert (écrase la version enregistrée)</label>'
-    +'<label><input type="checkbox" '+(l.addOnOpen?'checked':'')+' onchange="libSetOpt(\'addOnOpen\',this.checked)"> Ajouter à la bibliothèque les fichiers ouverts avec « Charger un planning »</label></div>'
+    +'<label><input type="checkbox" '+(l.addOnOpen?'checked':'')+' onchange="libSetOpt(\'addOnOpen\',this.checked)"> Ajouter à la bibliothèque les fichiers JSON que j\'ouvre</label></div>'
     +'<div class="lib-gauge"><div class="lib-gauge-bar"><div style="width:'+pct+'%;'+(pct>=80?'background:#c0392b':'')+'"></div></div><div class="lib-sub">'+Math.round(used/1000)+' Ko utilisés sur environ 5 Mo dans ce navigateur'+(pct>=80?' — <span class="lib-warn">presque plein</span>':'')+'</div></div>'
-    +'<div class="lib-sub lib-note">Les plannings sont stockés dans ce navigateur : un effacement des données ou la navigation privée les supprime. '+(old?'<span class="lib-warn">'+(l.lastExport?'Dernier export il y a plus de 30 jours. ':'Bibliothèque jamais exportée. ')+'</span>':'')+'Utilisez « Tout exporter » pour en garder une copie.</div></details>';
+    +'</details>';
   if(l.trash.length){
     foot+='<details class="lib-foot lib-trash"><summary>Corbeille ('+l.trash.length+')</summary>';
     l.trash.forEach((e,i)=>{ foot+='<div class="lib-trow"><div class="lib-row-main"><div class="lib-name">'+libEsc(e.name)+'</div><div class="lib-sub">Supprimé le '+libFmt(e.deletedAt)+'</div></div><button type="button" class="lib-btn sm" onclick="libRestore('+i+')">Restaurer</button></div>'; });
@@ -3951,9 +3953,10 @@ function libRender(){
   }
   const openDet=[...b.querySelectorAll('details.lib-foot')].map(d=>d.open);
   b.innerHTML='<div class="lib-bar">'
-    +'<div class="lib-bar-r"><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Ouvrir un fichier JSON…</button><button type="button" class="lib-btn" onclick="libExportAll()">Sauvegarder la bibliothèque en JSON</button></div>'
+    +'<div class="lib-bar-r"><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Ouvrir un fichier JSON…</button><button type="button" class="lib-btn" onclick="libExportAll()">Sauvegarder toute la bibliothèque en JSON</button></div>'
     +'<input type="file" id="lib-import-input" accept=".json,application/json" multiple hidden onchange="importJSON(event)"></div>'+state
-    +'<div class="lib-main"><div class="lib-side">'+side+'</div><div class="lib-pane"><div class="lib-pane-h"><input type="checkbox" id="lib-all" class="lib-chk" onchange="libSelAll(this.checked)" title="Tout sélectionner" aria-label="Tout sélectionner"><div id="lib-ptitle" class="lib-ptitle"></div><input type="search" class="lib-search" placeholder="Rechercher un planning…" value="'+libEsc(libSearch)+'" oninput="libSearchInput(this.value)"></div><div id="lib-selbar" class="lib-selbar" style="display:none"></div><div id="lib-list" class="lib-list">'+libListHtml(l)+'</div></div></div>'+foot;
+    +'<div class="lib-alert">Attention, la bibliothèque est stockée dans le cache de votre navigateur internet. Pensez à faire des sauvegardes locales !</div>'
+    +'<div class="lib-main"><div class="lib-side">'+side+'</div><div class="lib-pane"><div class="lib-search-row"><input type="search" class="lib-search" placeholder="Rechercher un planning…" value="'+libEsc(libSearch)+'" oninput="libSearchInput(this.value)"></div><div class="lib-pane-h"><input type="checkbox" id="lib-all" class="lib-chk" onchange="libSelAll(this.checked)" title="Tout sélectionner" aria-label="Tout sélectionner"><div id="lib-ptitle" class="lib-ptitle"></div></div><div id="lib-selbar" class="lib-selbar" style="display:none"></div><div id="lib-list" class="lib-list">'+libListHtml(l)+'</div></div></div>'+foot;
   libRenderTitle(l); libRefreshList();
   b.querySelectorAll('details.lib-foot').forEach((d,i)=>{ if(openDet[i]) d.open=true; });
 }
