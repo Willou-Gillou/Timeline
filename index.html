@@ -2850,6 +2850,7 @@ function clearMacroPlanning() {
   if (!confirm('Etes vous sur ?')) return;
   try { _saveUIPrefs(); } catch(e){}
   lanes = []; freezes = []; lid = 1; tid = 1; jalonColorIdx = 0;
+  libUnlink();
   const titleEl = document.getElementById('planning-title');
   if (titleEl) titleEl.value = 'Macro-planning projet';
   saveState();
@@ -3288,6 +3289,7 @@ function loadState() {
 // ═══ RESET ════════════════════════════════════════════════════
 function resetAll() {
   if (!confirm('Remettre à zéro le planning, les réglages ET les raccourcis ?\nCette action est irréversible.')) return;
+  libUnlink();
   localStorage.removeItem(MP_PLANNING_KEY);
   localStorage.removeItem(MP_PLANNING_KEY + '_backup');
   localStorage.removeItem(MP_SETTINGS_KEY);
@@ -3569,6 +3571,8 @@ function libSaveNewVersion(){
   if(ok) showToast('Nouvelle version enregistrée : « '+name+' »');
   return ok;
 }
+// Délie le planning ouvert de la bibliothèque : le prochain enregistrement créera un nouveau fichier à la racine
+function libUnlink(){ try{ const r=localStorage.getItem(LIB_KEY); if(!r) return; const l=JSON.parse(r); if(l&&l.current){ l.current=null; localStorage.setItem(LIB_KEY,JSON.stringify(l)); _lib=null; } }catch(e){} }
 function libUIOpen(){ return document.getElementById('lib-overlay')?.style.display==='flex'; }
 function libFolderOptions(l,sel){ return '<option value=""'+(!sel?' selected':'')+'>Racine</option>'+l.folders.map(f=>'<option value="'+f.id+'"'+(f.id===sel?' selected':'')+'>'+libEsc(f.name)+'</option>').join(''); }
 async function libSaveAs(){
