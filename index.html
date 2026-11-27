@@ -3865,7 +3865,7 @@ function libParse(text){
   if(o&&o.format==='macroplanning-library'){
     if(!Array.isArray(o.items)) throw new Error('bibliothèque invalide');
     o.items.forEach(it=>out.push(norm(it.data,it,it.name)));
-    out.folders=Array.isArray(o.folders)?o.folders.filter(x=>typeof x==='string'&&x.trim()):[];
+    out.folders=Array.isArray(o.folders)?o.folders.filter(x=>typeof x==='string'&&x.trim()):[]; out.isLibrary=true;
   } else { out.push(norm(o,o.mpMeta,o.name||(o.sidebar&&o.sidebar.planningTitle))); out.folders=[]; }
   return out;
 }
@@ -3965,9 +3965,9 @@ async function libImportItems(items,opts){
   return true;
 }
 async function libReadFiles(files){
-  const items=[]; const errs=[]; items.folders=[];
+  const items=[]; const errs=[]; items.folders=[]; items.isLibrary=false;
   for(const f of files){
-    try{ const txt=await f.text(); const ps=libParse(txt); ps.forEach(i=>items.push(i)); (ps.folders||[]).forEach(n=>{ if(!items.folders.includes(n)) items.folders.push(n); }); }
+    try{ const txt=await f.text(); const ps=libParse(txt); if(ps.isLibrary) items.isLibrary=true; ps.forEach(i=>items.push(i)); (ps.folders||[]).forEach(n=>{ if(!items.folders.includes(n)) items.folders.push(n); }); }
     catch(e){ errs.push(f.name+' : '+e.message); }
   }
   if(errs.length){ alert('Import annulé, fichier invalide :\n'+errs.join('\n')); return null; }
@@ -4144,8 +4144,8 @@ function libRender(){
   const openDet=[...b.querySelectorAll('details.lib-foot')].map(d=>d.open);
   foot='<div class="lib-footwrap">'+foot+'</div>';
   b.innerHTML='<div class="lib-bar">'
-    +'<div class="lib-bar-r"><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Ouvrir un fichier JSON…</button><button type="button" class="lib-btn" onclick="libExportAll()">Sauvegarder toute la bibliothèque en JSON</button></div>'
-    +'<input type="file" id="lib-import-input" accept=".json,application/json" multiple hidden onchange="importJSON(event)"></div>'+state
+    +'<div class="lib-bar-r"><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-input\').click()">Ouvrir un fichier JSON…</button><button type="button" class="lib-btn" onclick="document.getElementById(\'lib-import-lib-input\').click()">Importer une bibliothèque</button><button type="button" class="lib-btn" onclick="libExportAll()">Sauvegarder toute la bibliothèque en JSON</button></div>'
+    +'<input type="file" id="lib-import-input" accept=".json,application/json" hidden onchange="importJSON(event)"><input type="file" id="lib-import-lib-input" accept=".json,application/json" hidden onchange="libImportFromInput(event)"></div>'+state
     +'<div class="lib-alert">Attention, la bibliothèque est stockée dans le cache de votre navigateur internet. Pensez à faire des sauvegardes locales !</div>'
     +'<div class="lib-main"><div class="lib-side">'+side+'</div><div class="lib-pane"><div class="lib-search-row"><input type="search" class="lib-search" placeholder="Rechercher un planning…" value="'+libEsc(libSearch)+'" oninput="libSearchInput(this.value)"></div><div class="lib-pane-h"><input type="checkbox" id="lib-all" class="lib-chk" onchange="libSelAll(this.checked)" title="Tout sélectionner" aria-label="Tout sélectionner"><div id="lib-ptitle" class="lib-ptitle"></div></div><div id="lib-selbar" class="lib-selbar" style="display:none"></div><div id="lib-list" class="lib-list">'+libListHtml(l)+'</div></div></div>'+foot;
   libRenderTitle(l); libRefreshList();
@@ -4262,8 +4262,14 @@ async function importJSON(event) {
   const files = [...event.target.files];
   event.target.value = '';
   if (!files.length) return;
-  const items = await libReadFiles(files);
+  const items = await libReadFiles([files[0]]);
   if (!items) return;
+  if (items.isLibrary) { // « Ouvrir » n'ouvre qu'un seul macro-planning : une bibliothèque n'est jamais ouverte
+    const r = await libDialog('Fichier JSON', '<p style="margin:0">Il s\'agit d\'une bibliothèque, et non pas d\'un seul macro planning. Souhaitez vous tout importer?</p>',
+      [{label:'Non',value:null},{label:'Oui, tout importer',value:'ok',primary:true}]);
+    if (r.value === 'ok') await libImportItems(items, { openFirst: false });
+    return;
+  }
   if (libGet().addOnOpen) { await libImportItems(items, { openFirst: true, silent: lanes.length === 0 && freezes.length === 0 }); return; }
   // Sans bibliothèque : le fichier remplace le planning actuel (réglages conservés)
   if (!(await libConfirmLeave('open'))) return;
