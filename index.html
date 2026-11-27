@@ -1318,7 +1318,7 @@ function changeDash(type,d){
 // ═══ MODAL ═══════════════════════════════════════════════════
 let pendingDelTaskId=null;
 function askDelLane(id, ev) {
-  if (ev && ev.shiftKey) {
+  if ((ev && ev.shiftKey) || !confirmDelOn()) {
     lanes = lanes.filter(l => l.id !== id);
     renderData();
     renderTimeline();
@@ -1333,7 +1333,7 @@ function askDelLane(id, ev) {
   document.getElementById('modal-overlay').style.display='flex';
 }
 function askDelTask(lid, tid, ev) {
-  if (ev && ev.shiftKey) {
+  if ((ev && ev.shiftKey) || !confirmDelOn()) {
     delTask(lid, tid);
     return;
   }
