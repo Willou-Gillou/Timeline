@@ -458,7 +458,7 @@ input[type=checkbox].lib-chk::before{display:none}
     <button class="btn btn-icon" id="btn-undo" onclick="undoPlanning()" title="Retour : revenir incrémentalement aux dernières modifications" aria-label="Retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></svg></button>
     <button class="btn btn-icon" id="btn-redo" onclick="redoPlanning()" title="Annuler retour : rétablir le ou les retours effectués" aria-label="Annuler retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
     <button class="btn btn-icon" id="btn-new" type="button" onclick="libNew()" title="Nouveau macro-planning (vide ou modèle)" aria-label="Créer un nouveau macro-planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg></button>
-    <button class="btn btn-icon" id="btn-open" type="button" onclick="libOpenUI()" title="Ouvrir un planning (bibliothèque)" aria-label="Ouvrir un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 17a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.9a2 2 0 0 1-1.69-.9l-.81-1.2a2 2 0 0 0-1.67-.9H8a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2Z"/><path d="M2 8v11a2 2 0 0 0 2 2h14"/></svg></button>
+    <button class="btn btn-icon" id="btn-open" type="button" onclick="libOpenUI()" title="Ouvrir la bibliothèque" aria-label="Ouvrir la bibliothèque"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 17a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-3.9a2 2 0 0 1-1.69-.9l-.81-1.2a2 2 0 0 0-1.67-.9H8a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2Z"/><path d="M2 8v11a2 2 0 0 0 2 2h14"/></svg></button>
     <button class="btn btn-icon" id="btn-save" type="button" onclick="libSaveMenu(event)" title="Enregistrer (Ctrl+S)" aria-haspopup="true" aria-label="Enregistrer le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span class="lib-dirty" id="lib-dirty"></span></button>
     <button class="btn btn-icon" id="btn-export" onclick="toggleExportMenu(event)" title="Exporter le planning (PNG, SVG, PDF)" aria-label="Exporter le planning" aria-haspopup="true" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10l-3.1-3.1a2 2 0 0 0-2.814.014L6 21"/><path d="m14 19 3 3v-5.5"/><path d="m17 22 3-3"/><circle cx="9" cy="9" r="2"/></svg></button>
     <button class="btn btn-icon" id="btn-png2json" type="button" onclick="toggleConvMenu(event)" title="Conversion vers JSON" aria-label="Conversion vers JSON" aria-haspopup="menu" aria-expanded="false"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M10 12a1 1 0 0 0-1 1v1a1 1 0 0 1-1 1 1 1 0 0 1 1 1v1a1 1 0 0 0 1 1"/><path d="M14 18a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1 1 1 0 0 1-1-1v-1a1 1 0 0 0-1-1"/></svg></button>
@@ -3742,19 +3742,21 @@ function libNextVersionName(base){
 }
 async function libSaveAs(){
   if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return false; }
-  const l=libGet(), e=libCurEntry(l), fid=e?e.folder:null;
+  const l=libGet(), e=libCurEntry(l);
+  let fid=e?e.folder:null; if(fid&&!l.folders.some(f=>f.id===fid)) fid=null;
   let name=e?libNextVersionName():libTitle(), err='';
   for(;;){
-    const r=await libDialog('Enregistrer sous…','<label class="lib-lbl">'+(e?'Nom de la nouvelle version (la version actuelle est conservée)':'Nom du macro-planning')+'</label><input type="text" class="lib-input" id="lib-name-in" value="'+libEsc(name)+'" maxlength="120">'+(err?'<p class="lib-warn" style="margin:8px 0 0">'+libEsc(err)+'</p>':'')+'<p class="lib-sub" style="margin-top:8px">Dossier : '+libEsc(libFolderName(l,fid)||'Racine')+'</p>',
-      [{label:'Annuler',value:null},{label:'Enregistrer',value:'ok',primary:true}],o=>o.querySelector('#lib-name-in').value.trim());
+    const r=await libDialog('Enregistrer sous…','<label class="lib-lbl">'+(e?'Nom de la nouvelle version (la version actuelle est conservée)':'Nom du macro-planning')+'</label><input type="text" class="lib-input" id="lib-name-in" value="'+libEsc(name)+'" maxlength="120">'+(err?'<p class="lib-warn" style="margin:8px 0 0">'+libEsc(err)+'</p>':'')+'<label class="lib-lbl" style="margin-top:12px">Dossier de destination</label><select class="lib-input" id="lib-folder-in">'+libFolderOptions(l,fid)+'</select>',
+      [{label:'Annuler',value:null},{label:'Enregistrer',value:'ok',primary:true}],o=>({name:o.querySelector('#lib-name-in').value.trim(),folder:o.querySelector('#lib-folder-in').value||null}));
     if(r.value!=='ok') return false;
-    name=r.data; if(!name){ err='Le nom ne peut pas être vide.'; name=libNextVersionName(); continue; }
+    name=r.data.name; fid=r.data.folder;
+    if(!name){ err='Le nom ne peut pas être vide.'; name=libNextVersionName(); continue; }
     if(libGet().items.some(i=>(i.folder||null)===(fid||null)&&i.name.toLowerCase()===name.toLowerCase())){ err='Ce nom existe déjà dans ce dossier.'; continue; }
     break;
   }
   const t=document.getElementById('planning-title'); if(t) t.value=name;
   const ok=libSaveCurrent({asNew:true,name,folder:fid||null,silent:true});
-  if(ok) showToast('Macro-planning sauvegardé sous « '+name+' »');
+  if(ok) showToast('Macro-planning sauvegardé sous « '+name+' »'+(fid?' (dossier « '+libFolderName(libGet(),fid)+' »)':' (racine)'));
   return ok;
 }
 function libApply(d,name){
