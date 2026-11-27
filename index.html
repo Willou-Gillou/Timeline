@@ -3485,7 +3485,7 @@ function libUniqueIn(name,l,folder,skipId){ return libUnique(name,l.items.filter
 function libUnique(name,items,skipId){
   const names=new Set(items.filter(i=>i.id!==skipId).map(i=>i.name.toLowerCase()));
   if(!names.has(name.toLowerCase())) return name;
-  let n=2; while(names.has((name+' ('+n+')').toLowerCase())) n++;
+  let n=1; while(names.has((name+' ('+n+')').toLowerCase())) n++;
   return name+' ('+n+')';
 }
 function libCurEntry(l){ l=l||libGet(); return l.current ? (l.items.find(i=>i.id===l.current)||null) : null; }
@@ -3575,10 +3575,13 @@ function libSaveNewVersion(){
 // Délie le planning ouvert de la bibliothèque : le prochain enregistrement créera un nouveau fichier à la racine
 function libUnlink(){ try{ const r=localStorage.getItem(LIB_KEY); if(!r) return; const l=JSON.parse(r); if(l&&l.current){ l.current=null; localStorage.setItem(LIB_KEY,JSON.stringify(l)); _lib=null; } }catch(e){} }
 async function libNew(){
+  const empty=lanes.length===0&&freezes.length===0;
+  if(empty&&!libCurEntry()){ showToast('Le macro-planning est déjà vide'); return; }
   if(!(await libConfirmLeave())) return;
-  libApply({lanes:[],freezes:[],lid:1,tid:1,jalonColorIdx:0},LIB_DEFAULT_NAME);
+  const name=libUniqueIn(LIB_DEFAULT_NAME,libGet(),null);
+  libApply({lanes:[],freezes:[],lid:1,tid:1,jalonColorIdx:0},name);
   libUnlink(); libUpdateDirty(); if(libUIOpen()) libRender();
-  showToast('Nouveau macro-planning (non enregistré)');
+  showToast('Nouveau macro-planning « '+name+' » (non enregistré)');
 }
 function libUIOpen(){ return document.getElementById('lib-overlay')?.style.display==='flex'; }
 function libFolderOptions(l,sel){ return '<option value=""'+(!sel?' selected':'')+'>Racine</option>'+l.folders.map(f=>'<option value="'+f.id+'"'+(f.id===sel?' selected':'')+'>'+libEsc(f.name)+'</option>').join(''); }
