@@ -3470,7 +3470,7 @@ function exportJSON(customFileName) {
 // ═══ BIBLIOTHÈQUE DE PLANNINGS (v5.1) ═══════════════════════
 // Plannings enregistrés dans le cache du navigateur (localStorage), réutilisables, exportables et importables avec gestion des conflits.
 const LIB_KEY='test_mp_library_v1', LIB_TRASH_MAX=10, LIB_QUOTA=5000000, LIB_DEFAULT_NAME='Macro-planning projet';
-let _lib=null, libStale=false, _libAutoT=0;
+let _lib=null, libStale=false, _libAutoT=0, libFresh=false;
 function libEsc(s){ return String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function libDefault(){ return {v:2,items:[],folders:[],trash:[],current:null,auto:true,addOnOpen:true,lastExport:0}; }
 function libGet(){
@@ -3516,6 +3516,11 @@ function libUpdateDirty(){
   try{
     const d=libIsDirty(); const el=document.getElementById('lib-dirty'); if(el) el.style.display=d?'block':'none';
     const l=libGet();
+    const blank=lanes.length===0&&freezes.length===0&&!libCurEntry(l);
+    if(blank) libFresh=true;
+    else if(d&&l.auto&&!libCurEntry(l)&&libFresh&&!libStale){
+      clearTimeout(_libAutoT); _libAutoT=setTimeout(()=>{ if(!libCurEntry()&&libFresh&&(lanes.length||freezes.length)){ libFresh=false; libSaveCurrent(); } },800);
+    }
     if(d&&l.auto&&libCurEntry(l)&&!libStale){ clearTimeout(_libAutoT); _libAutoT=setTimeout(()=>{ if(libCurEntry()&&libIsDirty()) libSaveCurrent({silent:true,onlyUpdate:true}); },800); }
   }catch(e){}
 }
@@ -3636,6 +3641,7 @@ async function libSaveAs(){
   return ok;
 }
 function libApply(d,name){
+  libFresh=false;
   const c=JSON.parse(JSON.stringify(d));
   lanes=c.lanes||[]; freezes=sanitizeFreezes(c.freezes); lid=c.lid||1; tid=c.tid||1; jalonColorIdx=c.jalonColorIdx||0;
   const t=document.getElementById('planning-title'); if(t) t.value=name||LIB_DEFAULT_NAME;
