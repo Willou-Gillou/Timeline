@@ -3801,7 +3801,10 @@ async function libImportItems(items,opts){
   if(!items.length&&!(items.folders||[]).length){ alert('Aucun planning trouvé dans ce fichier.'); return false; }
     const plan=items.map(it=>{ const c=libClassify(it,libGet()); return {item:it,status:c.status,ex:c.ex,action:libDefaultAction(c.status)}; });
   const conflicts=plan.filter(p=>p.status!=='new'&&p.status!=='identical').length;
-  if(conflicts>0||items.length>1){
+  if(opts.silent&&items.length===1){
+    // Ouverture d'un fichier sur un macro-planning vide : pas de question, la version du fichier est toujours ouverte et rien n'est perdu
+    const p=plan[0]; p.action=p.status==='identical'?'skip':p.status==='newer-file'?'replace':p.status==='new'?'add':'both';
+  } else if(conflicts>0||items.length>1){
     let rows='';
     plan.forEach((p,i)=>{
       const c=libCount(p.item.data), canCmp=!!p.ex&&p.status!=='identical';
@@ -4134,7 +4137,7 @@ async function importJSON(event) {
   if (!files.length) return;
   const items = await libReadFiles(files);
   if (!items) return;
-  if (libGet().addOnOpen) { await libImportItems(items, { openFirst: true }); return; }
+  if (libGet().addOnOpen) { await libImportItems(items, { openFirst: true, silent: lanes.length === 0 && freezes.length === 0 }); return; }
   // Sans bibliothèque : le fichier remplace le planning actuel (réglages conservés)
   if (!(await libConfirmLeave('open'))) return;
   const it = items[0];
