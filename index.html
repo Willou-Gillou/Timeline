@@ -1803,7 +1803,7 @@ function computeLaneRows(lane){
 let _tlAutoEnd=false;
 // ═══ SUPERPOSITION (ordre des calques, de l'arrière-plan vers le premier plan) ═══
 const LAYER_DEFAULT=['base','hol','frz','today'];
-const LAYER_LABELS={base:['Phases, tâches et jalons','Barres, jalons et leurs textes'],hol:['Jours fériés','Colonnes grisées sur toute la hauteur'],frz:['Périodes de gel','Colonnes de gel sur toute la hauteur'],today:['Ligne « aujourd\'hui »','Trait, barre et rond du jour']};
+const LAYER_LABELS={base:['Phases, tâches et jalons','Barres, jalons et leurs textes'],hol:['Jours fériés','Bandeau de la barre de temps et colonnes grisées'],frz:['Périodes de gel','Bandeau de la barre de temps et colonnes pleine hauteur'],today:['Ligne « aujourd\'hui »','Trait, barre et rond du jour']};
 let layerOrder=[...LAYER_DEFAULT];
 function sanitizeLayerOrder(a){ if(!Array.isArray(a)||a.length!==LAYER_DEFAULT.length||!LAYER_DEFAULT.every(k=>a.includes(k))) return [...LAYER_DEFAULT]; return a.slice(); }
 function applyLayerOrder(svg,topAnchor){
@@ -1814,6 +1814,9 @@ function applyLayerOrder(svg,topAnchor){
   svg.querySelectorAll(':scope > [data-band]').forEach(b=>{ ref.after(b); ref=b; });
   order.slice(0,bi).forEach(id=>nodes(id).forEach(n=>{ ref.after(n); ref=n; }));
   order.slice(bi+1).forEach(id=>nodes(id).forEach(n=>topAnchor.before(n)));
+  // bandeaux de la barre de temps (gels, jours fériés) : toujours devant la barre, mais dans l'ordre des couches
+  let hr=topAnchor;
+  order.forEach(id=>{ const n=svg.querySelector(':scope > [data-lyh="'+id+'"]'); if(n){ hr.after(n); hr=n; } });
 }
 function layerMove(id,dir){ // dir=+1 : vers le premier plan, -1 : vers l'arrière-plan
   const o=sanitizeLayerOrder(layerOrder), i=o.indexOf(id), j=i+dir; if(i<0||j<0||j>=o.length) return;
@@ -2662,7 +2665,7 @@ function renderTimeline(){
   const _topAnchor=el('g',{id:'tl-anchor-top'}); svg.appendChild(_topAnchor); // calques placés devant les phases/tâches
   if(FZ>0){
     const fzY=MA+TH0; // bandeau de gel : bas de la barre de temps
-    const fzG=document.createElementNS(NS,'g'); fzG.setAttribute('id','freeze-row-group');
+    const fzG=document.createElementNS(NS,'g'); fzG.setAttribute('id','freeze-row-group'); fzG.setAttribute('data-lyh','frz');
     const fzOver=document.createElementNS(NS,'g'); fzOver.setAttribute('id','freeze-overlay-group'); fzOver.setAttribute('pointer-events','none'); fzOver.setAttribute('data-ly','frz');
     _fzList.forEach(f=>{
       const x1=Math.max(LL,dX(f.start)), x2=Math.min(VW,dX(f.end)+PPD);
@@ -2679,7 +2682,7 @@ function renderTimeline(){
       if(f.full) fzOver.appendChild(el('rect',{x:x1,y:MA+TH,width:x2-x1,height:Math.max(0,VH-(MA+TH)),fill:col,'fill-opacity':op})); // sous la barre de temps
     });
     const holBody=document.createElementNS(NS,'g'); holBody.setAttribute('id','holiday-body-group'); holBody.setAttribute('pointer-events','none'); holBody.setAttribute('data-ly','hol');
-    const holG=document.createElementNS(NS,'g'); holG.setAttribute('id','holiday-group'); holG.setAttribute('pointer-events','none'); // jours fériés : sous les gels
+    const holG=document.createElementNS(NS,'g'); holG.setAttribute('id','holiday-group'); holG.setAttribute('data-lyh','hol'); holG.setAttribute('pointer-events','none'); // jours fériés : sous les gels
     _holList.forEach(h=>{
       const x1=Math.max(LL,dX(h.d)), x2=Math.min(VW,dX(h.d)+PPD);
       if(x2<=x1) return;
