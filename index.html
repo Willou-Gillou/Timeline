@@ -441,6 +441,7 @@ input[type=checkbox].lib-chk::before{display:none}
     <button class="btn btn-icon" id="btn-redo" onclick="redoPlanning()" title="Annuler retour : rétablir le ou les retours effectués" aria-label="Annuler retour"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 14 5-5-5-5"/><path d="M20 9H9.5a5.5 5.5 0 0 0 0 11H13"/></svg></button>
     <button class="btn btn-icon" id="btn-new" type="button" onclick="libNew()" title="Créer un nouveau macro-planning (vide)" aria-label="Créer un nouveau macro-planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="12" x2="12" y2="18"/><line x1="9" y1="15" x2="15" y2="15"/></svg></button>
     <button class="btn btn-icon" id="btn-save" type="button" onclick="libSave()" title="Enregistrer le planning dans la bibliothèque (Ctrl+S)" aria-label="Enregistrer le planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span class="lib-dirty" id="lib-dirty"></span></button>
+    <button class="btn btn-icon" id="btn-saveas" type="button" onclick="libSaveAs()" title="Enregistrer sous… (nouvelle version, sans écraser l'autre)" aria-label="Enregistrer sous"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.5 22H18a2 2 0 0 0 2-2V7l-5-5H6a2 2 0 0 0-2 2v9.5"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M13.378 15.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg></button>
     <button class="btn btn-icon" id="btn-open" type="button" onclick="libOpenUI()" title="Ouvrir un planning (bibliothèque)" aria-label="Ouvrir un planning"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></button>
     <button class="btn btn-icon" onclick="checkModelsFolder()" title="Importer un modèle" aria-label="Importer un modèle"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg></button>
     <button class="btn btn-icon" id="btn-clipboard" type="button" onclick="copyPlanningToClipboard()" title="Copier l'image du planning dans le presse-papier" aria-label="Copier dans le presse-papier"><svg class="ic" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/></svg></button>
@@ -3515,7 +3516,7 @@ function libUpdateDirty(){
   try{
     const d=libIsDirty(); const el=document.getElementById('lib-dirty'); if(el) el.style.display=d?'block':'none';
     const l=libGet();
-    if(d&&l.auto&&libCurEntry(l)&&!libStale){ clearTimeout(_libAutoT); _libAutoT=setTimeout(()=>{ if(libIsDirty()) libSaveCurrent({silent:true}); },800); }
+    if(d&&l.auto&&libCurEntry(l)&&!libStale){ clearTimeout(_libAutoT); _libAutoT=setTimeout(()=>{ if(libCurEntry()&&libIsDirty()) libSaveCurrent({silent:true,onlyUpdate:true}); },800); }
   }catch(e){}
 }
 function libFmt(ms){ if(!ms) return '—'; try{ return new Date(ms).toLocaleString('fr-FR',{dateStyle:'short',timeStyle:'short'}); }catch(e){ return new Date(ms).toISOString(); } }
@@ -3543,12 +3544,18 @@ async function libAskName(title,label,def){
   const r=await libDialog(title,'<label class="lib-lbl">'+libEsc(label)+'</label><input type="text" class="lib-input" id="lib-name-in" value="'+libEsc(def)+'" maxlength="120">',[{label:'Annuler',value:null},{label:'Valider',value:'ok',primary:true}],o=>o.querySelector('#lib-name-in').value.trim());
   if(r.value!=='ok'||!r.data) return null; return r.data;
 }
-async function libConfirmLeave(targetId){
-  const l=libGet();
-  if(!libIsDirty()) return true;
-  const r=await libDialog('Modifications non enregistrées','<p>Le planning actuel a des modifications qui ne sont pas enregistrées dans la bibliothèque.</p>',[{label:'Annuler',value:null},{label:'Ne pas enregistrer',value:'no'},{label:'Enregistrer',value:'save',primary:true}]);
+async function libConfirmLeave(kind,targetId){
+  if(lanes.length===0&&freezes.length===0) return true;
+  const cur=libCurEntry(), dirty=libIsDirty();
+  if(targetId&&cur&&cur.id===targetId&&!dirty) return true;
+  const isNew=kind==='new';
+  let html='<p style="margin:0">Êtes-vous sûr de vouloir fermer ce macro-planning pour en ouvrir '+(isNew?'un nouveau':'un autre')+' ?</p>';
+  const btns=[{label:'Annuler',value:null}];
+  if(dirty){ html+='<p class="lib-warn" style="margin:10px 0 0">Il contient des modifications non enregistrées.</p>'; btns.push({label:'Oui, sans enregistrer',value:'yes'}); btns.push({label:'Enregistrer et continuer',value:'save',primary:true}); }
+  else btns.push({label:'Oui, fermer ce macro-planning',value:'yes',primary:true});
+  const r=await libDialog('Fermer ce macro-planning ?',html,btns);
   if(r.value==='save') return libSave();
-  return r.value==='no';
+  return r.value==='yes';
 }
 
 // ── Enregistrer / ouvrir ──
@@ -3556,6 +3563,8 @@ function libSaveCurrent(o){
   o=o||{};
   const l=libClone(), now=Date.now(), title=o.name||libTitle(), data=libCurData();
   let e=o.asNew?null:libCurEntry(l);
+  if(o.onlyUpdate&&!e) return false;
+  const created=!e;
   if(e){ e.name=libUniqueIn(title,l,e.folder,e.id); e.modified=now; e.rev=(e.rev||0)+1; e.data=data; e.hash=libFullHash(data,e.name); }
   else {
     let fid=o.folder!==undefined?o.folder:null; if(fid&&!l.folders.some(f=>f.id===fid)) fid=null;
@@ -3565,7 +3574,7 @@ function libSaveCurrent(o){
   if(!libCommit(l)) return false;
   const t=document.getElementById('planning-title'); if(t&&t.value.trim()!==e.name){ t.value=e.name; saveState(); }
   libUpdateDirty();
-  if(!o.silent) showToast('Planning « '+e.name+' » enregistré dans la bibliothèque');
+  if(!o.silent) showToast(created?('Macro-planning sauvegardé '+(libFolderName(l,e.folder)?'dans le dossier « '+libFolderName(l,e.folder)+' »':'à la racine')):('Macro-planning « '+e.name+' » enregistré'));
   if(libUIOpen()) libRender();
   return true;
 }
@@ -3583,20 +3592,19 @@ async function libSave(){
   return false;
 }
 function libSaveNewVersion(){
-  const l=libGet(), e=libCurEntry(l); if(!e) return libSaveCurrent();
-  const base=libTitle().replace(/\s*\(v\d+\)\s*$/i,'')||LIB_DEFAULT_NAME;
-  let n=2; while(l.items.some(i=>(i.folder||null)===(e.folder||null)&&i.name.toLowerCase()===(base+' (v'+n+')').toLowerCase())) n++;
-  const name=base+' (v'+n+')';
+  const e=libCurEntry(); if(!e) return libSaveCurrent();
+  const name=libNextVersionName();
+  const t=document.getElementById('planning-title'); if(t) t.value=name;
   const ok=libSaveCurrent({asNew:true,name,folder:e.folder||null,silent:true});
   if(ok) showToast('Nouvelle version enregistrée : « '+name+' »');
   return ok;
 }
 // Délie le planning ouvert de la bibliothèque : le prochain enregistrement créera un nouveau fichier à la racine
-function libUnlink(){ try{ const r=localStorage.getItem(LIB_KEY); if(!r) return; const l=JSON.parse(r); if(l&&l.current){ l.current=null; localStorage.setItem(LIB_KEY,JSON.stringify(l)); _lib=null; } }catch(e){} }
+function libUnlink(){ clearTimeout(_libAutoT); try{ const r=localStorage.getItem(LIB_KEY); if(!r) return; const l=JSON.parse(r); if(l&&l.current){ l.current=null; localStorage.setItem(LIB_KEY,JSON.stringify(l)); _lib=null; } }catch(e){} }
 async function libNew(){
   const empty=lanes.length===0&&freezes.length===0;
   if(empty&&!libCurEntry()){ showToast('Le macro-planning est déjà vide'); return; }
-  if(!(await libConfirmLeave())) return;
+  if(!(await libConfirmLeave('new'))) return;
   const name=libUniqueIn(LIB_DEFAULT_NAME,libGet(),null);
   libApply({lanes:[],freezes:[],lid:1,tid:1,jalonColorIdx:0},name);
   libUnlink(); libUpdateDirty(); if(libUIOpen()) libRender();
@@ -3604,15 +3612,28 @@ async function libNew(){
 }
 function libUIOpen(){ return document.getElementById('lib-overlay')?.style.display==='flex'; }
 function libFolderOptions(l,sel){ return '<option value=""'+(!sel?' selected':'')+'>Racine</option>'+l.folders.map(f=>'<option value="'+f.id+'"'+(f.id===sel?' selected':'')+'>'+libEsc(f.name)+'</option>').join(''); }
+function libNextVersionName(base){
+  const l=libGet(), e=libCurEntry(l), fid=e?e.folder:null;
+  const b=(base||libTitle()).replace(/\s*\(?\bv\d+\)?\s*$/i,'').trim()||LIB_DEFAULT_NAME;
+  let n=2; while(l.items.some(i=>(i.folder||null)===(fid||null)&&i.name.toLowerCase()===(b+' v'+n).toLowerCase())) n++;
+  return b+' v'+n;
+}
 async function libSaveAs(){
-  if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return; }
-  const l=libGet();
-  const r=await libDialog('Enregistrer sous…','<label class="lib-lbl">Nom du nouveau planning</label><input type="text" class="lib-input" id="lib-name-in" value="'+libEsc(libTitle())+'" maxlength="120">'
-    +(l.folders.length?'<label class="lib-lbl" style="margin-top:10px">Dossier</label><select class="lib-sel wide" id="lib-fold-in">'+libFolderOptions(l,libUIOpen()?libView:null)+'</select>':''),
-    [{label:'Annuler',value:null},{label:'Enregistrer',value:'ok',primary:true}],o=>({name:o.querySelector('#lib-name-in').value.trim(),folder:o.querySelector('#lib-fold-in')?.value||null}));
-  if(r.value!=='ok'||!r.data.name) return;
-  const t=document.getElementById('planning-title'); if(t) t.value=r.data.name;
-  libSaveCurrent({asNew:true,name:r.data.name,folder:r.data.folder,silent:false});
+  if(libIsBlank()){ showToast('Le macro-planning est vide : rien à enregistrer'); return false; }
+  const l=libGet(), e=libCurEntry(l), fid=e?e.folder:null;
+  let name=e?libNextVersionName():libTitle(), err='';
+  for(;;){
+    const r=await libDialog('Enregistrer sous…','<label class="lib-lbl">'+(e?'Nom de la nouvelle version (la version actuelle est conservée)':'Nom du macro-planning')+'</label><input type="text" class="lib-input" id="lib-name-in" value="'+libEsc(name)+'" maxlength="120">'+(err?'<p class="lib-warn" style="margin:8px 0 0">'+libEsc(err)+'</p>':'')+'<p class="lib-sub" style="margin-top:8px">Dossier : '+libEsc(libFolderName(l,fid)||'Racine')+'</p>',
+      [{label:'Annuler',value:null},{label:'Enregistrer',value:'ok',primary:true}],o=>o.querySelector('#lib-name-in').value.trim());
+    if(r.value!=='ok') return false;
+    name=r.data; if(!name){ err='Le nom ne peut pas être vide.'; name=libNextVersionName(); continue; }
+    if(libGet().items.some(i=>(i.folder||null)===(fid||null)&&i.name.toLowerCase()===name.toLowerCase())){ err='Ce nom existe déjà dans ce dossier.'; continue; }
+    break;
+  }
+  const t=document.getElementById('planning-title'); if(t) t.value=name;
+  const ok=libSaveCurrent({asNew:true,name,folder:fid||null,silent:true});
+  if(ok) showToast('Macro-planning sauvegardé sous « '+name+' »');
+  return ok;
 }
 function libApply(d,name){
   const c=JSON.parse(JSON.stringify(d));
@@ -3625,7 +3646,7 @@ function libApply(d,name){
 }
 async function libOpen(id){
   const e=libGet().items.find(i=>i.id===id); if(!e) return;
-  if(!(await libConfirmLeave(id))) return;
+  if(!(await libConfirmLeave('open',id))) return;
   libApply(e.data,e.name);
   const l=libClone(); l.current=e.id; libCommit(l);
   libUpdateDirty(); libRender();
@@ -3652,6 +3673,7 @@ function libTrashPush(l,e){ const c=JSON.parse(JSON.stringify(e)); c.deletedAt=D
 function libDelete(id){
   const l=libClone(), e=l.items.find(i=>i.id===id); if(!e) return;
   if(!confirm('Supprimer « '+e.name+' » de la bibliothèque ?\nIl sera conservé dans la corbeille (10 derniers éléments).')) return;
+  clearTimeout(_libAutoT);
   const wasCur=l.current===id;
   libTrashPush(l,e); l.items=l.items.filter(i=>i.id!==id); if(l.current===id) l.current=null;
   if(libCommit(l)){ libUpdateDirty(); libRender(); showToast(wasCur?'Planning supprimé. Le planning ouvert n\'est plus lié à la bibliothèque : le prochain enregistrement créera un nouveau fichier à la racine.':'Planning supprimé (corbeille)'); }
@@ -3879,6 +3901,7 @@ function libDeleteMany(){
   const ids=[...libSel]; if(!ids.length) return;
   const l=libClone(); const es=l.items.filter(i=>ids.includes(i.id)); if(!es.length) return;
   if(!confirm('Supprimer '+es.length+' planning'+(es.length>1?'s':'')+' de la bibliothèque ?\nIls seront conservés dans la corbeille (10 derniers éléments).')) return;
+  clearTimeout(_libAutoT);
   const wasCur=es.some(e=>e.id===l.current);
   es.forEach(e=>libTrashPush(l,e)); l.items=l.items.filter(i=>!ids.includes(i.id)); if(wasCur) l.current=null;
   if(libCommit(l)){ libSel.clear(); libUpdateDirty(); libRender(); showToast(es.length+' planning'+(es.length>1?'s supprimés':' supprimé')+(wasCur?'. Le planning ouvert n\'est plus lié à la bibliothèque.':' (corbeille)')); }
@@ -4107,7 +4130,7 @@ async function importJSON(event) {
   if (!items) return;
   if (libGet().addOnOpen) { await libImportItems(items, { openFirst: true }); return; }
   // Sans bibliothèque : le fichier remplace le planning actuel (réglages conservés)
-  if (!(await libConfirmLeave())) return;
+  if (!(await libConfirmLeave('open'))) return;
   const it = items[0];
   libApply(it.data, it.name);
   const l = libClone(); l.current = null; libCommit(l);
